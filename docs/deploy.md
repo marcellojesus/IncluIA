@@ -2,6 +2,10 @@
 
 Stack de deploy (ver `arquitetura.md` §Infraestrutura): **GitHub** (código) → **Render** (backend FastAPI) → **Vercel** (frontend Next.js).
 
+**URLs da v1.0 em produção**:
+- Backend: https://incluia-api.onrender.com
+- Frontend: https://inclu-ia.vercel.app
+
 ## Por que o `data/incluia.db` é versionado no Git
 
 O `.gitignore` normalmente excluiria um banco de dados gerado, mas aqui é uma exceção deliberada: o backend em produção só lê esse arquivo (não recalcula nada em tempo de execução) e os dados brutos do Censo (`base/`, ~400MB) nunca vão ao repositório — não haveria como o Render gerar o `.db` sozinho. Por isso `data/incluia.db` (~30MB) é comitado como um artefato pronto.
@@ -33,7 +37,7 @@ Ao importar o repositório na Vercel:
 
 ## 4. Fechar o CORS com a URL real do frontend
 
-Depois que a Vercel gerar a URL de produção (ex.: `https://incluia.vercel.app`), voltar ao Render e atualizar a variável `INCLUIA_CORS_ORIGINS` do serviço `incluia-api` para essa URL (pode listar mais de uma, separadas por vírgula, se houver domínio de preview). Sem isso, o navegador bloqueia as chamadas do frontend em produção para o backend por causa do CORS.
+`INCLUIA_CORS_ORIGINS` no `render.yaml` **não** está marcada como `sync: false` — o valor vem do próprio arquivo, e o Render resincroniza a cada push. Por isso, para liberar a URL real do frontend, o jeito certo é editar o `value` desse campo no `render.yaml` e comitar/dar push — nunca editar só pelo painel do Render (um push futuro reverteria o valor). Sem essa origem liberada, o navegador bloqueia por CORS toda chamada feita direto do cliente (ex.: aba Escolas, chat do Diagnóstico IA) — só as chamadas feitas no servidor (SSR) continuam funcionando, o que confunde o diagnóstico do problema.
 
 ## 5. Limitações do MVP a ter em mente em produção
 

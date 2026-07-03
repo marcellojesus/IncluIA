@@ -21,7 +21,5 @@ services:
         sync: false
       - key: INCLUIA_JWT_SECRET
         generateValue: true
-      # Atualizar para a URL real do frontend (Vercel) depois do primeiro deploy do frontend —
-      # ver docs/deploy.md.
       - key: INCLUIA_CORS_ORIGINS
-        value: http://localhost:3000
+        value: https://inclu-ia.vercel.app,http://localhost:3000
