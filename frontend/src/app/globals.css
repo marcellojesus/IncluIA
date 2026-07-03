@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+:root {
+  --color-blue: #1351b4;
+  --color-blue-dark: #071d41;
+  --color-blue-mid: #0c326f;
+  --color-blue-lt: #dbe8fb;
+  --color-green: #168821;
+  --color-orange: #e05c00;
+  --color-red: #e52207;
+  --color-yellow: #e6b800;
+}
+
+@theme inline {
+  --color-gov-blue: var(--color-blue);
+  --color-gov-blue-dark: var(--color-blue-dark);
+  --color-gov-blue-mid: var(--color-blue-mid);
+  --color-gov-blue-lt: var(--color-blue-lt);
+  --color-gov-green: var(--color-green);
+  --color-gov-orange: var(--color-orange);
+  --color-gov-red: var(--color-red);
+  --color-gov-yellow: var(--color-yellow);
+}
+
+body {
+  background: #f8f8f8;
+  color: #333;
+}

@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IncluIA</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Rawline:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --blue:#1351b4; --blue-dark:#071d41; --blue-mid:#0c326f; --blue-lt:#dbe8fb;
+  --green:#168821; --green-lt:#e3f2e5;
+  --orange:#e05c00; --orange-lt:#fdf2ea;
+  --red:#e52207; --red-lt:#fde8e5;
+  --yellow:#e6b800; --yellow-lt:#fff8d6;
+  --g1:#f8f8f8; --g2:#ededed; --g3:#ccc; --g4:#888; --g5:#555; --g6:#333;
+  --white:#fff; --r:4px; --sh:0 1px 4px rgba(0,0,0,.12);
+  --font:'Rawline','Raleway',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);font-size:14px;background:var(--g1);color:var(--g6);overflow:hidden;height:100vh;}
+
+/* ── GOV.BR HEADER ── */
+.gtop{background:var(--blue-dark);padding:5px 24px;display:flex;align-items:center;gap:10px;}
+.gmark{display:flex;gap:2px;}
+.gmark span{display:block;width:5px;border-radius:1px;height:16px;}
+.gm-g{background:#168821;}.gm-y{background:#ffcd07;}.gm-b{background:#1351b4;}
+.gtxt{font-weight:700;font-size:13px;color:#fff;}
+.gdiv{width:1px;height:18px;background:rgba(255,255,255,.25);}
+.gsys{font-size:12px;color:rgba(255,255,255,.65);}
+.gmain{background:var(--blue);padding:0 24px;height:52px;display:flex;align-items:center;}
+.gapp{font-size:17px;font-weight:700;color:#fff;cursor:pointer;text-decoration:none;}
+.gapp-sub{font-size:11px;color:rgba(255,255,255,.6);margin-top:1px;}
+.gright{margin-left:auto;display:flex;align-items:center;gap:12px;}
+.guser{font-size:12px;color:rgba(255,255,255,.8);}
+.guser strong{color:#fff;}
+.gbtn-logout{font-family:var(--font);font-size:11px;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;text-decoration:underline;}
+
+/* ── UTILITIES ── */
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;}
+.bd-g{background:var(--green-lt);color:var(--green);}
+.bd-y{background:var(--yellow-lt);color:#7a5800;}
+.bd-o{background:var(--orange-lt);color:var(--orange);}
+.bd-r{background:var(--red-lt);color:var(--red);}
+.bd-b{background:var(--blue-lt);color:var(--blue);}
+.btn{font-family:var(--font);font-size:13px;font-weight:600;padding:8px 16px;border-radius:var(--r);cursor:pointer;border:none;display:inline-flex;align-items:center;gap:6px;transition:all .15s;}
+.btn-p{background:var(--blue);color:#fff;}.btn-p:hover{background:var(--blue-mid);}
+.btn-o{background:transparent;border:1px solid var(--blue);color:var(--blue);}.btn-o:hover{background:var(--blue-lt);}
+.panel{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);}
+.ph{padding:11px 16px;border-bottom:1px solid var(--g2);display:flex;align-items:center;justify-content:space-between;}
+.ph-t{font-size:13px;font-weight:700;color:var(--blue-dark);}
+.pb{padding:14px 16px;}
+.pb0{padding:0;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.mb14{margin-bottom:14px;}
+
+/* ── KPI STRIP ── */
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);background:var(--white);border-bottom:1px solid var(--g2);}
+.kpi{padding:12px 20px;border-left:3px solid var(--blue);border-right:1px solid var(--g2);}
+.kpi:last-child{border-right:none;}
+.kpi.r{border-left-color:var(--red);}.kpi.o{border-left-color:var(--orange);}.kpi.g{border-left-color:var(--green);}
+.kpi-l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--g4);margin-bottom:3px;}
+.kpi-v{font-size:22px;font-weight:700;line-height:1;margin-bottom:2px;}
+.kpi-s{font-size:11px;color:var(--g4);}
+
+/* ── MAPA ── */
+.map-wrap{display:flex;flex-direction:column;border-right:1px solid var(--g2);}
+.map-toolbar{background:var(--white);border-bottom:1px solid var(--g2);padding:8px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.tl-label{font-size:12px;font-weight:600;color:var(--g5);}
+.map-toolbar select{font-family:var(--font);font-size:13px;border:1px solid var(--g3);border-radius:var(--r);padding:5px 10px;background:var(--white);}
+.map-hint{font-size:11px;color:var(--g4);}
+.map-rel{position:relative;flex:1;overflow:hidden;}
+#leaflet-map{height:100%;width:100%;}
+.map-loading{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(255,255,255,.95);border-radius:var(--r);padding:20px 28px;text-align:center;font-size:13px;color:var(--g5);box-shadow:var(--sh);z-index:999;display:none;}
+.spinner{width:24px;height:24px;border:3px solid var(--g2);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RANKING ── */
+.rank-wrap{display:flex;flex-direction:column;background:var(--white);}
+.rp-hdr{padding:11px 16px;border-bottom:1px solid var(--g2);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.rp-t{font-size:13px;font-weight:700;color:var(--blue-dark);}
+.rank-body{overflow-y:auto;flex:1;}
+.rsect{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--g4);padding:10px 16px 4px;}
+.ritem{display:flex;align-items:center;gap:9px;padding:9px 16px;border-bottom:1px solid var(--g2);cursor:pointer;transition:background .1s;}
+.ritem:hover,.ritem.active{background:var(--blue-lt);}
+.rnum{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.rnum.top{background:var(--blue-lt);color:var(--blue);}.rnum.bot{background:var(--red-lt);color:var(--red);}
+.rname{flex:1;font-size:13px;}
+.rbar{width:52px;}.rbar-bg{height:4px;background:var(--g2);border-radius:3px;}.rbar-fill{height:4px;border-radius:3px;}
+.rscore{font-size:13px;font-weight:700;min-width:28px;text-align:right;}
+
+/* ── CONTEXTO MUNICÍPIO (barra fixa ao entrar no município) ── */
+.ctx-bar{
+  background:var(--blue-dark);
+  padding:0 24px;
+  display:flex;
+  align-items:center;
+  gap:0;
+  flex-shrink:0;
+  min-height:56px;
+}
+.ctx-back{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);
+  border-radius:var(--r);padding:6px 12px;
+  color:rgba(255,255,255,.85);font-family:var(--font);font-size:12px;font-weight:600;
+  cursor:pointer;margin-right:20px;flex-shrink:0;
+}
+.ctx-back:hover{background:rgba(255,255,255,.16);}
+.ctx-muni-name{font-size:17px;font-weight:700;color:#fff;}
+.ctx-muni-uf{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px;}
+.ctx-score{margin-left:auto;margin-right:24px;text-align:right;flex-shrink:0;}
+.ctx-sv{font-size:30px;font-weight:700;color:#fff;line-height:1;}
+.ctx-sl{font-size:10px;color:rgba(255,255,255,.5);}
+/* Tabs do contexto município */
+.ctx-tabs{display:flex;height:100%;align-items:flex-end;gap:0;flex-shrink:0;}
+.ctx-tab{
+  padding:0 20px;height:56px;display:flex;align-items:center;
+  font-family:var(--font);font-size:13px;font-weight:600;
+  color:rgba(255,255,255,.55);cursor:pointer;
+  border:none;background:none;
+  border-bottom:3px solid transparent;
+  transition:all .15s;
+}
+.ctx-tab:hover{color:rgba(255,255,255,.85);}
+.ctx-tab.active{color:#fff;border-bottom-color:#ffcd07;}
+
+/* ── SEMÁFOROS ── */
+.sem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;}
+.sem{border-radius:var(--r);padding:16px 14px;box-shadow:var(--sh);border:1px solid transparent;}
+.sem.ok{background:var(--green-lt);border-color:#a7d9ab;}
+.sem.warn{background:var(--orange-lt);border-color:#f5bb8a;}
+.sem.nok{background:var(--red-lt);border-color:#f5a79e;}
+.sem-ico{font-size:22px;margin-bottom:7px;}
+.sem-axis{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+.sem.ok .sem-axis{color:var(--green);}.sem.warn .sem-axis{color:var(--orange);}.sem.nok .sem-axis{color:var(--red);}
+.sem-val{font-size:19px;font-weight:700;}
+.sem.ok .sem-val{color:var(--green);}.sem.warn .sem-val{color:var(--orange);}.sem.nok .sem-val{color:var(--red);}
+.sem-sub{font-size:10px;color:var(--g4);margin-top:3px;}
+
+/* ── PROGRESSO ── */
+.prog{margin-bottom:11px;}
+.prog-lbl{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;color:var(--g5);}
+.prog-bg{height:6px;background:var(--g2);border-radius:4px;}
+.prog-fill{height:6px;border-radius:4px;}
+
+/* ── TABELA ── */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{background:var(--blue);color:#fff;padding:8px 14px;text-align:left;font-size:11px;font-weight:700;letter-spacing:.3px;}
+.tbl td{padding:8px 14px;border-bottom:1px solid var(--g2);vertical-align:middle;}
+.tbl tr:hover td{background:var(--blue-lt);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl.clickable tr{cursor:pointer;}
+
+/* ── IA BOX ── */
+.ia-box{font-size:13px;line-height:1.78;}
+.ia-axis-t{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--blue);margin:20px 0 7px;padding-bottom:5px;border-bottom:1px solid var(--blue-lt);}
+.ia-axis-t:first-child{margin-top:0;}
+.ia-box p{margin-bottom:8px;color:var(--g6);}
+.ia-rec{background:var(--blue-lt);border-left:3px solid var(--blue);border-radius:0 var(--r) var(--r) 0;padding:10px 14px;margin:8px 0;font-size:12px;color:var(--blue-dark);}
+.ia-rec strong{color:var(--blue-dark);}
+.ia-alerta{background:var(--red-lt);border-left:3px solid var(--red);border-radius:0 var(--r) var(--r) 0;padding:10px 14px;margin:8px 0;font-size:12px;color:#7a0f00;}
+
+/* ── MODAL ESCOLA ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--white);border-radius:var(--r);box-shadow:0 4px 28px rgba(0,0,0,.3);max-width:600px;width:90%;max-height:82vh;overflow-y:auto;}
+.modal-hdr{background:var(--blue-dark);padding:16px 20px;display:flex;align-items:flex-start;justify-content:space-between;border-radius:var(--r) var(--r) 0 0;}
+.modal-title{font-size:15px;font-weight:700;color:#fff;}
+.modal-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;}
+.modal-close{background:none;border:none;color:rgba(255,255,255,.65);font-size:22px;cursor:pointer;line-height:1;padding:0;}
+.modal-body{padding:20px;}
+
+/* ── SCREEN SYSTEM ── */
+.screen{display:none;flex-direction:column;height:calc(100vh - 57px);overflow:hidden;}
+.screen.active{display:flex;}
+.scroll-area{overflow-y:auto;flex:1;padding:20px 24px;}
+
+/* ── LOGIN ── */
+#login-page{height:100vh;display:flex;flex-direction:column;}
+.login-body{flex:1;display:grid;grid-template-columns:1fr 1fr;}
+.l-left{background:linear-gradient(165deg,#071d41 0%,#0c326f 55%,#1351b4 100%);padding:64px 52px;display:flex;flex-direction:column;justify-content:center;}
+.l-logo{font-size:48px;font-weight:700;color:#fff;margin-bottom:8px;}
+.l-tag{font-size:14px;color:rgba(255,255,255,.55);line-height:1.6;margin-bottom:40px;}
+.l-decree{display:inline-flex;align-items:center;gap:7px;background:rgba(255,205,7,.12);border:1px solid rgba(255,205,7,.3);border-radius:20px;padding:6px 14px;font-size:12px;color:#ffcd07;font-weight:600;margin-bottom:52px;width:fit-content;}
+.l-stats{display:flex;flex-direction:column;gap:22px;}
+.l-stat{display:flex;align-items:baseline;gap:12px;border-left:3px solid rgba(255,255,255,.18);padding-left:16px;}
+.ls-v{font-size:26px;font-weight:700;color:#fff;flex-shrink:0;}
+.ls-l{font-size:13px;color:rgba(255,255,255,.5);line-height:1.4;}
+.l-right{background:var(--white);display:flex;align-items:center;justify-content:center;padding:64px 52px;}
+.lf{width:100%;max-width:360px;}
+.lf-title{font-size:20px;font-weight:700;color:var(--blue-dark);margin-bottom:4px;}
+.lf-sub{font-size:13px;color:var(--g4);margin-bottom:22px;}
+.btn-gov{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:12px;border-radius:var(--r);font-family:var(--font);font-size:14px;font-weight:700;cursor:not-allowed;border:none;background:var(--blue);color:#fff;opacity:.45;position:relative;margin-bottom:4px;}
+.soon{position:absolute;right:12px;background:rgba(255,255,255,.2);border-radius:10px;font-size:10px;font-weight:700;padding:2px 8px;}
+.lf-div{display:flex;align-items:center;gap:10px;margin:18px 0;color:var(--g3);font-size:12px;}
+.lf-div::before,.lf-div::after{content:'';flex:1;height:1px;background:var(--g2);}
+.fg{margin-bottom:14px;}
+.fl{display:block;font-size:12px;font-weight:600;color:var(--g6);margin-bottom:4px;}
+.fi{width:100%;font-family:var(--font);font-size:14px;border:1px solid var(--g3);border-radius:var(--r);padding:10px 12px;color:var(--g6);outline:none;}
+.fi:focus{border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-lt);}
+.btn-login{width:100%;padding:11px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;}
+.btn-login:hover{background:var(--blue-mid);}
+.lf-note{margin-top:20px;background:var(--g1);border:1px solid var(--g2);border-radius:var(--r);padding:11px 13px;font-size:12px;color:var(--g5);}
+
+/* ── FOOTER ── */
+.footer{background:var(--blue-dark);color:rgba(255,255,255,.4);text-align:center;padding:10px 24px;font-size:11px;flex-shrink:0;}
+
+/* Leaflet popup */
+.leaflet-popup-content-wrapper{border-radius:var(--r) !important;box-shadow:0 3px 16px rgba(0,0,0,.22) !important;}
+.leaflet-popup-content{margin:14px 16px !important;font-family:var(--font) !important;}
+.mp-name{font-size:14px;font-weight:700;color:var(--blue-dark);margin-bottom:2px;}
+.mp-uf{font-size:11px;color:var(--g4);margin-bottom:8px;}
+.mp-sr{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;}
+.mp-sv{font-size:28px;font-weight:700;}
+.mp-sl{font-size:11px;color:var(--g4);}
+.mp-btn{display:block;width:100%;margin-top:10px;padding:9px 12px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;}
+.mp-btn:hover{background:var(--blue-mid);}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-page">
+  <div class="gtop">
+    <div class="gmark"><span class="gm-g"></span><span class="gm-y"></span><span class="gm-b"></span></div>
+    <span class="gtxt">gov.br</span><div class="gdiv"></div>
+    <span class="gsys">Ministério da Educação · INEP</span>
+  </div>
+  <div class="login-body">
+    <div class="l-left">
+      <div class="l-logo">IncluIA</div>
+      <div class="l-tag">Dados do Censo Escolar 2025 transformados em<br>decisões de inclusão para gestores públicos.</div>
+      <div class="l-decree">⚖️ Alinhado ao Decreto 12.773/2025 — PNEEI</div>
+      <div class="l-stats">
+        <div class="l-stat"><div class="ls-v">2,45M</div><div class="ls-l">alunos com deficiência matriculados no Brasil</div></div>
+        <div class="l-stat"><div class="ls-v">98.310</div><div class="ls-l">escolas sem nenhum AEE registrado no Censo</div></div>
+        <div class="l-stat"><div class="ls-v">5.570</div><div class="ls-l">municípios mapeados com Score IncluIA</div></div>
+      </div>
+    </div>
+    <div class="l-right">
+      <div class="lf">
+        <div class="lf-title">Entrar no IncluIA</div>
+        <div class="lf-sub">Acesso a gestores de secretarias de educação.</div>
+        <button class="btn-gov" disabled>
+          <div class="gmark"><span class="gm-g"></span><span class="gm-y"></span><span style="display:block;width:5px;border-radius:1px;height:16px;background:rgba(255,255,255,.7)"></span></div>
+          Entrar com gov.br <span class="soon">Fase 2</span>
+        </button>
+        <div class="lf-div">acesso MVP</div>
+        <div class="fg"><label class="fl">E-mail institucional</label><input class="fi" type="email" value="joao.silva@niteroi.rj.gov.br"/></div>
+        <div class="fg"><label class="fl">Senha</label><input class="fi" type="password" value="demo1234"/></div>
+        <button class="btn-login" onclick="doLogin(event)">Entrar</button>
+        <div class="lf-note">Na Fase 2, o acesso via <strong>gov.br</strong> identificará automaticamente o perfil e o município do gestor.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">IncluIA · Censo Escolar 2025 — INEP/MEC · Decreto 12.773/2025</div>
+</div>
+
+
+<!-- ═══ APP ═══ -->
+<div id="app" style="display:none;height:100vh;flex-direction:column;">
+
+  <!-- Header fixo gov.br -->
+  <div class="gtop" style="flex-shrink:0">
+    <div class="gmark"><span class="gm-g"></span><span class="gm-y"></span><span class="gm-b"></span></div>
+    <span class="gtxt">gov.br</span><div class="gdiv"></div>
+    <span class="gsys">Ministério da Educação · INEP</span>
+  </div>
+  <div class="gmain" style="flex-shrink:0">
+    <div><a class="gapp" onclick="voltarMapa()">IncluIA</a><div class="gapp-sub">Governança da Inclusão Escolar · Censo 2025</div></div>
+    <div class="gright">
+      <span class="guser">👤 <strong>João Silva</strong> — Sec. de Educação · Niterói/RJ</span>
+      <button class="gbtn-logout" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <!-- ═══ TELA 1: MAPA ═══ -->
+  <div id="screen-mapa" class="screen active">
+    <!-- KPIs nacionais -->
+    <div class="kpi-strip" style="flex-shrink:0">
+      <div class="kpi r"><div class="kpi-l">Municípios Críticos</div><div class="kpi-v" style="color:var(--red)">1.843</div><div class="kpi-s">Score &lt; 3,0 · Brasil</div></div>
+      <div class="kpi o"><div class="kpi-l">Escolas sem AEE</div><div class="kpi-v" style="color:var(--orange)">98.310</div><div class="kpi-s">+1 mi de alunos sem suporte</div></div>
+      <div class="kpi"><div class="kpi-l">Score Médio Nacional</div><div class="kpi-v">3,8</div><div class="kpi-s">Escala 0–10 · IncluIA 2025</div></div>
+      <div class="kpi g"><div class="kpi-l">Municípios Mapeados</div><div class="kpi-v" style="color:var(--green)">5.570</div><div class="kpi-s">214 mil escolas analisadas</div></div>
+    </div>
+    <!-- Mapa + Ranking -->
+    <div style="display:grid;grid-template-columns:1fr 300px;flex:1;overflow:hidden;">
+      <div class="map-wrap">
+        <div class="map-toolbar">
+          <span class="tl-label">Estado:</span>
+          <select id="sel-uf" onchange="mudarUF()">
+            <option value="33" selected>RJ — Rio de Janeiro</option>
+            <option value="35">SP — São Paulo</option>
+            <option value="31">MG — Minas Gerais</option>
+            <option value="29">BA — Bahia</option>
+          </select>
+          <span class="tl-label" style="margin-left:4px;">Município:</span>
+          <select id="sel-muni" onchange="irParaMunicipio()" style="min-width:200px;">
+            <option value="">— selecione —</option>
+          </select>
+          <span class="map-hint">ou clique no mapa</span>
+        </div>
+        <div class="map-rel">
+          <div class="map-loading" id="map-loading"><div class="spinner"></div>Carregando mapa IBGE…</div>
+          <div id="leaflet-map"></div>
+        </div>
+      </div>
+      <div class="rank-wrap">
+        <div class="rp-hdr"><span class="rp-t" id="rank-title">Ranking — Rio de Janeiro</span></div>
+        <div class="rank-body">
+          <div class="rsect">🏆 Melhores</div>
+          <div class="ritem active" id="ri-3303302" onclick="focusMuni(3303302)"><div class="rnum top">1</div><span class="rname">Niterói</span><div class="rbar"><div class="rbar-bg"><div class="rbar-fill" style="width:74%;background:var(--green)"></div></div></div><span class="rscore" style="color:var(--green)">7,4</span></div>
+          <div class="ritem" id="ri-3304557" onclick="focusMuni(3304557)"><div class="rnum top">2</div><span class="rname">Rio de Janeiro</span><div class="rbar"><div class="rbar-bg"><div class="rbar-fill" style="width:71%;background:var(--green)"></div></div></div><span class="rscore" style="color:var(--green)">7,1</span></div>
+          <div class="ritem" id="ri-3303906" onclick="focusMuni(3303906)"><div class="rnum top">3</div><span class="rname">Petrópolis</span><div class="rbar"><div class="rbar-bg"><div class="rbar-fill" style="width:65%;background:var(--yellow)"></div></div></div><span class="rscore" style="color:var(--yellow)">6,5</span></div>
+          <div class="ritem" id="ri-3306701" onclick="focusMuni(3306701)"><div class="rnum top">4</div><span class="rname">Volta Redonda</span><div class="rbar"><div class="rbar-bg"><div class="rbar-fill" style="width:62%;background:var(--yellow)"></div></div></div><span class="rscore" style="color:var(--yellow)">6,2</span></div>
+          <div class="ritem" id="ri-3301009" onclick="focusMuni(3301009)"><div class="rnum" style="background:var(--orange-lt);color:var(--orange)">5</div><span class="rname">Campos dos Goytacazes</span><div class="rbar"><div class="rbar-bg"><div class="rbar-fill" style="width:41%;background:var(--orange)"></div></div></div><span class="rscore" style="color:var(--orange)">4,1</span></div>
+          <div class="rsect" style="margin-top:4px">⚠️ Críticos (Score &lt; 3,0)</div>
+          <div class="ritem" id="ri-3301108" onclick="focusMuni(3301108)"><div class="rnum bot">90</div><span class="rname">Cardoso Moreira</span><div class="rbar"><div class="rbar-bg"><div class="rbar-fill" style="width:24%;background:var(--red)"></div></div></div><span class="rscore" style="color:var(--red)">2,4</span></div>
+          <div class="ritem" id="ri-3302304" onclick="focusMuni(3302304)"><div class="rnum bot">91</div><span class="rname">Italva</span><div class="rbar"><div class="rbar-bg"><div class="rbar-fill" style="width:21%;background:var(--red)"></div></div></div><span class="rscore" style="color:var(--red)">2,1</span></div>
+          <div class="ritem" id="ri-3306008" onclick="focusMuni(3306008)"><div class="rnum bot">92</div><span class="rname">Trajano de Moraes</span><div class="rbar"><div class="rbar-bg"><div class="rbar-fill" style="width:17%;background:var(--red)"></div></div></div><span class="rscore" style="color:var(--red)">1,7</span></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /screen-mapa -->
+
+
+  <!-- ═══ TELA 2: CONTEXTO MUNICÍPIO (Indicadores + Escolas + IA) ═══ -->
+  <div id="screen-muni" class="screen">
+
+    <!-- Barra de contexto com navegação por tabs -->
+    <div class="ctx-bar" style="flex-shrink:0">
+      <button class="ctx-back" onclick="voltarMapa()">
+        ← Mapa
+      </button>
+      <div>
+        <div class="ctx-muni-name" id="ctx-nome">Niterói</div>
+        <div class="ctx-muni-uf" id="ctx-uf">Rio de Janeiro — RJ</div>
+      </div>
+      <div class="ctx-score">
+        <div class="ctx-sv" id="ctx-score">7,4</div>
+        <div class="ctx-sl">Score IncluIA</div>
+        <span class="badge bd-g" id="ctx-badge" style="margin-top:3px;float:right">Adequado</span>
+      </div>
+      <div class="ctx-tabs">
+        <button class="ctx-tab active" id="tab-ind" onclick="showTab('indicadores')">📋 Indicadores</button>
+        <button class="ctx-tab" id="tab-esc" onclick="showTab('escolas')">🏫 Escolas</button>
+        <button class="ctx-tab" id="tab-ia-btn" onclick="showTab('ia')">🤖 Diagnóstico IA</button>
+      </div>
+    </div>
+
+    <!-- Painel: Indicadores -->
+    <div id="tab-indicadores" class="scroll-area">
+      <p style="font-size:12px;color:var(--g4);margin-bottom:14px">Situação em relação aos <strong>4 eixos do Decreto 12.773/2025 — PNEEI</strong>.</p>
+
+      <div class="sem-grid" id="semaforos"></div>
+
+      <div class="grid2 mb14">
+        <div class="panel">
+          <div class="ph"><span class="ph-t">Score por Eixo</span></div>
+          <div class="pb" id="score-eixos"></div>
+        </div>
+        <div class="panel">
+          <div class="ph"><span class="ph-t">Dados Gerais</span></div>
+          <div class="pb" id="dados-gerais"></div>
+        </div>
+      </div>
+
+      <div class="panel mb14">
+        <div class="ph">
+          <span class="ph-t">Detalhamento — Decreto 12.773/2025</span>
+          <span style="font-size:11px;color:var(--orange)">⚠️ Em validação jurídica</span>
+        </div>
+        <div class="pb0" id="tabela-decreto"></div>
+      </div>
+    </div>
+
+    <!-- Painel: Escolas -->
+    <div id="tab-escolas" class="scroll-area" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <p style="font-size:12px;color:var(--g4)">Score e situação de cada escola nos eixos do Decreto 12.773/2025.</p>
+        <div style="display:flex;gap:8px;">
+          <select style="font-family:var(--font);font-size:12px;border:1px solid var(--g3);border-radius:var(--r);padding:5px 10px;" id="filtro-escola" onchange="filtrarEscolas()">
+            <option value="">Todas as escolas</option>
+            <option value="nok">Situação crítica</option>
+            <option value="sem-aee">Sem AEE</option>
+          </select>
+          <button class="btn btn-o" style="font-size:12px;padding:5px 12px">📄 Exportar</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="pb0">
+          <table class="tbl clickable">
+            <thead>
+              <tr>
+                <th style="min-width:180px">Escola</th>
+                <th>Rede</th>
+                <th>Alunos ESP</th>
+                <th style="text-align:center">Eixo I AEE</th>
+                <th style="text-align:center">Eixo II Acessib.</th>
+                <th style="text-align:center">Eixo III Prof.</th>
+                <th style="text-align:center">Eixo IV CC</th>
+                <th style="text-align:center">Score</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-escolas"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Painel: IA -->
+    <div id="tab-ia" class="scroll-area" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <p style="font-size:12px;color:var(--g4)">Análise gerada por <strong>Gemini 2.0 Flash</strong> com base nos dados do Censo Escolar 2025 · Cache de 24h.</p>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-p" style="font-size:12px" onclick="regenerarIA(event)">🔄 Regenerar</button>
+          <button class="btn btn-o" style="font-size:12px">📄 Exportar PDF</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph">
+          <span class="ph-t">Diagnóstico por Eixo do Decreto</span>
+          <span style="font-size:11px;color:var(--g4)" id="ia-timestamp">Gerado em 2,3s · atualizado há 4h</span>
+        </div>
+        <div class="pb" id="ia-content"></div>
+      </div>
+    </div>
+
+  </div><!-- /screen-muni -->
+
+  <div class="footer" style="flex-shrink:0">IncluIA · Censo Escolar 2025 — INEP/MEC · Decreto 12.773/2025 (PNEEI) · Mapa: Leaflet + OpenStreetMap + IBGE</div>
+</div><!-- /app -->
+
+
+<!-- Modal Escola -->
+<div class="modal-bg" id="escola-modal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div><div class="modal-title" id="modal-nome"></div><div class="modal-sub" id="modal-sub"></div></div>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ════════════════════════════════
+   DADOS
+════════════════════════════════ */
+const MUNIS_BASE = {
+  3303302:{nome:'Niterói',uf:'Rio de Janeiro — RJ',score:7.4},
+  3304557:{nome:'Rio de Janeiro',uf:'Rio de Janeiro — RJ',score:7.1},
+  3303906:{nome:'Petrópolis',uf:'Rio de Janeiro — RJ',score:6.5},
+  3306701:{nome:'Volta Redonda',uf:'Rio de Janeiro — RJ',score:6.2},
+  3301009:{nome:'Campos dos Goytacazes',uf:'Rio de Janeiro — RJ',score:4.1},
+  3301108:{nome:'Cardoso Moreira',uf:'Rio de Janeiro — RJ',score:2.4},
+  3302304:{nome:'Italva',uf:'Rio de Janeiro — RJ',score:2.1},
+  3306008:{nome:'Trajano de Moraes',uf:'Rio de Janeiro — RJ',score:1.7},
+};
+
+const MUNIS_DETAIL = {
+  3303302:{
+    eixos:[
+      {status:'ok', ico:'✅', label:'Eixo I — AEE',          val:'68%',    sub:'das escolas ofertam'},
+      {status:'warn',ico:'⚠️',label:'Eixo II — Acessibilidade',val:'Parcial',sub:'piso tátil pendente'},
+      {status:'nok', ico:'❌', label:'Eixo III — Profissionais',val:'Déficit',sub:'Braille insuficiente'},
+      {status:'ok', ico:'✅', label:'Eixo IV — Inclusão CC',  val:'82%',    sub:'em classe comum'},
+    ],
+    scoreEixos:[
+      {label:'Eixo I — AEE (30%)',pct:81,val:'8,1',cor:'var(--blue)'},
+      {label:'Eixo II — Acessibilidade (30%)',pct:72,val:'7,2',cor:'var(--yellow)'},
+      {label:'Eixo III — Profissionais (25%)',pct:48,val:'4,8',cor:'var(--orange)'},
+      {label:'Eixo IV — Inclusão CC (15%)',pct:90,val:'9,0',cor:'var(--green)'},
+    ],
+    dados:[
+      ['Total de alunos ESP','4.832'],['Escolas com AEE','68% (213/312)'],
+      ['Em classe comum','82%'],['Score médio estadual','4,6'],
+      ['Professores LIBRAS','12'],['Revisores Braille','2'],
+      ['Escolas com rampa','74% (231/312)'],['Piso tátil','39% (122/312)'],
+      ['Banheiro PNE','62% (194/312)'],['Ranking no estado','#1 de 92'],
+    ],
+    ia:`
+      <div class="ia-axis-t">⚖️ Eixo I — Oferta de Atendimento Educacional Especializado (AEE)</div>
+      <p>Niterói apresenta <strong>68% das escolas com AEE disponível</strong> — acima da média estadual (38%) e nacional (41%). Contudo, 99 escolas ainda não ofertam atendimento especializado; destas, 48 possuem alunos com deficiência registrados e nenhum suporte na escola-sede.</p>
+      <p>As escolas sem AEE estão concentradas na <strong>zona norte</strong> (62%) e na <strong>região oceânica</strong> (21%). A análise revela correlação com menor IDH e maior proporção de alunos em situação de vulnerabilidade socioeconômica.</p>
+      <div class="ia-rec">💡 <strong>Recomendação:</strong> Implantar 3 salas de recursos multifuncionais (SRM) do Tipo I nas escolas com maior concentração de alunos ESP sem AEE — estimativa: R$ 90k em equipamentos, elegível ao PDDE Educação Especial 2025. Prazo estimado: 6 meses.</div>
+
+      <div class="ia-axis-t">♿ Eixo II — Acessibilidade Física</div>
+      <p>Rampas (74%) e banheiros PNE (62%) apresentam boa cobertura. O <strong>gap crítico é o piso tátil, presente em apenas 39% das escolas</strong> — comprometendo a mobilidade autônoma dos 187 alunos com deficiência visual matriculados, mesmo onde já existe rampa de acesso.</p>
+      <p>Corrimão está ausente em 28% das escolas. Sinal sonoro e visual para deficientes auditivos está abaixo de 15% das unidades.</p>
+      <div class="ia-rec">💡 <strong>Recomendação:</strong> Instalação de piso tátil nas 190 escolas sem o recurso. Custo médio R$ 8.200/escola → total ~R$ 1,56M. Viável via PDDE Acessibilidade — priorizar escolas com alunos cegos ou com baixa visão matriculados.</div>
+
+      <div class="ia-axis-t">👩‍🏫 Eixo III — Profissionais Especializados</div>
+      <p>Maior gap do município. <strong>Apenas 2 revisores de Braille</strong> para 4.832 alunos — necessidade estimada de 8 profissionais para cobertura mínima. Os 12 professores de LIBRAS cobrem ~60% da demanda identificada, com ausência total em 18 escolas que possuem alunos surdos matriculados.</p>
+      <div class="ia-alerta">🚨 <strong>Alerta:</strong> As 18 escolas com alunos surdos e sem professor de LIBRAS configuram descumprimento direto do Art. 7º do Decreto 12.773/2025.</div>
+      <div class="ia-rec">💡 <strong>Recomendação:</strong> Contratar 6 revisores de Braille (~R$ 180k/ano) e 5 professores de LIBRAS adicionais (~R$ 150k/ano). Total: R$ 330k/ano. Impacto direto em 340 alunos com deficiência visual e auditiva atualmente sem cobertura.</div>
+
+      <div class="ia-axis-t">🏫 Eixo IV — Inclusão em Classe Comum</div>
+      <p>Com <strong>82% dos alunos ESP em classe comum</strong>, Niterói supera a média nacional (67%) e estadual (71%), posicionando-se como referência no estado neste eixo. A inclusão em CC cresceu 4 pontos percentuais em relação ao Censo 2024.</p>
+      <p>Atenção: 6 escolas apresentaram queda superior a 10% na taxa de inclusão em relação ao ano anterior — monitorar reversão de prática inclusiva nessas unidades.</p>
+      <div class="ia-rec">💡 <strong>Recomendação:</strong> Manter e monitorar. Investigar as 6 escolas com regressão e verificar se houve mudança de gestão ou de corpo docente. Nenhuma ação estrutural urgente necessária neste eixo.</div>
+    `
+  },
+  3304557:{
+    eixos:[
+      {status:'ok', ico:'✅', label:'Eixo I — AEE',           val:'71%',    sub:'das escolas ofertam'},
+      {status:'warn',ico:'⚠️',label:'Eixo II — Acessibilidade',val:'Parcial',sub:'elevador e piso tátil'},
+      {status:'warn',ico:'⚠️',label:'Eixo III — Profissionais',val:'Parcial',sub:'Braille insuficiente'},
+      {status:'ok', ico:'✅', label:'Eixo IV — Inclusão CC',   val:'76%',    sub:'em classe comum'},
+    ],
+    scoreEixos:[
+      {label:'Eixo I — AEE (30%)',pct:79,val:'7,9',cor:'var(--blue)'},
+      {label:'Eixo II — Acessibilidade (30%)',pct:68,val:'6,8',cor:'var(--yellow)'},
+      {label:'Eixo III — Profissionais (25%)',pct:60,val:'6,0',cor:'var(--yellow)'},
+      {label:'Eixo IV — Inclusão CC (15%)',pct:86,val:'8,6',cor:'var(--green)'},
+    ],
+    dados:[
+      ['Total de alunos ESP','48.210'],['Escolas com AEE','71% (2.012/2.834)'],
+      ['Em classe comum','76%'],['Score médio estadual','4,6'],
+      ['Professores LIBRAS','142'],['Revisores Braille','18'],
+      ['Escolas com rampa','80%'],['Piso tátil','44%'],
+      ['Banheiro PNE','71%'],['Ranking no estado','#2 de 92'],
+    ],
+    ia:`
+      <div class="ia-axis-t">⚖️ Eixo I — AEE</div>
+      <p>Rio de Janeiro tem 71% das escolas com AEE. Dado o volume de 2.834 escolas, ainda há <strong>822 unidades sem atendimento</strong> — escala incomum que demanda plano regionalizado por AP (Área de Planejamento).</p>
+      <div class="ia-rec">💡 <strong>Recomendação:</strong> Plano de expansão por AP, priorizando AP3 (zona norte) e AP5 (zona oeste) com maior concentração de déficit. Solicitar apoio do MEC para co-financiamento de 80 novas SRM.</div>
+      <div class="ia-axis-t">♿ Eixo II — Acessibilidade Física</div>
+      <p>Bom desempenho em rampas (80%). Gap: elevadores ausentes em 91% das escolas com mais de 1 pavimento. Piso tátil cobre apenas 44% das unidades.</p>
+      <div class="ia-rec">💡 <strong>Recomendação:</strong> Priorizar piso tátil em escolas com alunos com deficiência visual. Elevadores: avaliar casos onde rampa não é viável e pleitear adequação via PAR/FNDE.</div>
+      <div class="ia-axis-t">👩‍🏫 Eixo III — Profissionais</div>
+      <p>142 professores de LIBRAS com cobertura razoável. <strong>Déficit de 27 revisores de Braille</strong> (18 disponíveis, necessidade estimada de 45).</p>
+      <div class="ia-rec">💡 <strong>Recomendação:</strong> Concurso para 27 revisores de Braille (R$ 810k/ano). Avaliar modelo de centros de recurso regionais para otimizar cobertura.</div>
+      <div class="ia-axis-t">🏫 Eixo IV — Inclusão CC</div>
+      <p>76% — acima da média nacional. Monitorar regressão por escola, especialmente em unidades com mudança de gestão.</p>
+    `
+  },
+  3301108:{
+    eixos:[
+      {status:'nok', ico:'❌', label:'Eixo I — AEE',           val:'8%',     sub:'das escolas ofertam'},
+      {status:'nok', ico:'❌', label:'Eixo II — Acessibilidade',val:'Ausente',sub:'sem rampa nem banheiro PNE'},
+      {status:'nok', ico:'❌', label:'Eixo III — Profissionais',val:'Zero',   sub:'nenhum especialista'},
+      {status:'warn',ico:'⚠️',label:'Eixo IV — Inclusão CC',   val:'51%',    sub:'abaixo da média nacional'},
+    ],
+    scoreEixos:[
+      {label:'Eixo I — AEE (30%)',pct:18,val:'1,8',cor:'var(--red)'},
+      {label:'Eixo II — Acessibilidade (30%)',pct:12,val:'1,2',cor:'var(--red)'},
+      {label:'Eixo III — Profissionais (25%)',pct:5,val:'0,5',cor:'var(--red)'},
+      {label:'Eixo IV — Inclusão CC (15%)',pct:51,val:'5,1',cor:'var(--yellow)'},
+    ],
+    dados:[
+      ['Total de alunos ESP','312'],['Escolas com AEE','8% (2/24)'],
+      ['Em classe comum','51%'],['Score médio estadual','4,6'],
+      ['Professores LIBRAS','0'],['Revisores Braille','0'],
+      ['Escolas com rampa','14% (3/24)'],['Piso tátil','0% (0/24)'],
+      ['Banheiro PNE','9% (2/24)'],['Ranking no estado','#90 de 92'],
+    ],
+    ia:`
+      <div class="ia-axis-t">⚖️ Eixo I — AEE · SITUAÇÃO CRÍTICA</div>
+      <p>Apenas 2 das 24 escolas têm AEE (8%). <strong>312 alunos com deficiência sem nenhuma perspectiva de suporte especializado</strong> na escola. Município em descumprimento flagrante do Decreto 12.773/2025.</p>
+      <div class="ia-alerta">🚨 <strong>Risco legal:</strong> A ausência de AEE em 92% das escolas com alunos ESP caracteriza violação do direito à educação inclusiva (LBI 13.146/2015 + Decreto 12.773/2025). Risco de ação civil pública pelo MP.</div>
+      <div class="ia-rec">💡 <strong>Ação urgente:</strong> Solicitar recursos emergenciais ao MEC via PAR. Implantar 2 SRM Tipo I nas escolas com maior concentração. Prazo estimado: 6 meses.</div>
+      <div class="ia-axis-t">♿ Eixo II — Acessibilidade · SITUAÇÃO CRÍTICA</div>
+      <p>Apenas 3 das 24 escolas têm rampa (14%). Banheiro PNE em 9%. Nenhuma escola possui piso tátil ou sinalização sonora/visual. Município em situação de risco de responsabilização por barreiras arquitetônicas.</p>
+      <div class="ia-rec">💡 <strong>Ação urgente:</strong> Levantamento de barreiras por escola e plano de obras emergenciais. Estimativa de adequação básica (rampa + banheiro PNE): R$ 280k via FNDE Acessibilidade.</div>
+      <div class="ia-axis-t">👩‍🏫 Eixo III — Profissionais · SITUAÇÃO CRÍTICA</div>
+      <p>Zero professores de LIBRAS e zero revisores de Braille no Censo 2025. <strong>Município não possui nenhum recurso humano especializado</strong> para educação especial registrado.</p>
+      <div class="ia-rec">💡 <strong>Ação urgente:</strong> Contratação emergencial de 1 professor de LIBRAS e 1 revisor de Braille (R$ 110k/ano). Explorar convênio com IES da região (UFF/UENF) para estágio supervisionado como medida imediata.</div>
+      <div class="ia-axis-t">🏫 Eixo IV — Inclusão CC</div>
+      <p>51% dos alunos ESP em classe comum — 16 pontos abaixo da média nacional (67%). Há indícios de segregação indevida em turmas especiais sem fundamentação pedagógica registrada no sistema.</p>
+      <div class="ia-rec">💡 <strong>Recomendação:</strong> Auditar as turmas especiais existentes. Desenvolver plano de transição gradual para inclusão em classe comum com suporte de AEE quando implantado.</div>
+    `
+  }
+};
+
+const ESCOLAS = {
+  3303302:[
+    {nome:'C.M.E.I. Fonseca',bairro:'Fonseca',rede:'Municipal',alunos:19,aee:'✅',ac:'✅',prof:'✅',cc:'✅',score:9.1},
+    {nome:'E.M. Icaraí',bairro:'Icaraí',rede:'Municipal',alunos:68,aee:'✅',ac:'✅',prof:'⚠️',cc:'✅',score:7.8},
+    {nome:'E.E. Nilo Peçanha',bairro:'Centro',rede:'Estadual',alunos:53,aee:'✅',ac:'⚠️',prof:'⚠️',cc:'✅',score:6.9},
+    {nome:'E.M. Largo da Batalha',bairro:'Zona Norte',rede:'Municipal',alunos:24,aee:'⚠️',ac:'⚠️',prof:'❌',cc:'✅',score:5.5},
+    {nome:'E.M. Caramujo',bairro:'Zona Oeste',rede:'Municipal',alunos:31,aee:'❌',ac:'⚠️',prof:'❌',cc:'⚠️',score:3.4},
+    {nome:'E.E. Visconde do Rio Branco',bairro:'Centro',rede:'Estadual',alunos:37,aee:'❌',ac:'⚠️',prof:'⚠️',cc:'✅',score:5.1},
+    {nome:'E.M. São Domingos',bairro:'Zona Norte',rede:'Municipal',alunos:48,aee:'❌',ac:'⚠️',prof:'❌',cc:'✅',score:4.2},
+    {nome:'E.M. Maravista',bairro:'Reg. Oceânica',rede:'Municipal',alunos:29,aee:'❌',ac:'❌',prof:'❌',cc:'⚠️',score:2.8},
+    {nome:'E.M. Santa Rosa',bairro:'Santa Rosa',rede:'Municipal',alunos:41,aee:'✅',ac:'✅',prof:'⚠️',cc:'✅',score:7.2},
+    {nome:'E.M. Vital Brazil',bairro:'Charitas',rede:'Municipal',alunos:22,aee:'✅',ac:'⚠️',prof:'❌',cc:'✅',score:6.1},
+    {nome:'E.E. Bento Ribeiro Dantas',bairro:'Pendotiba',rede:'Estadual',alunos:33,aee:'❌',ac:'❌',prof:'❌',cc:'⚠️',score:2.2},
+    {nome:'E.M. Engenho do Mato',bairro:'Engenho do Mato',rede:'Municipal',alunos:15,aee:'⚠️',ac:'⚠️',prof:'❌',cc:'✅',score:4.8},
+  ],
+  3304557:[
+    {nome:'E.M. Classe Especial AP3',bairro:'Zona Norte',rede:'Municipal',alunos:120,aee:'✅',ac:'⚠️',prof:'✅',cc:'⚠️',score:6.8},
+    {nome:'E.E. Prof. Horácio Macedo',bairro:'Cidade Universitária',rede:'Estadual',alunos:88,aee:'✅',ac:'✅',prof:'✅',cc:'✅',score:8.9},
+    {nome:'E.M. Leônidas Basbaum',bairro:'Campo Grande',rede:'Municipal',alunos:97,aee:'❌',ac:'⚠️',prof:'⚠️',cc:'⚠️',score:4.3},
+    {nome:'E.M. Bahia',bairro:'Maré',rede:'Municipal',alunos:65,aee:'❌',ac:'❌',prof:'❌',cc:'⚠️',score:2.1},
+    {nome:'C.E. André Maurois',bairro:'Penha',rede:'Estadual',alunos:74,aee:'✅',ac:'✅',prof:'⚠️',cc:'✅',score:7.4},
+  ],
+  3301108:[
+    {nome:'E.M. Cardoso Moreira',bairro:'Centro',rede:'Municipal',alunos:78,aee:'⚠️',ac:'❌',prof:'❌',cc:'⚠️',score:2.1},
+    {nome:'E.E. Cel. Serapião',bairro:'Sede',rede:'Estadual',alunos:52,aee:'❌',ac:'❌',prof:'❌',cc:'⚠️',score:1.8},
+    {nome:'E.M. Distrito Morangaba',bairro:'Zona Rural',rede:'Municipal',alunos:38,aee:'❌',ac:'❌',prof:'❌',cc:'❌',score:1.2},
+    {nome:'E.M. Barra do Açu',bairro:'Rural Norte',rede:'Municipal',alunos:28,aee:'⚠️',ac:'❌',prof:'❌',cc:'⚠️',score:1.9},
+    {nome:'E.M. Rio Preto',bairro:'Rio Preto',rede:'Municipal',alunos:21,aee:'❌',ac:'❌',prof:'❌',cc:'❌',score:1.0},
+  ]
+};
+
+/* ════════════════════════════════
+   MAPA LEAFLET
+════════════════════════════════ */
+let map, geojsonLayer, allLayers = {};
+let mapReady = false;
+
+function getScore(cod){ return MUNIS_BASE[cod]?.score ?? Math.round((1.0+(((cod*1103515245+12345)>>>0)%10000)/10000*9)*10)/10; }
+function scoreColor(s){ return s>=8.5?'#1351b4':s>=7?'#168821':s>=5?'#e6b800':s>=3?'#e05c00':'#e52207'; }
+function scoreInfo(s){ return s>=8.5?{t:'Referência',c:'bd-b'}:s>=7?{t:'Adequado',c:'bd-g'}:s>=5?{t:'Em desenvolvimento',c:'bd-y'}:s>=3?{t:'Insuficiente',c:'bd-o'}:{t:'Crítico',c:'bd-r'}; }
+
+function initMap(){
+  if(mapReady) return; mapReady=true;
+  map = L.map('leaflet-map',{zoomControl:true});
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>',maxZoom:18
+  }).addTo(map);
+  popularComboMuni(33);
+  loadGeoJSON(33);
+}
+
+function loadGeoJSON(uf){
+  const load=document.getElementById('map-loading'); load.style.display='block';
+  Promise.all([
+    fetch(`https://servicodados.ibge.gov.br/api/v3/malhas/estados/${uf}?formato=application%2Fvnd.geo%2Bjson&resolucao=5`).then(r=>r.json()),
+    fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`).then(r=>r.json())
+  ]).then(([geo,nomes])=>{
+    load.style.display='none';
+    const nm={}; nomes.forEach(m=>{nm[m.id]=m.nome;});
+    if(geojsonLayer) map.removeLayer(geojsonLayer);
+    allLayers={};
+    geojsonLayer=L.geoJSON(geo,{
+      style:f=>{const c=parseInt(f.properties.codarea),s=getScore(c);return{fillColor:scoreColor(s),fillOpacity:.65,color:'#fff',weight:.8};},
+      onEachFeature:(f,layer)=>{
+        const cod=parseInt(f.properties.codarea), sc=getScore(cod);
+        const nome=nm[cod]||MUNIS_BASE[cod]?.nome||'Município '+cod;
+        allLayers[cod]=layer;
+        layer.on({
+          mouseover:e=>{e.target.setStyle({weight:2,color:'#071d41',fillOpacity:.88});e.target.bringToFront();},
+          mouseout:e=>{geojsonLayer.resetStyle(e.target);},
+          click:()=>abrirPopup(cod,sc,nome,layer)
+        });
+      }
+    }).addTo(map);
+    map.fitBounds(geojsonLayer.getBounds(),{padding:[10,10]});
+  }).catch(()=>{load.innerHTML='⚠️ Erro ao carregar mapa IBGE.';load.style.display='block';});
+}
+
+function abrirPopup(cod,sc,nome,layer){
+  const si=scoreInfo(sc), ss=sc.toFixed(1).replace('.',',');
+  layer.bindPopup(`
+    <div class="mp-name">${nome}</div>
+    <div class="mp-uf">${MUNIS_BASE[cod]?.uf||'Rio de Janeiro — RJ'}</div>
+    <div class="mp-sr"><span class="mp-sv" style="color:${scoreColor(sc)}">${ss}</span><span class="mp-sl">Score IncluIA</span></div>
+    <span class="badge ${si.c}">${si.t}</span>
+    <button class="mp-btn" onclick="abrirMunicipio(${cod},'${nome}',${sc})">Ver indicadores do município →</button>
+  `,{maxWidth:240}).openPopup();
+  document.querySelectorAll('.ritem').forEach(r=>r.classList.remove('active'));
+  const ri=document.getElementById('ri-'+cod);
+  if(ri){ri.classList.add('active');ri.scrollIntoView({block:'nearest',behavior:'smooth'});}
+}
+
+function focusMuni(cod){
+  const layer=allLayers[cod]; if(!layer){return;}
+  const nome=MUNIS_BASE[cod]?.nome||'Município '+cod, sc=getScore(cod);
+  map.fitBounds(layer.getBounds(),{maxZoom:11,padding:[40,40]});
+  abrirPopup(cod,sc,nome,layer);
+}
+
+/* Municípios mockados por UF — os do RJ já existem em MUNIS_BASE;
+   para os outros estados usamos um subconjunto representativo */
+const MUNIS_POR_UF = {
+  33: [
+    {cod:3303302,nome:'Niterói'},{cod:3304557,nome:'Rio de Janeiro'},
+    {cod:3303906,nome:'Petrópolis'},{cod:3306701,nome:'Volta Redonda'},
+    {cod:3301009,nome:'Campos dos Goytacazes'},{cod:3301108,nome:'Cardoso Moreira'},
+    {cod:3302304,nome:'Italva'},{cod:3306008,nome:'Trajano de Moraes'},
+    {cod:3300456,nome:'Angra dos Reis'},{cod:3300100,nome:'Armação dos Búzios'},
+    {cod:3300209,nome:'Arraial do Cabo'},{cod:3300308,nome:'Barra Mansa'},
+    {cod:3302858,nome:'Macaé'},{cod:3303500,nome:'Nova Friburgo'},
+    {cod:3303609,nome:'Nova Iguaçu'},{cod:3304003,nome:'Resende'},
+  ],
+  35: [
+    {cod:3550308,nome:'São Paulo'},{cod:3509502,nome:'Campinas'},
+    {cod:3518800,nome:'Guarulhos'},{cod:3534401,nome:'Osasco'},
+    {cod:3543402,nome:'Ribeirão Preto'},{cod:3548708,nome:'Santos'},
+    {cod:3549904,nome:'São Bernardo do Campo'},{cod:3529401,nome:'Mogi das Cruzes'},
+    {cod:3506003,nome:'Bauru'},{cod:3557105,nome:'Sorocaba'},
+  ],
+  31: [
+    {cod:3106200,nome:'Belo Horizonte'},{cod:3143302,nome:'Montes Claros'},
+    {cod:3170206,nome:'Uberlândia'},{cod:3132403,nome:'Juiz de Fora'},
+    {cod:3167202,nome:'Teófilo Otoni'},{cod:3156700,nome:'Poços de Caldas'},
+    {cod:3119401,nome:'Contagem'},{cod:3138203,nome:'Lavras'},
+    {cod:3171204,nome:'Uberaba'},{cod:3101706,nome:'Alfenas'},
+  ],
+  29: [
+    {cod:2927408,nome:'Salvador'},{cod:2910800,nome:'Feira de Santana'},
+    {cod:2919207,nome:'Ilhéus'},{cod:2918407,nome:'Itabuna'},
+    {cod:2933307,nome:'Vitória da Conquista'},{cod:2914802,nome:'Jequié'},
+    {cod:2924801,nome:'Paulo Afonso'},{cod:2900702,nome:'Alagoinhas'},
+    {cod:2903201,nome:'Barreiras'},{cod:2908903,nome:'Cruz das Almas'},
+  ],
+};
+
+function popularComboMuni(uf){
+  const sel = document.getElementById('sel-muni');
+  sel.innerHTML = '<option value="">— selecione —</option>';
+  const lista = MUNIS_POR_UF[uf] || [];
+  lista.sort((a,b)=>a.nome.localeCompare(b.nome,'pt'));
+  lista.forEach(m=>{
+    const opt = document.createElement('option');
+    opt.value = m.cod;
+    opt.textContent = m.nome;
+    sel.appendChild(opt);
+  });
+}
+
+function mudarUF(){
+  const uf=parseInt(document.getElementById('sel-uf').value);
+  const labels={33:'Rio de Janeiro',35:'São Paulo',31:'Minas Gerais',29:'Bahia'};
+  document.getElementById('rank-title').textContent='Ranking — '+(labels[uf]||uf);
+  popularComboMuni(uf);
+  loadGeoJSON(uf);
+}
+
+function irParaMunicipio(){
+  const sel = document.getElementById('sel-muni');
+  const cod = parseInt(sel.value);
+  if(!cod) return;
+  const layer = allLayers[cod];
+  if(!layer){ return; }
+  const nome = sel.options[sel.selectedIndex].text;
+  const sc = getScore(cod);
+  map.fitBounds(layer.getBounds(), {maxZoom:11, padding:[40,40]});
+  abrirPopup(cod, sc, nome, layer);
+}
+
+/* ════════════════════════════════
+   NAVEGAÇÃO
+════════════════════════════════ */
+let muniCtx = {cod:3303302, nome:'Niterói', score:7.4};
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');});
+  document.getElementById('screen-'+id).classList.add('active');
+  if(id==='mapa') setTimeout(()=>{ if(map) map.invalidateSize(); },50);
+}
+
+function showTab(tab){
+  // Painéis de conteúdo
+  document.getElementById('tab-indicadores').style.display = tab==='indicadores' ? '' : 'none';
+  document.getElementById('tab-escolas').style.display     = tab==='escolas'     ? '' : 'none';
+  document.getElementById('tab-ia').style.display          = tab==='ia'          ? '' : 'none';
+  // Botões da barra de contexto
+  document.getElementById('tab-ind').classList.toggle('active', tab==='indicadores');
+  document.getElementById('tab-esc').classList.toggle('active', tab==='escolas');
+  document.getElementById('tab-ia-btn').classList.toggle('active', tab==='ia');
+}
+
+function abrirMunicipio(cod, nome, score){
+  muniCtx={cod,nome,score};
+  const si=scoreInfo(score), ss=score.toFixed(1).replace('.',',');
+  document.getElementById('ctx-nome').textContent=nome;
+  document.getElementById('ctx-uf').textContent=MUNIS_BASE[cod]?.uf||'Rio de Janeiro — RJ';
+  document.getElementById('ctx-score').textContent=ss;
+  document.getElementById('ctx-score').style.color=scoreColor(score);
+  const b=document.getElementById('ctx-badge');b.textContent=si.t;b.className='badge '+si.c;
+  preencherIndicadores(cod,score);
+  preencherEscolas(cod);
+  preencherIA(cod);
+  showTab('indicadores');
+  showScreen('muni');
+}
+
+function voltarMapa(){
+  showScreen('mapa');
+}
+
+/* ════════════════════════════════
+   INDICADORES
+════════════════════════════════ */
+function preencherIndicadores(cod,score){
+  const d=MUNIS_DETAIL[cod]||MUNIS_DETAIL[3303302];
+
+  // Semáforos
+  document.getElementById('semaforos').innerHTML=d.eixos.map(e=>`
+    <div class="sem ${e.status}">
+      <div class="sem-ico">${e.ico}</div>
+      <div class="sem-axis">${e.label}</div>
+      <div class="sem-val">${e.val}</div>
+      <div class="sem-sub">${e.sub}</div>
+    </div>`).join('');
+
+  // Score por eixo
+  document.getElementById('score-eixos').innerHTML=d.scoreEixos.map(e=>`
+    <div class="prog">
+      <div class="prog-lbl"><span>${e.label}</span><span style="font-weight:700;color:${e.cor}">${e.val}</span></div>
+      <div class="prog-bg"><div class="prog-fill" style="width:${e.pct}%;background:${e.cor}"></div></div>
+    </div>`).join('');
+
+  // Dados gerais
+  document.getElementById('dados-gerais').innerHTML=
+    `<table style="width:100%;border-collapse:collapse;font-size:12px">
+    ${d.dados.map(r=>`<tr><td style="padding:5px 0;color:var(--g4);border-bottom:1px solid var(--g2)">${r[0]}</td><td style="text-align:right;font-weight:700;border-bottom:1px solid var(--g2)">${r[1]}</td></tr>`).join('')}
+    </table>`;
+
+  // Tabela decreto
+  const eixos=d.eixos;
+  const sb=s=>s==='ok'?'<span class="badge bd-g">✅ Conforme</span>':s==='warn'?'<span class="badge bd-o">⚠️ Parcial</span>':'<span class="badge bd-r">❌ Não conforme</span>';
+  document.getElementById('tabela-decreto').innerHTML=`
+    <table class="tbl">
+      <thead><tr><th>Eixo</th><th>Critério do Decreto</th><th>Variável Censo 2025</th><th>Resultado</th><th>Conformidade</th></tr></thead>
+      <tbody>
+        <tr><td rowspan="2"><strong>I — AEE</strong></td><td>Oferta de AEE na escola</td><td>TP_AEE ≠ 0</td><td>${eixos[0].val}</td><td>${sb(eixos[0].status)}</td></tr>
+        <tr><td>Sala de recursos multifuncional</td><td>IN_SALA_ATENDIMENTO_ESPECIAL</td><td>—</td><td><span class="badge bd-b">Em apuração</span></td></tr>
+        <tr><td rowspan="4"><strong>II — Acessib.</strong></td><td>Rampa de acesso</td><td>IN_ACESSIBILIDADE_RAMPAS</td><td>—</td><td>${sb(eixos[1].status)}</td></tr>
+        <tr><td>Banheiro adaptado PNE</td><td>IN_BANHEIRO_PNE</td><td>—</td><td><span class="badge bd-o">⚠️ Parcial</span></td></tr>
+        <tr><td>Piso tátil</td><td>IN_ACESSIBILIDADE_SINAL_TATIL</td><td>—</td><td><span class="badge bd-r">❌ Não conforme</span></td></tr>
+        <tr><td>Corrimão e guarda-corpo</td><td>IN_ACESSIBILIDADE_CORRIMAO</td><td>—</td><td><span class="badge bd-o">⚠️ Parcial</span></td></tr>
+        <tr><td rowspan="2"><strong>III — Prof.</strong></td><td>Tradutor/intérprete de LIBRAS</td><td>QT_PROF_TRAD_LIBRAS > 0</td><td>—</td><td>${sb(eixos[2].status)}</td></tr>
+        <tr><td>Revisor de Braille</td><td>QT_PROF_REVISOR_BRAILLE > 0</td><td>—</td><td><span class="badge bd-r">❌ Déficit</span></td></tr>
+        <tr><td><strong>IV — Incl. CC</strong></td><td>Taxa de matrícula em classe comum</td><td>QT_MAT_ESP_CC / QT_MAT_ESP</td><td>${eixos[3].val}</td><td>${sb(eixos[3].status)}</td></tr>
+      </tbody>
+    </table>`;
+}
+
+/* ════════════════════════════════
+   ESCOLAS
+════════════════════════════════ */
+let escolasData = [];
+function preencherEscolas(cod){
+  escolasData = ESCOLAS[cod] || ESCOLAS[3303302];
+  renderEscolas(escolasData);
+}
+function renderEscolas(lista){
+  const sc=s=>s>=7?'var(--green)':s>=5?'var(--yellow)':s>=3?'var(--orange)':'var(--red)';
+  const bi=s=>s>=7?'bd-g':s>=5?'bd-y':s>=3?'bd-o':'bd-r';
+  document.getElementById('tabela-escolas').innerHTML=lista.map((e,i)=>`
+    <tr onclick="abrirEscola(${i})">
+      <td><strong>${e.nome}</strong><span style="display:block;font-size:10px;color:var(--g4)">${e.bairro}</span></td>
+      <td><span class="badge bd-b" style="font-size:10px">${e.rede}</span></td>
+      <td style="text-align:center;font-weight:700">${e.alunos}</td>
+      <td style="text-align:center;font-size:16px">${e.aee}</td>
+      <td style="text-align:center;font-size:16px">${e.ac}</td>
+      <td style="text-align:center;font-size:16px">${e.prof}</td>
+      <td style="text-align:center;font-size:16px">${e.cc}</td>
+      <td style="text-align:center"><span class="badge ${bi(e.score)}">${e.score.toFixed(1).replace('.',',')}</span></td>
+    </tr>`).join('');
+}
+function filtrarEscolas(){
+  const f=document.getElementById('filtro-escola').value;
+  if(!f){renderEscolas(escolasData);return;}
+  const lista=f==='nok'?escolasData.filter(e=>e.score<3):escolasData.filter(e=>e.aee==='❌');
+  renderEscolas(lista);
+}
+function abrirEscola(idx){
+  const e=escolasData[idx];
+  document.getElementById('modal-nome').textContent=e.nome;
+  document.getElementById('modal-sub').textContent=`${muniCtx.nome} — RJ · Rede ${e.rede} · ${e.bairro}`;
+  const sc=s=>s>=7?'var(--green)':s>=5?'var(--yellow)':s>=3?'var(--orange)':'var(--red)';
+  document.getElementById('modal-body').innerHTML=`
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px">
+      ${[['Eixo I — AEE',e.aee,'ok'],['Eixo II — Acessib.',e.ac,''],['Eixo III — Prof.',e.prof,''],['Eixo IV — CC',e.cc,'']].map(([l,v])=>`
+        <div style="text-align:center;padding:12px 8px;border-radius:var(--r);border:1px solid var(--g2);background:var(--g1)">
+          <div style="font-size:24px;margin-bottom:4px">${v}</div>
+          <div style="font-size:10px;color:var(--g4);line-height:1.3">${l}</div>
+        </div>`).join('')}
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <tr style="border-bottom:1px solid var(--g2)"><td style="padding:7px 0;color:var(--g4)">Alunos com deficiência (ESP)</td><td style="text-align:right;font-weight:700">${e.alunos}</td></tr>
+      <tr style="border-bottom:1px solid var(--g2)"><td style="padding:7px 0;color:var(--g4)">Bairro / Região</td><td style="text-align:right;font-weight:700">${e.bairro}</td></tr>
+      <tr style="border-bottom:1px solid var(--g2)"><td style="padding:7px 0;color:var(--g4)">Rede de ensino</td><td style="text-align:right;font-weight:700">${e.rede}</td></tr>
+      <tr><td style="padding:7px 0;color:var(--g4)">Score IncluIA</td><td style="text-align:right;font-size:24px;font-weight:700;color:${sc(e.score)}">${e.score.toFixed(1).replace('.',',')}</td></tr>
+    </table>
+    <button class="btn btn-p" style="width:100%;margin-top:16px;justify-content:center" onclick="fecharModal()">Fechar</button>`;
+  document.getElementById('escola-modal').classList.add('open');
+}
+function fecharModal(){document.getElementById('escola-modal').classList.remove('open');}
+
+/* ════════════════════════════════
+   IA
+════════════════════════════════ */
+function preencherIA(cod){
+  const d=MUNIS_DETAIL[cod]||MUNIS_DETAIL[3303302];
+  document.getElementById('ia-content').innerHTML=`<div class="ia-box">${d.ia}</div>`;
+}
+function regenerarIA(e){
+  const btn=e.target; btn.textContent='⏳ Gerando…'; btn.disabled=true;
+  setTimeout(()=>{btn.textContent='🔄 Regenerar';btn.disabled=false;},2000);
+}
+
+/* ════════════════════════════════
+   LOGIN / LOGOUT
+════════════════════════════════ */
+function doLogin(e){
+  const btn=e.target; btn.textContent='⏳ Entrando…'; btn.disabled=true;
+  setTimeout(()=>{
+    document.getElementById('login-page').style.display='none';
+    const app=document.getElementById('app'); app.style.display='flex';
+    btn.textContent='Entrar'; btn.disabled=false;
+    setTimeout(initMap,120);
+    // Pré-carregar Niterói como município padrão
+    preencherIndicadores(3303302,7.4);
+    preencherEscolas(3303302);
+    preencherIA(3303302);
+  },800);
+}
+function doLogout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-page').style.display='flex';
+  showScreen('mapa');
+}
+</script>
+</body>
+</html>

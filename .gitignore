@@ -1,0 +1,31 @@
+# Microdados do Censo (brutos, ~400MB — nunca versionar; entrada do ETL, não do app em si)
+base/
+
+# Banco de dados gerado pelo ETL: versionado de propósito (deploy/README.md explica por quê) —
+# é o artefato pronto que o backend em produção lê; só muda quando o ETL é rodado de novo.
+# Se no futuro data/ ganhar outros .db (ex.: backup, teste local), ignore-os explicitamente aqui.
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Segredos (chaves de API) — nunca versionar
+.env
+*.env
+!.env.example
+
+# Node / Next.js (preparado para quando o frontend for criado)
+node_modules/
+.next/
+
+# Editor / SO
+.DS_Store
+Thumbs.db
+
+# Pasta de rascunho vazia (arquivo de 0 bytes) — nunca teve segredo real, mas não deve ir ao repo
+/chave api/
+
+# Logs de execução local do dev server
+*.log

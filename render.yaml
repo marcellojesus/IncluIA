@@ -1,0 +1,27 @@
+# Blueprint do Render para o backend do IncluIA — https://render.com/docs/blueprint-spec
+# Ao conectar este repositório no Render como "Blueprint", ele lê este arquivo e propõe o serviço
+# abaixo automaticamente, pedindo só os valores marcados com "sync: false" (segredos).
+services:
+  - type: web
+    name: incluia-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: MISTRAL_API_KEY
+        sync: false
+      - key: INCLUIA_JWT_SECRET
+        generateValue: true
+      # Atualizar para a URL real do frontend (Vercel) depois do primeiro deploy do frontend —
+      # ver docs/deploy.md.
+      - key: INCLUIA_CORS_ORIGINS
+        value: http://localhost:3000
