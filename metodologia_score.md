@@ -1,9 +1,9 @@
-# Score IncluIA — Metodologia de Cálculo
+# Score Escola Sem Barreiras — Metodologia de Cálculo
 
 > Índice de Governança da Inclusão Escolar
 > Versão 1.0 · Julho 2026 · Baseado nos Microdados do Censo Escolar 2025 — INEP/MEC
 
-Esta é a **fonte de verdade oficial** para a fórmula, pesos e regras de cálculo do Score IncluIA — prevalece sobre qualquer resumo de pesos citado em `context.md` ou `arquitetura.md`. As regras de negócio derivadas deste documento estão consolidadas em [docs/business-rules/score-incluia.md](docs/business-rules/score-incluia.md).
+Esta é a **fonte de verdade oficial** para a fórmula, pesos e regras de cálculo do Score Escola Sem Barreiras — prevalece sobre qualquer resumo de pesos citado em `context.md` ou `arquitetura.md`. As regras de negócio derivadas deste documento estão consolidadas em [docs/business-rules/score-incluia.md](docs/business-rules/score-incluia.md).
 
 > **Correções aplicadas após validação com o dicionário oficial de dados do Censo 2025** (`base/microdados_censo_escolar_2025/Anexos/ANEXO I - Dicionário de Dados`), que têm precedência sobre o texto original do `IncluIA_Metodologia_Score_v1.docx`:
 > 1. **Campo de "Piso tátil" corrigido**: o documento original citava `IN_ACESSIBILIDADE_SINAL_TATIL`, mas esse campo é na verdade "Sinalização tátil (piso/paredes)" — um recurso diferente (placas/sinalização, não o piso em si). O campo correto para piso tátil é **`IN_ACESSIBILIDADE_PISOS_TATEIS`** ("Pisos táteis"). Corrigido em todo este documento.
@@ -13,7 +13,7 @@ Esta é a **fonte de verdade oficial** para a fórmula, pesos e regras de cálcu
 
 ## 📋 Resumo Executivo
 
-O Score IncluIA é um índice composto de 0 a 10 que mede o nível de governança da inclusão escolar de cada escola e município brasileiro. É calculado a partir de variáveis dos Microdados do Censo Escolar 2025 (INEP/MEC), agrupadas em três dimensões: **Suporte Educacional Especializado**, **Recursos Humanos Especializados** e **Acessibilidade Física**. O índice é calculado por escola e agregado para o nível municipal por média ponderada pelo número de alunos com deficiência matriculados. Aplicado a 214 mil escolas e 5.570 municípios, é o primeiro instrumento padronizado, auditável e replicável para monitoramento de políticas públicas de educação especial no Brasil.
+O Score Escola Sem Barreiras é um índice composto de 0 a 10 que mede o nível de governança da inclusão escolar de cada escola e município brasileiro. É calculado a partir de variáveis dos Microdados do Censo Escolar 2025 (INEP/MEC), agrupadas em três dimensões: **Suporte Educacional Especializado**, **Recursos Humanos Especializados** e **Acessibilidade Física**. O índice é calculado por escola e agregado para o nível municipal por média ponderada pelo número de alunos com deficiência matriculados. Aplicado a 214 mil escolas e 5.570 municípios, é o primeiro instrumento padronizado, auditável e replicável para monitoramento de políticas públicas de educação especial no Brasil.
 
 > **Nota editorial**: o resumo executivo do documento original cita "10 variáveis", mas a estrutura detalhada nas seções 3 e 4 usa **11 variáveis** com pesos somando 100% (ver §3 e §4.1). Considerar 11 como o número correto — é o valor também usado em `IncluIA_MVP5` e no protótipo funcional.
 
@@ -21,9 +21,9 @@ O Score IncluIA é um índice composto de 0 a 10 que mede o nível de governanç
 
 ## 1. Fundamentação
 
-O Score IncluIA foi desenvolvido para responder a uma lacuna crítica de governança: apesar de o Brasil possuir dados anuais detalhados sobre infraestrutura e recursos de inclusão escolar — os Microdados do Censo Escolar do INEP —, não existe nenhum índice que transforme essas variáveis em uma métrica comparável, auditável e acionável para gestores públicos.
+O Score Escola Sem Barreiras foi desenvolvido para responder a uma lacuna crítica de governança: apesar de o Brasil possuir dados anuais detalhados sobre infraestrutura e recursos de inclusão escolar — os Microdados do Censo Escolar do INEP —, não existe nenhum índice que transforme essas variáveis em uma métrica comparável, auditável e acionável para gestores públicos.
 
-O Decreto 12.686/2025, que institui a Política Nacional de Educação Especial Inclusiva (PNEEI) — posteriormente alterado pontualmente pelo Decreto 12.773/2025, ver `docs/legislacao.md` —, agrava essa lacuna ao estabelecer critérios objetivos de conformidade sem oferecer instrumentos de medição. O Score IncluIA nasce como resposta direta a essa demanda regulatória.
+O Decreto 12.686/2025, que institui a Política Nacional de Educação Especial Inclusiva (PNEEI) — posteriormente alterado pontualmente pelo Decreto 12.773/2025, ver `docs/legislacao.md` —, agrava essa lacuna ao estabelecer critérios objetivos de conformidade sem oferecer instrumentos de medição. O Score Escola Sem Barreiras nasce como resposta direta a essa demanda regulatória.
 
 ### 1.1 Princípios Metodológicos
 
@@ -60,7 +60,7 @@ Prevalência real de cada indicador na base do Censo Escolar 2025, calculada sob
 
 ---
 
-## 3. Estrutura do Score IncluIA
+## 3. Estrutura do Score Escola Sem Barreiras
 
 O Score é organizado em três dimensões, cada uma cobrindo um aspecto distinto da governança da inclusão. A soma dos pesos de todas as variáveis totaliza 100%.
 
@@ -162,7 +162,7 @@ Score_UF = Σ (Score_municipio_j × QT_MAT_ESP_total_municipio_j) ÷ Σ QT_MAT_E
 
 ## 6. Decomposição do Score — Diagnóstico por Dimensão
 
-Além do score total, o IncluIA exibe o score por dimensão (D1, D2, D3), permitindo diagnóstico preciso. Um município pode ter score total 6,0 mas score D2 = 0,0 (sem nenhum professor de LIBRAS ou revisor de Braille) — isso é informação acionável que o score total não revelaria.
+Além do score total, a Escola Sem Barreiras exibe o score por dimensão (D1, D2, D3), permitindo diagnóstico preciso. Um município pode ter score total 6,0 mas score D2 = 0,0 (sem nenhum professor de LIBRAS ou revisor de Braille) — isso é informação acionável que o score total não revelaria.
 
 | Dimensão | Score Parcial | O que revela ao gestor |
 |---|---|---|
@@ -184,9 +184,9 @@ Além do score total, o IncluIA exibe o score por dimensão (D1, D2, D3), permit
 
 ## 8. Alinhamento com a PNEEI (Decreto 12.686/2025)
 
-A PNEEI (Decreto 12.686/2025, alterado pontualmente pelo Decreto 12.773/2025; ver `docs/legislacao.md` para o texto legal completo e o mapeamento validado por eixo) estabelece quatro eixos de conformidade para a inclusão escolar. A tabela abaixo mostra a correspondência entre esses eixos e as variáveis do Score IncluIA:
+A PNEEI (Decreto 12.686/2025, alterado pontualmente pelo Decreto 12.773/2025; ver `docs/legislacao.md` para o texto legal completo e o mapeamento validado por eixo) estabelece quatro eixos de conformidade para a inclusão escolar. A tabela abaixo mostra a correspondência entre esses eixos e as variáveis do Score Escola Sem Barreiras:
 
-| Eixo da PNEEI | Indicador IncluIA | Variável do Censo |
+| Eixo da PNEEI | Indicador Escola Sem Barreiras | Variável do Censo |
 |---|---|---|
 | Oferta de AEE | V_AEE (peso 30%) | `TP_AEE` |
 | Acessibilidade física | D3 completo (peso 30%) | 6 variáveis `IN_ACESSIBILIDADE_*` |
@@ -195,4 +195,4 @@ A PNEEI (Decreto 12.686/2025, alterado pontualmente pelo Decreto 12.773/2025; ve
 
 Esta tabela é a confirmação oficial de que os pesos por Eixo da PNEEI usados na interface (`interface.md` §5.2) devem ser **30% / 30% / 25% / 15%** (Eixo I / II / III / IV) — exatamente os mesmos valores já adotados como decisão em [docs/business-rules/score-incluia.md](docs/business-rules/score-incluia.md) RN-01.
 
-> ⚠️ **Nota jurídica**: o alinhamento com a PNEEI apresentado nesta seção é uma aproximação metodológica baseada na leitura técnica dos textos legais (ver `docs/legislacao.md`). Os critérios exatos de conformidade jurídica estão em processo de validação com especialistas em direito educacional e serão incorporados na Fase 2 do produto. **O Score IncluIA não deve ser utilizado como instrumento oficial de prestação de contas ao MEC até a conclusão dessa validação.**
+> ⚠️ **Nota jurídica**: o alinhamento com a PNEEI apresentado nesta seção é uma aproximação metodológica baseada na leitura técnica dos textos legais (ver `docs/legislacao.md`). Os critérios exatos de conformidade jurídica estão em processo de validação com especialistas em direito educacional e serão incorporados na Fase 2 do produto. **O Score Escola Sem Barreiras não deve ser utilizado como instrumento oficial de prestação de contas ao MEC até a conclusão dessa validação.**

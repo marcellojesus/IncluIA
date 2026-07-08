@@ -1,4 +1,4 @@
-# IncluIA — Stack Tecnológica
+# Escola Sem Barreiras — Stack Tecnológica
 
 ## Frontend
 
@@ -26,11 +26,11 @@
 | Cache | SQLite | Diagnósticos de IA por 24h, sem custo |
 | Servidor | Uvicorn | ASGI, roda o FastAPI |
 
-## Transformação dos Dados do Censo (ETL do Score IncluIA)
+## Transformação dos Dados do Censo (ETL do Score Escola Sem Barreiras)
 
 ### Onde este processo se encaixa
 
-O Score IncluIA não é calculado em tempo real a cada requisição — ele é um **processo em lote (batch)**, executado uma vez por versão do Censo, que lê os microdados brutos do INEP e grava o resultado já pronto (escola, município e UF) em SQLite. A API (`backend/app/`) só lê esse resultado; toda a lógica de cálculo mora em `backend/etl/`, isolada da camada de API. Isso segue a metodologia oficial documentada em `metodologia_score.md` — o ETL é a implementação executável dela, não uma reinterpretação.
+O Score Escola Sem Barreiras não é calculado em tempo real a cada requisição — ele é um **processo em lote (batch)**, executado uma vez por versão do Censo, que lê os microdados brutos do INEP e grava o resultado já pronto (escola, município e UF) em SQLite. A API (`backend/app/`) só lê esse resultado; toda a lógica de cálculo mora em `backend/etl/`, isolada da camada de API. Isso segue a metodologia oficial documentada em `metodologia_score.md` — o ETL é a implementação executável dela, não uma reinterpretação.
 
 ### Pipeline (`backend/etl/run_etl.py`, 4 etapas sequenciais)
 
@@ -62,7 +62,7 @@ O ETL é reexecutado manualmente (`python run_etl.py` dentro de `backend/`) semp
 
 A IA generativa é usada em **um único lugar do produto**: a feature `diagnostico-ia` (aba "🤖 Diagnóstico IA" da tela de município). Ela transforma os indicadores já calculados de cada eixo da PNEEI (Decreto 12.686/2025) em texto explicativo, alertas legais e recomendações com custo/prazo, em linguagem natural — e, a partir desta versão, também conversa com o gestor sobre esse diagnóstico via um chat por eixo (ver "Chat de ajuste de recomendações" abaixo).
 
-**A IA nunca decide números ou status** — isso é uma regra de negócio explícita (RN-03 de `docs/business-rules/diagnostico-ia.md`): o Score IncluIA, as faixas de classificação (Crítico/Insuficiente/Em desenvolvimento/Adequado/Referência) e os semáforos ✅/⚠️/❌ de cada eixo são 100% calculados deterministicamente pelo ETL (`backend/etl/score.py`), a partir da metodologia em `metodologia_score.md`. A IA só recebe esse resultado já pronto como contexto e o explica — nunca o contrário. Isso evita que uma alucinação de modelo altere o "resultado oficial" de conformidade exibido ao gestor.
+**A IA nunca decide números ou status** — isso é uma regra de negócio explícita (RN-03 de `docs/business-rules/diagnostico-ia.md`): o Score Escola Sem Barreiras, as faixas de classificação (Crítico/Insuficiente/Em desenvolvimento/Adequado/Referência) e os semáforos ✅/⚠️/❌ de cada eixo são 100% calculados deterministicamente pelo ETL (`backend/etl/score.py`), a partir da metodologia em `metodologia_score.md`. A IA só recebe esse resultado já pronto como contexto e o explica — nunca o contrário. Isso evita que uma alucinação de modelo altere o "resultado oficial" de conformidade exibido ao gestor.
 
 ### Como está implementado
 

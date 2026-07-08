@@ -11,7 +11,7 @@ import { login } from "../api";
 // vinda da querystring (evitaria um open redirect se alguém manipular o link).
 function destinoSeguro(redirect: string | null): string {
   if (redirect && redirect.startsWith("/") && !redirect.startsWith("//")) return redirect;
-  return "/mapa";
+  return "/";
 }
 
 export function LoginForm() {
@@ -42,24 +42,9 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-sm">
-      <div className="mb-1 text-xl font-bold text-gov-blue-dark">Entrar no IncluIA</div>
-      <div className="mb-6 text-sm text-gray-400">Acesso a gestores de secretarias de educação.</div>
-
-      <button
-        type="button"
-        disabled
-        className="relative mb-1 flex w-full cursor-not-allowed items-center justify-center gap-2 rounded bg-gov-blue py-3 text-sm font-bold text-white opacity-45"
-      >
-        Entrar com gov.br
-        <span className="absolute right-3 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold">
-          Fase 2
-        </span>
-      </button>
-
-      <div className="my-4 flex items-center gap-2 text-xs text-gray-300">
-        <span className="h-px flex-1 bg-gray-200" />
-        acesso MVP
-        <span className="h-px flex-1 bg-gray-200" />
+      <div className="mb-1 text-xl font-bold text-gov-blue-dark">Entrar</div>
+      <div className="mb-6 text-sm text-gray-400">
+        Acesso necessário para gerar o Diagnóstico com IA de um município.
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -98,8 +83,9 @@ export function LoginForm() {
       </form>
 
       <div className="mt-5 rounded border border-gray-200 bg-gray-50 px-3 py-2.5 text-xs text-gray-500">
-        Na Fase 2, o acesso via <strong>gov.br</strong> identificará automaticamente o perfil e o
-        município do gestor.
+        Esta tela é só para contas de gestor (sem autocadastro) — use o acesso de demonstração já
+        preenchido acima. Famílias, jornalistas, ONGs e pesquisadores podem criar a própria conta
+        ao abrir o Diagnóstico IA de um município.
       </div>
     </div>
   );

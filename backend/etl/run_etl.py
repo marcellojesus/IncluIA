@@ -1,4 +1,4 @@
-"""Orquestra o ETL do Score IncluIA: carga -> score -> agregação -> persistência.
+"""Orquestra o ETL do Score Escola Sem Barreiras: carga -> score -> agregação -> persistência.
 
 Uso: python run_etl.py   (a partir da pasta backend/)
 """
@@ -18,7 +18,7 @@ def main() -> None:
     df_escolas = carregar_escolas_com_matricula()
     print(f"     {len(df_escolas):,} escolas em atividade carregadas.")
 
-    print("2/4 — Calculando o Score IncluIA por escola...")
+    print("2/4 — Calculando o Score Escola Sem Barreiras por escola...")
     df_escolas = calcular_score_escola(df_escolas)
     df_escolas = adicionar_ranking_escolas(df_escolas)
 

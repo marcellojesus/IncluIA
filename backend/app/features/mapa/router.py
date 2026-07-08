@@ -3,7 +3,7 @@
 from fastapi import APIRouter
 
 from app.features.mapa import service
-from app.features.mapa.schemas import KpisNacionais, MunicipioResumo, RankingUf
+from app.features.mapa.schemas import KpisNacionais, MunicipioResumo, RankingUf, UfRanking
 
 router = APIRouter(tags=["mapa"])
 
@@ -11,6 +11,11 @@ router = APIRouter(tags=["mapa"])
 @router.get("/kpis-nacionais", response_model=KpisNacionais)
 def get_kpis_nacionais() -> KpisNacionais:
     return service.obter_kpis_nacionais()
+
+
+@router.get("/ranking-nacional", response_model=list[UfRanking])
+def get_ranking_nacional() -> list[UfRanking]:
+    return service.obter_ranking_nacional()
 
 
 @router.get("/uf/{sigla}/municipios", response_model=list[MunicipioResumo])

@@ -8,12 +8,13 @@ Permitir que um gestor de secretaria de educação (municipal ou estadual) se au
 
 ## Atores
 
-- **Secretário Municipal** (perfil prioritário do MVP)
-- **Secretário Estadual** (perfil suportado, mas não priorizado no MVP)
+- **Secretário Municipal** / **Secretário Estadual** — contas de gestor, provisionadas manualmente (seed), sem cadastro público.
+- **Público em geral** (família/responsável, jornalista/imprensa, sociedade civil/ONG, pesquisador, poder público) — cria a própria conta na tela de Diagnóstico IA.
 
 ## Pré-condições
 
-- Usuário possui uma conta previamente cadastrada (cadastro em si é fora do escopo do MVP — provisionamento manual/seed).
+- Perfis de gestor: usuário possui uma conta previamente cadastrada (cadastro em si é fora do escopo do MVP — provisionamento manual/seed).
+- Perfis públicos: nenhuma — a conta é criada na hora, na própria tela de login contextual do Diagnóstico IA (RF-09).
 
 ## Requisitos Funcionais
 
@@ -25,8 +26,10 @@ Permitir que um gestor de secretaria de educação (municipal ou estadual) se au
 - **RF-06**: A tela de login deve exibir estatísticas institucionais fixas (alunos com deficiência no Brasil, escolas sem AEE, municípios mapeados) — dados agregados nacionais, atualizados junto com o dataset do Censo vigente.
 - **RF-07**: Deve existir um botão "Sair" visível no header do app em qualquer tela pós-login, que encerra a sessão e retorna à tela de login.
 - **RF-08**: Após logout, a próxima entrada não deve reaproveitar UF/município previamente selecionados na sessão anterior — o usuário reinicia no mapa padrão do seu perfil.
-- **RF-09**: Ao clicar na aba "🤖 Diagnóstico IA" (ou navegar direto para ela via URL) sem estar autenticado, o sistema redireciona para a tela de login com um parâmetro de retorno (`?redirect=...`); após autenticar com sucesso, o sistema volta automaticamente para o mesmo município na aba Diagnóstico IA, sem exigir nova navegação manual.
+- **RF-09**: Ao clicar na aba "🤖 Diagnóstico IA" (ou navegar direto para ela via URL) sem estar autenticado, o sistema redireciona para a tela de login com um parâmetro de retorno (`?redirect=...`); após autenticar com sucesso, o sistema volta automaticamente para o mesmo município na aba Diagnóstico IA, sem exigir nova navegação manual. Nesse caso, a tela de login exibe um layout contextual (ícone, título e descrição do Diagnóstico IA) com abas "Criar conta" e "Entrar", em vez do layout institucional genérico.
 - **RF-10**: O parâmetro de retorno só é aceito se apontar para um caminho interno do próprio sistema (começar com `/`) — nunca redirecionar para uma URL externa vinda da querystring.
+- **RF-11**: Na aba "Criar conta" da tela contextual do Diagnóstico IA, o público em geral se autocadastra informando nome completo, perfil ("Você é": família/responsável, jornalista/imprensa, sociedade civil/ONG, secretário(a) de educação, pesquisador(a) ou poder público/gestor), e-mail e senha. Ao concluir, o sistema já autentica a conta criada e redireciona para o `redirect` recebido, sem exigir login separado em seguida.
+- **RF-12**: Se o e-mail informado no autocadastro já existir, o sistema deve rejeitar com uma mensagem clara (ex.: "Este e-mail já está cadastrado"), sem criar uma segunda conta nem sobrescrever a existente.
 
 ## Requisitos Não Funcionais
 
@@ -36,8 +39,9 @@ Permitir que um gestor de secretaria de educação (municipal ou estadual) se au
 
 ## Dados de entrada/saída
 
-**Entrada**: e-mail institucional, senha.
-**Saída (sessão autenticada)**: `{ usuarioId, nome, perfil: 'municipal'|'estadual', municipioId?, uf }`.
+**Entrada (login)**: e-mail, senha.
+**Entrada (autocadastro público)**: nome completo, e-mail, senha, perfil (`familia`|`imprensa`|`sociedade_civil`|`secretario_educacao`|`pesquisador`|`poder_publico`).
+**Saída (sessão autenticada)**: `{ usuarioId, nome, perfil, municipioId?, uf? }` — `municipioId`/`uf` só existem para contas de gestor (seed); contas públicas não os têm.
 
 ## Fluxo principal
 
@@ -62,3 +66,6 @@ Permitir que um gestor de secretaria de educação (municipal ou estadual) se au
 - [ ] Logout limpa a sessão e qualquer estado de UF/município em memória.
 - [ ] Acessar o Mapa, um Município (aba Indicadores/Escolas) sem estar logado nunca pede login.
 - [ ] Clicar em "🤖 Diagnóstico IA" sem login vai para `/login`; logar em seguida volta para a mesma aba do mesmo município.
+- [ ] Nesse fluxo, `/login` mostra a tela contextual (ícone + "Diagnóstico com IA" + abas Criar conta/Entrar), não o layout institucional genérico.
+- [ ] Criar conta com um e-mail novo autentica na hora e volta para o Diagnóstico IA do município de origem.
+- [ ] Criar conta com um e-mail já cadastrado é rejeitado com mensagem clara, sem duplicar a conta.

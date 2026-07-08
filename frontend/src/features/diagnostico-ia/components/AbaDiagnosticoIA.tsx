@@ -48,13 +48,13 @@ export function AbaDiagnosticoIA({ codigoIbge }: { codigoIbge: number }) {
 
   if (precisaLogin) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-3 p-5 text-center">
+      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
         <p className="text-sm text-gray-500">
           Sua sessão expirou. Faça login novamente para acessar o Diagnóstico IA.
         </p>
         <Link
-          href={`/login?redirect=${encodeURIComponent(`/municipio/${codigoIbge}?aba=diagnostico`)}`}
-          className="rounded bg-gov-blue px-4 py-2 text-sm font-bold text-white"
+          href={`/login?redirect=${encodeURIComponent(`/municipio/${codigoIbge}/diagnostico`)}`}
+          className="rounded-lg bg-gov-blue px-4 py-2 text-sm font-bold text-white"
         >
           Fazer login
         </Link>
@@ -63,12 +63,12 @@ export function AbaDiagnosticoIA({ codigoIbge }: { codigoIbge: number }) {
   }
 
   if (erro) {
-    return <p className="p-5 text-sm text-gov-red">{erro}</p>;
+    return <p className="text-sm text-gov-red">{erro}</p>;
   }
 
   if (!diagnosticos) {
     return (
-      <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-gray-400">
+      <div className="flex flex-col items-center justify-center gap-2 py-16 text-sm text-gray-400">
         <div>🤖 Gerando diagnóstico por IA — pode levar alguns segundos…</div>
       </div>
     );
@@ -92,7 +92,7 @@ export function AbaDiagnosticoIA({ codigoIbge }: { codigoIbge: number }) {
   }
 
   return (
-    <div className="flex h-full flex-col gap-3 overflow-y-auto p-5">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
         <p className="text-xs text-gray-400">
           Análise gerada por <strong>{modelos.join(", ")}</strong> com base nos dados do Censo

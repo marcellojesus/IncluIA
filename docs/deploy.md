@@ -1,10 +1,13 @@
-# Publicação em produção — IncluIA v1.0
+# Publicação em produção — Escola Sem Barreiras v1.0
 
 Stack de deploy (ver `arquitetura.md` §Infraestrutura): **GitHub** (código) → **Render** (backend FastAPI) → **Vercel** (frontend Next.js).
 
 **URLs da v1.0 em produção**:
 - Backend: https://incluia-api.onrender.com
-- Frontend: https://inclu-ia.vercel.app
+- Frontend (original): https://inclu-ia.vercel.app
+- Frontend (Escola Sem Barreiras, novo — confirmar URL exata após o deploy na Vercel): https://escola-sem-barreiras.vercel.app
+
+**Dois frontends, um só backend**: os dois projetos Vercel acima são deploys independentes do mesmo código (`frontend/`), apontando para o mesmo backend no Render — não há dado nem lógica duplicada, só duas URLs diferentes servindo a mesma aplicação. Ambas precisam estar na lista `INCLUIA_CORS_ORIGINS` do `render.yaml` (ver passo 4) para que as chamadas de API feitas direto do navegador funcionem nos dois domínios.
 
 ## Por que o `data/incluia.db` é versionado no Git
 
@@ -30,14 +33,17 @@ Depois do primeiro deploy, anotar a URL pública do serviço (algo como `https:/
 
 ## 3. Frontend na Vercel
 
-Ao importar o repositório na Vercel:
+Ao importar o repositório na Vercel (cada projeto Vercel é um import independente do mesmo repositório — é assim que se cria um segundo frontend com nome/URL diferente, como o `escola-sem-barreiras` ao lado do `inclu-ia` original):
 - **Root Directory**: `frontend` (o projeto Next.js não está na raiz do repo).
 - Framework é detectado automaticamente (Next.js).
-- Variável de ambiente: `NEXT_PUBLIC_API_URL` = URL do backend no Render (do passo 2).
+- **Project Name**: define o subdomínio gerado (`<nome>.vercel.app`) — depois de criado, o nome do projeto pode ser alterado em Project Settings → General, mas isso muda a URL, então é melhor decidir antes se possível.
+- Variável de ambiente: `NEXT_PUBLIC_API_URL` = URL do backend no Render (do passo 2) — a mesma para todos os frontends, a menos que se queira backends distintos.
 
-## 4. Fechar o CORS com a URL real do frontend
+## 4. Fechar o CORS com a(s) URL(s) real(is) do frontend
 
-`INCLUIA_CORS_ORIGINS` no `render.yaml` **não** está marcada como `sync: false` — o valor vem do próprio arquivo, e o Render resincroniza a cada push. Por isso, para liberar a URL real do frontend, o jeito certo é editar o `value` desse campo no `render.yaml` e comitar/dar push — nunca editar só pelo painel do Render (um push futuro reverteria o valor). Sem essa origem liberada, o navegador bloqueia por CORS toda chamada feita direto do cliente (ex.: aba Escolas, chat do Diagnóstico IA) — só as chamadas feitas no servidor (SSR) continuam funcionando, o que confunde o diagnóstico do problema.
+`INCLUIA_CORS_ORIGINS` no `render.yaml` **não** está marcada como `sync: false` — o valor vem do próprio arquivo, e o Render resincroniza a cada push. Por isso, para liberar a URL real do frontend, o jeito certo é editar o `value` desse campo no `render.yaml` (lista separada por vírgula — pode ter mais de um domínio, um por frontend) e comitar/dar push — nunca editar só pelo painel do Render (um push futuro reverteria o valor). Sem essa origem liberada, o navegador bloqueia por CORS toda chamada feita direto do cliente (ex.: aba Escolas, chat do Diagnóstico IA) — só as chamadas feitas no servidor (SSR) continuam funcionando, o que confunde o diagnóstico do problema.
+
+**Depois de criar um novo frontend na Vercel**: confirmar a URL exata gerada (pode diferir do nome do projeto se o slug já estiver em uso) e atualizar `INCLUIA_CORS_ORIGINS` no `render.yaml` com essa URL antes de considerar o deploy concluído — sem isso, o novo frontend carrega mas nenhuma chamada de API feita pelo navegador funciona.
 
 ## 5. Limitações do MVP a ter em mente em produção
 

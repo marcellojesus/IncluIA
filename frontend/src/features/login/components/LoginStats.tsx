@@ -28,7 +28,7 @@ export function LoginStats() {
     },
     {
       valor: kpis ? formatarNumero(kpis.municipiosMapeados) : "—",
-      label: "municípios mapeados com Score IncluIA",
+      label: "municípios mapeados com índice de inclusão",
     },
   ];
 

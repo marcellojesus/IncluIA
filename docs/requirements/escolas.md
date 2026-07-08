@@ -17,7 +17,7 @@ Secretário Municipal (escolas do próprio município) e Secretário Estadual (e
 
 ## Requisitos Funcionais
 
-- **RF-01**: Listar todas as escolas do município selecionado em uma tabela, com colunas: nome + bairro, rede de ensino, alunos ESP, status por eixo (I–IV, ícone ✅/⚠️/❌) e score badge (0–10).
+- **RF-01**: Listar todas as escolas do município selecionado, com nome + bairro/rede/alunos ESP e o status por eixo (I–IV). **Status atual (rastreabilidade)**: a lista é renderizada como cartões empilhados (`ListaEscolas.tsx`), um por escola — não mais uma tabela HTML — e o status por eixo usa um badge de texto com ponto colorido ("Conforme"/"Parcial"/"Não conf.") em vez dos ícones ✅/⚠️/❌ da especificação original; a legenda de ícones (`LegendaIconesEscola.tsx`) foi removida por ficar redundante com os badges de texto. O score individual (0–10) saiu da lista e só aparece no modal de detalhamento (RF-04) — a lista prioriza a leitura rápida da conformidade por eixo.
 - **RF-02**: Oferecer um filtro com pelo menos as opções: "Todas as escolas", "Situação crítica" (score < 3,0) e "Sem AEE" (status Eixo I = ❌).
 - **RF-03**: Ao clicar em qualquer linha da tabela, abrir um modal com o detalhamento completo da escola.
 - **RF-04**: O modal deve exibir, no mínimo: nome, rede, bairro/endereço, código INEP, os 4 status por eixo, score individual, e posição da escola no ranking do município.

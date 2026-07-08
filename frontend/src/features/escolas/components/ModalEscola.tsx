@@ -64,7 +64,7 @@ export function ModalEscola({ escola, onFechar }: { escola: Escola; onFechar: ()
             </td>
           </tr>
           <tr>
-            <td className="py-1.5 text-gray-500">Score IncluIA</td>
+            <td className="py-1.5 text-gray-500">Índice de inclusão</td>
             <td className="py-1.5 text-right">
               <Badge texto={`${formatarScore(escola.score)} · ${escola.faixa}`} cor={escola.cor} />
             </td>

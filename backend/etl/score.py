@@ -1,4 +1,4 @@
-"""Cálculo do Score IncluIA por escola, conforme metodologia_score.md (com as correções
+"""Cálculo do Score Escola Sem Barreiras por escola, conforme metodologia_score.md (com as correções
 de TP_AEE e piso tátil confirmadas contra o dicionário oficial do Censo 2025)."""
 
 import numpy as np

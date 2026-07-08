@@ -1,4 +1,4 @@
-"""Agregação do Score IncluIA de escola -> município -> UF (RN-03 de
+"""Agregação do Score Escola Sem Barreiras de escola -> município -> UF (RN-03 de
 docs/business-rules/score-incluia.md: média ponderada por QT_MAT_ESP, com fallback
 para média simples quando a soma de pesos do grupo é zero)."""
 

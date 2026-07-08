@@ -23,14 +23,20 @@ class ClaimsUsuario(TypedDict):
     nome: str
     perfil: str
     municipioId: Optional[int]
-    uf: str
+    uf: Optional[str]
 
 
 def verificar_senha(senha: str, senha_hash: str) -> bool:
     return bcrypt.checkpw(senha.encode(), senha_hash.encode())
 
 
-def criar_token(*, usuario_id: str, nome: str, perfil: str, municipio_id: Optional[int], uf: str) -> str:
+def hash_senha(senha: str) -> str:
+    return bcrypt.hashpw(senha.encode(), bcrypt.gensalt()).decode()
+
+
+def criar_token(
+    *, usuario_id: str, nome: str, perfil: str, municipio_id: Optional[int], uf: Optional[str]
+) -> str:
     payload = {
         "sub": usuario_id,
         "nome": nome,

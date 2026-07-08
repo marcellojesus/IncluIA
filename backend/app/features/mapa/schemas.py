@@ -29,3 +29,17 @@ class MunicipioRanking(MunicipioResumo):
 class RankingUf(CamelModel):
     melhores: list[MunicipioRanking]
     criticos: list[MunicipioRanking]
+
+
+class UfResumo(CamelModel):
+    sigla: str
+    codigo_uf: int
+    qtd_municipios: int
+    total_alunos_esp: int
+    score: float
+    faixa: str
+    cor: str
+
+
+class UfRanking(UfResumo):
+    ranking_nacional: int

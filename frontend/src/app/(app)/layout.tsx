@@ -1,17 +1,21 @@
 import { AppHeader } from "@/shared/components/AppHeader";
+import { BarraAcessibilidade } from "@/shared/components/BarraAcessibilidade";
 import { Footer } from "@/shared/components/Footer";
-import { GovTopBar } from "@/shared/components/GovTopBar";
+import { GeoFiltroBar } from "@/shared/components/GeoFiltroBar";
 
-// Shell das telas pós-login (Mapa, Município) — ver interface.md §0. A tela de Login não usa
-// este layout (só tem o GovTopBar, sem o AppHeader com usuário/logout).
+// Shell das telas públicas (Início, Escolas, Diagnóstico IA, Comparar, Dados abertos, Sobre,
+// Participar) — cabeçalho com navegação + filtro geográfico fixo (Região→UF→Município) + rodapé.
+// A tela de Login não usa este layout (fica fora do grupo de rotas (app)), mas replica a mesma
+// BarraAcessibilidade — ver features/login/components/LoginPage.tsx e app/metodologia/page.tsx.
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
-      <GovTopBar />
+    <div className="flex h-screen flex-col overflow-hidden bg-cream">
+      <BarraAcessibilidade />
       <AppHeader />
+      <GeoFiltroBar />
       {/* min-h-0 é necessário: sem ele, o padrão de flexbox (min-height:auto) impede este
           div de encolher, e conteúdo mais alto que a tela fica cortado em vez de rolar. */}
-      <div className="min-h-0 flex-1 overflow-hidden">{children}</div>
+      <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
       <Footer />
     </div>
   );

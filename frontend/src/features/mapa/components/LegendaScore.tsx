@@ -1,4 +1,4 @@
-// Ver interface.md §3.2 "Legenda do Score IncluIA" — explica as cores do mapa coroplético.
+// Ver interface.md §3.2 "Legenda do Score Escola Sem Barreiras" — explica as cores do mapa coroplético.
 // Reaproveita a mesma classificação usada em todo o produto (RN-02 de docs/business-rules/mapa.md).
 import { FAIXAS } from "@/shared/lib/score";
 
@@ -8,7 +8,7 @@ export function LegendaScore() {
   return (
     <div className="absolute bottom-3 left-3 z-[900] rounded bg-white/95 px-3 py-2 shadow-md">
       <div className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400">
-        Score IncluIA
+        Score Escola Sem Barreiras
       </div>
       <div className="flex flex-col gap-1">
         {faixasEmOrdem.map((f) => (

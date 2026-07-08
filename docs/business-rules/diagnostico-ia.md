@@ -24,7 +24,7 @@ A IA generativa nunca decide se um eixo é ✅/⚠️/❌ — isso é calculado 
 
 Apenas dados agregados e públicos do Censo (contagens, percentuais, médias) podem compor o prompt enviado a Gemini/Groq/Mistral. Nomes de alunos, professores ou qualquer identificador individual nunca fazem parte do contexto.
 
-**Por quê**: privacidade por design (`IncluIA_IA_Estrategia_v1`) — os dados do Censo usados são agregações por escola/município, não microdados de indivíduos, então essa regra é naturalmente satisfeita se a fonte de dados do prompt for sempre o resultado do Score IncluIA (ver [[score-incluia]]), nunca uma tabela de matrícula bruta.
+**Por quê**: privacidade por design (`IncluIA_IA_Estrategia_v1`) — os dados do Censo usados são agregações por escola/município, não microdados de indivíduos, então essa regra é naturalmente satisfeita se a fonte de dados do prompt for sempre o resultado do Score Escola Sem Barreiras (ver [[score-incluia]]), nunca uma tabela de matrícula bruta.
 
 ## RN-05 — Cache de 24h com chave dependente da versão do Censo
 

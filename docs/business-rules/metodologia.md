@@ -4,7 +4,7 @@
 
 `frontend/src/app/metodologia/page.tsx` lê `metodologia_score.md` do sistema de arquivos em tempo de renderização (`fs.readFileSync`) e converte para HTML com `react-markdown` — não existe um segundo texto da metodologia hardcoded na página ou em um CMS.
 
-**Por quê**: `metodologia_score.md` já é a fonte de verdade oficial (ver seu próprio cabeçalho). Duplicar o conteúdo criaria risco de a página exibir uma versão desatualizada da fórmula do Score IncluIA.
+**Por quê**: `metodologia_score.md` já é a fonte de verdade oficial (ver seu próprio cabeçalho). Duplicar o conteúdo criaria risco de a página exibir uma versão desatualizada da fórmula do Score Escola Sem Barreiras.
 
 **Como aplicar**: qualquer correção futura na metodologia (pesos, variáveis, faixas) é feita apenas em `metodologia_score.md` — nunca editar texto de metodologia diretamente em componentes React.
 

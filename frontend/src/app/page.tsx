@@ -1,7 +1,21 @@
 import { redirect } from "next/navigation";
 
-// RN-06 de docs/business-rules/login.md: o sistema é público — a porta de entrada é o Mapa,
-// não mais o Login. Só a aba Diagnóstico IA exige autenticação (gate em MunicipioClient.tsx).
-export default function RootPage() {
-  redirect("/mapa");
+import { getMunicipiosPorUf } from "@/features/mapa/api";
+
+// Sistema é público — a porta de entrada é o dashboard de um município (Início), não mais o
+// Mapa (removido da navegação principal nesta etapa). Sem um município selecionado ainda
+// (primeira visita), cai num município padrão; o filtro geográfico no topo troca livremente.
+const UF_PADRAO = "DF";
+
+export const dynamic = "force-dynamic";
+
+export default async function RootPage() {
+  const municipios = await getMunicipiosPorUf(UF_PADRAO);
+  const padrao = municipios[0];
+
+  if (!padrao) {
+    redirect("/sobre");
+  }
+
+  redirect(`/municipio/${padrao.codigoIbge}`);
 }

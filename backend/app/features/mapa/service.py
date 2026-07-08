@@ -4,11 +4,18 @@ Consultas sobre data/incluia.db (gerado pela feature score-incluia, backend/etl/
 """
 
 from app.database import get_connection
-from app.features.mapa.schemas import KpisNacionais, MunicipioRanking, MunicipioResumo, RankingUf
+from app.features.mapa.schemas import (
+    KpisNacionais,
+    MunicipioRanking,
+    MunicipioResumo,
+    RankingUf,
+    UfRanking,
+    UfResumo,
+)
 from etl.score import LIMIAR_SCORE_DESEJADO
 
 # RN-04 de docs/business-rules/mapa.md: limiar absoluto de score, o mesmo da faixa "Crítico"
-# na metodologia do Score IncluIA (ver metodologia_score.md §5) — não é um "top N piores".
+# na metodologia do Score Escola Sem Barreiras (ver metodologia_score.md §5) — não é um "top N piores".
 LIMIAR_CRITICO = 3.0
 
 
@@ -74,6 +81,37 @@ def obter_municipios_por_uf(sigla: str) -> list[MunicipioResumo]:
             (sigla.upper(),),
         ).fetchall()
         return [_linha_para_municipio_resumo(linha) for linha in linhas]
+    finally:
+        conn.close()
+
+
+def _linha_para_uf_resumo(linha) -> UfResumo:
+    return UfResumo(
+        sigla=linha["sg_uf"],
+        codigo_uf=linha["co_uf"],
+        qtd_municipios=linha["qtd_municipios"],
+        total_alunos_esp=linha["total_alunos_esp"],
+        score=linha["score"],
+        faixa=linha["faixa"],
+        cor=linha["cor"],
+    )
+
+
+# Ranking nacional dos 26 estados + DF — usa a tabela uf_agregado (backend/etl/aggregate.py::
+# agregar_uf), cujo score já é a média ponderada pelo total de alunos ESP de cada município,
+# conforme metodologia_score.md §4.3. Retorna a lista completa (27 linhas); o front decide
+# quanto exibir (ex.: top 6 na Início, lista completa em /comparar).
+def obter_ranking_nacional() -> list[UfRanking]:
+    conn = get_connection()
+    try:
+        linhas = conn.execute(
+            "SELECT sg_uf, co_uf, qtd_municipios, total_alunos_esp, score, faixa, cor "
+            "FROM uf_agregado ORDER BY score DESC"
+        ).fetchall()
+        return [
+            UfRanking(**_linha_para_uf_resumo(linha).model_dump(), ranking_nacional=i + 1)
+            for i, linha in enumerate(linhas)
+        ]
     finally:
         conn.close()
 

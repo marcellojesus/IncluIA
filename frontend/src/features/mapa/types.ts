@@ -27,3 +27,14 @@ export type RankingUf = {
   melhores: MunicipioRanking[];
   criticos: MunicipioRanking[];
 };
+
+export type UfRanking = {
+  sigla: string;
+  codigoUf: number;
+  qtdMunicipios: number;
+  totalAlunosEsp: number;
+  score: number;
+  faixa: string;
+  cor: string;
+  rankingNacional: number;
+};

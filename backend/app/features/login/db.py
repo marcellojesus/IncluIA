@@ -31,9 +31,46 @@ _USUARIOS_DEMO = [
 ]
 
 
+def _tabela_usuarios_desatualizada(conn) -> bool:
+    # A tabela original restringia `perfil` a municipal/estadual e exigia `uf` — incompatível
+    # com o autocadastro público (RN-01 revisada), que aceita outros perfis e não coleta UF.
+    # SQLite não suporta ALTER de CHECK/NOT NULL, então recriamos a tabela quando detectamos o
+    # schema antigo (migração feita uma única vez, nas próximas subidas o SQL já bate).
+    linha = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'usuarios'"
+    ).fetchone()
+    if linha is None:
+        return False
+    return "CHECK" in (linha["sql"] or "")
+
+
+def _migrar_tabela_usuarios(conn) -> None:
+    conn.execute("ALTER TABLE usuarios RENAME TO usuarios_old")
+    conn.execute(
+        """
+        CREATE TABLE usuarios (
+            id TEXT PRIMARY KEY,
+            email TEXT UNIQUE NOT NULL,
+            senha_hash TEXT NOT NULL,
+            nome TEXT NOT NULL,
+            perfil TEXT NOT NULL,
+            municipio_id INTEGER,
+            uf TEXT
+        )
+        """
+    )
+    conn.execute(
+        "INSERT INTO usuarios (id, email, senha_hash, nome, perfil, municipio_id, uf) "
+        "SELECT id, email, senha_hash, nome, perfil, municipio_id, uf FROM usuarios_old"
+    )
+    conn.execute("DROP TABLE usuarios_old")
+
+
 def ensure_schema_and_seed() -> None:
     conn = get_connection()
     try:
+        if _tabela_usuarios_desatualizada(conn):
+            _migrar_tabela_usuarios(conn)
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS usuarios (
@@ -41,9 +78,9 @@ def ensure_schema_and_seed() -> None:
                 email TEXT UNIQUE NOT NULL,
                 senha_hash TEXT NOT NULL,
                 nome TEXT NOT NULL,
-                perfil TEXT NOT NULL CHECK (perfil IN ('municipal', 'estadual')),
+                perfil TEXT NOT NULL,
                 municipio_id INTEGER,
-                uf TEXT NOT NULL
+                uf TEXT
             )
             """
         )

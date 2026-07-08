@@ -1,4 +1,4 @@
-"""Configuração de caminhos e constantes do ETL do Score IncluIA."""
+"""Configuração de caminhos e constantes do ETL do Score Escola Sem Barreiras."""
 
 from pathlib import Path
 

@@ -1,6 +1,6 @@
-# Base Legal do IncluIA
+# Base Legal da Escola Sem Barreiras
 
-Este documento é a fonte de verdade única sobre qual texto legal fundamenta cada eixo do Score IncluIA. O código (`_ARTIGO_VALIDADO_POR_EIXO` em `backend/app/features/diagnostico_ia/service.py`) e o prompt do chat de diagnóstico devem espelhar exatamente este mapeamento — nunca citar um artigo que não esteja aqui.
+Este documento é a fonte de verdade única sobre qual texto legal fundamenta cada eixo do Score Escola Sem Barreiras. O código (`_ARTIGO_VALIDADO_POR_EIXO` em `backend/app/features/diagnostico_ia/service.py`) e o prompt do chat de diagnóstico devem espelhar exatamente este mapeamento — nunca citar um artigo que não esteja aqui.
 
 ## Os 3 textos legais do produto
 
@@ -18,7 +18,7 @@ Os textos integrais (ou o recorte relevante) estão salvos em `base/legislacao/`
 
 ## Mapeamento oficial: eixo → base legal
 
-| Eixo do Score IncluIA | Base legal validada | Trecho relevante |
+| Eixo do Score Escola Sem Barreiras | Base legal validada | Trecho relevante |
 |---|---|---|
 | **I — AEE** | Decreto 12.686/2025, Art. 5º a Art. 10 | Define o AEE, seus objetivos e organização (caráter complementar/suplementar, não substitutivo à classe comum). |
 | **II — Acessibilidade física** | Lei 13.146/2015, Art. 28, II e XVI | "aprimoramento dos sistemas educacionais... por meio da oferta de... recursos de acessibilidade que eliminem as barreiras" (II); "acessibilidade... às edificações, aos ambientes..." (XVI). |

@@ -1,4 +1,4 @@
-# Regras de Negócio — Score IncluIA (Engine de Cálculo)
+# Regras de Negócio — Score Escola Sem Barreiras (Engine de Cálculo)
 
 ## RN-01 — Fórmula oficial: 11 variáveis, 3 dimensões, pesos por Eixo do Decreto
 

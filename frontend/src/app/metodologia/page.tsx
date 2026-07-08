@@ -5,7 +5,7 @@ import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import { GovTopBar } from "@/shared/components/GovTopBar";
+import { BarraAcessibilidade } from "@/shared/components/BarraAcessibilidade";
 
 // Lê o .md fonte de verdade direto do repositório (raiz do projeto, um nível acima de
 // frontend/) em vez de manter uma cópia — garante que esta página nunca fica desatualizada
@@ -20,10 +20,10 @@ export default function MetodologiaPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <GovTopBar />
+      <BarraAcessibilidade />
       <div className="flex-shrink-0 bg-gov-blue-dark px-6 py-3">
-        <Link href="/mapa" className="text-xs text-white/60 hover:text-white/90">
-          ← Voltar ao Mapa
+        <Link href="/" className="text-xs text-white/60 hover:text-white/90">
+          ← Voltar ao início
         </Link>
       </div>
       <div className="flex-1 bg-gray-50 px-6 py-10">

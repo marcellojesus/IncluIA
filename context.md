@@ -1,4 +1,4 @@
-# IncluIA — Dashboard de Governança da Inclusão Escolar com IA
+# Escola Sem Barreiras — Dashboard de Governança da Inclusão Escolar com IA
 
 > Documento de Defesa do Produto — MVP5
 > Mestrado em Governança e Transformação Digital · 2025
@@ -27,15 +27,15 @@ O Brasil possui 2,45 milhões de alunos com deficiência matriculados na educaç
 
 Em outubro de 2025, o Governo Federal publicou o Decreto 12.686/2025, que instituiu a Política Nacional de Educação Especial Inclusiva (PNEEI) — posteriormente alterado pontualmente pelo Decreto 12.773/2025, de dezembro de 2025 (formação de professores de AEE e de profissionais de apoio, PAEE/PEI, Fundeb; ver `docs/legislacao.md`). O decreto estabelece critérios objetivos de conformidade e exige que municípios e estados demonstrem seu cumprimento. Até junho de 2026, 5.512 municípios já aderiram à política. Nenhum possui ferramenta para mapear seus próprios gaps de desconformidade.
 
-**O problema central**: para cumprir o decreto, gestores precisam tomar decisões concretas de alocação de recursos. Essas decisões exigem visibilidade sobre os gaps escola a escola — algo que o IncluIA oferece de forma inédita.
+**O problema central**: para cumprir o decreto, gestores precisam tomar decisões concretas de alocação de recursos. Essas decisões exigem visibilidade sobre os gaps escola a escola — algo que a Escola Sem Barreiras oferece de forma inédita.
 
 ---
 
-## 2. Por que o IncluIA é Inovador
+## 2. Por que a Escola Sem Barreiras é Inovadora
 
 ### 2.1 Análise do Mercado Atual
 
-| Capacidade | IRM Painel | Vínculo / INEP Data | IncluIA |
+| Capacidade | IRM Painel | Vínculo / INEP Data | Escola Sem Barreiras |
 |---|---|---|---|
 | Dados do Censo Escolar 2025 | ✅ | ✅ | ✅ |
 | Granularidade por escola | ❌ | ❌ | ✅ |
@@ -48,20 +48,20 @@ Em outubro de 2025, o Governo Federal publicou o Decreto 12.686/2025, que instit
 
 ### 2.2 Os Três Diferenciais Inovadores
 
-**🔬 Inovação 1 — Score IncluIA: Índice Inédito de Governança da Inclusão**
+**🔬 Inovação 1 — Score Escola Sem Barreiras: Índice Inédito de Governança da Inclusão**
 Calculado a partir de 11 variáveis do Censo Escolar (AEE, acessibilidade física, recursos humanos, taxa de inclusão em classe comum) organizadas em 3 dimensões e 4 eixos da PNEEI (Decreto 12.686/2025). Aplicado a 214 mil escolas e 5.570 municípios — inédito no setor público brasileiro.
 
 **🤖 Inovação 2 — IA Generativa para Diagnóstico por Eixo de Política Pública**
 Gemini 2.0 Flash (primário) com fallback para Groq LLaMA 3.3 70B e Mistral Small. Cache de 24h em SQLite para uso eficiente da API. Diagnósticos estruturados por Eixo I–IV, com análise de problemas, alertas legais e recomendações com estimativa de custo.
 
 **⚖️ Inovação 3 — Conformidade com a PNEEI (Decreto 12.686/2025) como Produto**
-Os 4 eixos da PNEEI são a espinha dorsal de todo o sistema: organizam o Score, os indicadores do município, o diagnóstico por escola e as recomendações da IA. O IncluIA traduz obrigações regulatórias em métricas automatizadas e acionáveis.
+Os 4 eixos da PNEEI são a espinha dorsal de todo o sistema: organizam o Score, os indicadores do município, o diagnóstico por escola e as recomendações da IA. O Escola Sem Barreiras traduz obrigações regulatórias em métricas automatizadas e acionáveis.
 
 ---
 
-## 3. O Produto — IncluIA MVP5
+## 3. O Produto — Escola Sem Barreiras MVP5
 
-O IncluIA é um dashboard de governança com IA que transforma os microdados do Censo Escolar em inteligência acionável para gestores de educação especial em secretarias municipais e estaduais.
+O Escola Sem Barreiras é um dashboard de governança com IA que transforma os microdados do Censo Escolar em inteligência acionável para gestores de educação especial em secretarias municipais e estaduais.
 
 ### 3.1 Fluxo de Navegação
 
@@ -87,14 +87,14 @@ O MVP5 prioriza o Secretário Municipal — perfil que tem responsabilidade dire
 
 ## 4. Módulos Funcionais
 
-### Módulo 1 — Mapa da Inclusão + Score IncluIA por Município
+### Módulo 1 — Mapa da Inclusão + Score Escola Sem Barreiras por Município
 
 **🎯 Gap que resolve**: o gestor não tem visão territorial do problema nem uma referência objetiva para comparar seu município. O Módulo 1 oferece leitura geográfica imediata via mapa coroplético interativo com polígonos reais (IBGE GeoJSON) e ranking lateral com melhores e piores municípios do estado.
 
 **Tela 1: Mapa + KPIs Nacionais** — logo após o login, o gestor vê:
 
 - Faixa de KPIs nacionais no topo: Municípios Críticos (score < 3), Escolas sem AEE, Score Nacional Médio, Municípios Mapeados
-- Mapa interativo Leaflet.js com polígonos dos municípios do estado, coloridos pelo Score IncluIA
+- Mapa interativo Leaflet.js com polígonos dos municípios do estado, coloridos pelo Score Escola Sem Barreiras
 - Escala de cores: Crítico (vermelho #E52207), Insuficiente (laranja #E05C00), Em desenvolvimento (amarelo #E6B800), Adequado (verde #168821), Referência (azul #1351B4)
 - Ranking lateral: 5 melhores e 5 piores municípios do estado com score e badge de status
 - Tooltip ao passar o cursor: nome do município, score, status e botão "Ver detalhes"
@@ -170,11 +170,11 @@ O cache de 24h em SQLite garante que diagnósticos repetidos não consomem créd
 
 ---
 
-## 5. Score IncluIA — Metodologia
+## 5. Score Escola Sem Barreiras — Metodologia
 
 ### 5.1 Visão Geral
 
-O Score IncluIA é um índice composto de 0 a 10 calculado a partir de 11 variáveis do Censo Escolar 2025, organizadas em 3 dimensões alinhadas aos 4 Eixos da PNEEI (Decreto 12.686/2025).
+O Score Escola Sem Barreiras é um índice composto de 0 a 10 calculado a partir de 11 variáveis do Censo Escolar 2025, organizadas em 3 dimensões alinhadas aos 4 Eixos da PNEEI (Decreto 12.686/2025).
 
 | Eixo do Decreto | Dimensão Score | Variáveis Censo | Peso |
 |---|---|---|---|
@@ -222,7 +222,7 @@ O Score IncluIA é um índice composto de 0 a 10 calculado a partir de 11 variá
 
 ### 6.2 Design System Gov.br
 
-O IncluIA segue integralmente o Padrão Digital de Governo (design.gov.br), garantindo acessibilidade WCAG 2.1 e consistência visual com outros sistemas públicos federais:
+O Escola Sem Barreiras segue integralmente o Padrão Digital de Governo (design.gov.br), garantindo acessibilidade WCAG 2.1 e consistência visual com outros sistemas públicos federais:
 
 - Cores primárias: Azul institucional #1351B4, Azul escuro #071D41, Amarelo #FFCD07
 - Semáforos: Verde #168821 (conforme), Laranja #E05C00 (atenção), Vermelho #E52207 (crítico)
@@ -267,7 +267,7 @@ O IncluIA segue integralmente o Padrão Digital de Governo (design.gov.br), gara
 
 ## 8. Conclusão
 
-O IncluIA MVP5 representa uma evolução significativa em relação ao MVP4:
+O Escola Sem Barreiras MVP5 representa uma evolução significativa em relação ao MVP4:
 
 - A navegação contextual — sem menu de módulos — torna a experiência mais intuitiva para o gestor municipal
 - O mapa real com Leaflet.js e polígonos IBGE elimina a dependência de APIs pagas e oferece dados geográficos oficiais
@@ -276,7 +276,7 @@ O IncluIA MVP5 representa uma evolução significativa em relação ao MVP4:
 
 ### 🎯 Proposta de Valor Síntese
 
-O IncluIA responde em segundos às perguntas que hoje demandam semanas de análise manual:
+O Escola Sem Barreiras responde em segundos às perguntas que hoje demandam semanas de análise manual:
 
 - Meu município está em conformidade com a PNEEI (Decreto 12.686/2025)?
 - Quais escolas priorizar para maximizar o impacto?

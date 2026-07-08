@@ -2,9 +2,11 @@
 
 Fonte de interface: `interface.md` §3. Fonte de contexto: `context.md` (Módulo 1).
 
+> **Status atual (rastreabilidade)**: a tela dedicada de Mapa descrita abaixo não existe mais como rota própria do produto — ver RN-00 de `docs/business-rules/mapa.md`. RF-01 a RF-12 documentam a especificação original e ficam mantidos por histórico. Hoje a navegação por UF/município é o filtro em cascata do cabeçalho (`GeoFiltroBar.tsx`), e o ranking passou a viver na Início do município e na tela `/comparar` (ver [[indicadores-municipio]] e [[comparar]]). O ranking nacional de estados (RF-13) é a única funcionalidade deste módulo que é genuinamente nova desde a redação original.
+
 ## Objetivo
 
-Dar ao gestor uma visão territorial imediata do estado (ou do seu município, se perfil Municipal), com KPIs nacionais, mapa coroplético por Score IncluIA e ranking dos melhores/piores municípios.
+Dar ao gestor uma visão territorial imediata do estado (ou do seu município, se perfil Municipal), com KPIs nacionais, mapa coroplético por Score Escola Sem Barreiras e ranking dos melhores/piores municípios.
 
 ## Atores
 
@@ -13,14 +15,14 @@ Secretário Estadual (visão completa da UF) e Secretário Municipal (visão da 
 ## Pré-condições
 
 - Usuário autenticado.
-- Score IncluIA já calculado para todos os municípios da UF (depende de [[score-incluia]]).
+- Score Escola Sem Barreiras já calculado para todos os municípios da UF (depende de [[score-incluia]]).
 
 ## Requisitos Funcionais
 
 - **RF-01**: Exibir 5 KPIs nacionais no topo: Municípios Críticos (score < 3,0), Escolas sem AEE, Score Médio Nacional, Score Desejado (ver `docs/business-rules/mapa.md` RN-07), Municípios Mapeados — com contagens/valores atualizados a partir do dataset vigente.
 - **RF-02**: Exibir um seletor de UF cobrindo os 26 estados + Distrito Federal (o protótipo cobre apenas RJ/SP/MG/BA como amostra — a implementação real deve suportar todas as UFs).
 - **RF-03**: Exibir um seletor de município (busca/seleção direta) que lista os municípios da UF selecionada, como alternativa a clicar no mapa.
-- **RF-04**: Renderizar um mapa coroplético dos municípios da UF selecionada, usando polígonos GeoJSON reais da API do IBGE, coloridos conforme a faixa de Score IncluIA de cada município (ver [[score-incluia]] para as faixas/cores).
+- **RF-04**: Renderizar um mapa coroplético dos municípios da UF selecionada, usando polígonos GeoJSON reais da API do IBGE, coloridos conforme a faixa de Score Escola Sem Barreiras de cada município (ver [[score-incluia]] para as faixas/cores).
 - **RF-05**: Ao passar o cursor sobre um município no mapa, destacar visualmente o polígono (borda e opacidade).
 - **RF-06**: Ao clicar em um município (no mapa, no popup, ou no ranking lateral), abrir a tela de Contexto do Município correspondente (ver [[indicadores-municipio]]).
 - **RF-07**: Exibir um painel de ranking lateral com os 5 melhores e os municípios em situação crítica (score < 3,0) da UF selecionada, cada um com posição, nome, barra de progresso do score e valor do score.
@@ -28,7 +30,8 @@ Secretário Estadual (visão completa da UF) e Secretário Municipal (visão da 
 - **RF-09**: Exibir estado de carregamento explícito enquanto os polígonos do IBGE são buscados, e uma mensagem de erro clara caso a API do IBGE esteja indisponível.
 - **RF-10**: Para perfil Secretário Municipal, restringir a navegação de forma que o clique em qualquer município leve sempre ao seu próprio município (ou, alternativamente, desabilitar/ocultar municípios que não são o seu — decisão de produto a confirmar, ver RN correspondente).
 - **RF-11**: Exibir, ao lado do seletor de município na toolbar, uma legenda com o score do município atualmente focado (via clique no mapa, no ranking, ou seleção no próprio combo) — oculta/vazia quando nenhum município está focado (ex.: acabou de trocar de UF).
-- **RF-12**: Exibir permanentemente sobre o mapa uma legenda com as 5 faixas de classificação do Score IncluIA (Crítico, Insuficiente, Em desenvolvimento, Adequado, Referência) e suas cores correspondentes — visível independente de qualquer interação, para o gestor entender as cores do mapa sem precisar clicar em nada.
+- **RF-12**: Exibir permanentemente sobre o mapa uma legenda com as 5 faixas de classificação do Score Escola Sem Barreiras (Crítico, Insuficiente, Em desenvolvimento, Adequado, Referência) e suas cores correspondentes — visível independente de qualquer interação, para o gestor entender as cores do mapa sem precisar clicar em nada.
+- **RF-13** (novo): Expor um ranking nacional de estados (`GET /ranking-nacional`) com sigla, código IBGE, quantidade de municípios, total de alunos ESP, score, faixa e cor por UF, ordenado por score decrescente — consumido pela seção "Como [estado] se compara" da Início do município (ver [[indicadores-municipio]]) e pela tela `/comparar` (ver [[comparar]]).
 
 ## Requisitos Não Funcionais
 

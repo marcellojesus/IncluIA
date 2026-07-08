@@ -41,7 +41,7 @@ function construirPopup(municipio: MunicipioResumo, router: ReturnType<typeof us
     <div class="mb-2 text-xs text-gray-400">${municipio.uf}</div>
     <div class="mb-2 flex items-baseline gap-2">
       <span class="text-2xl font-bold" style="color:${municipio.cor}">${formatarScore(municipio.score)}</span>
-      <span class="text-xs text-gray-400">Score IncluIA</span>
+      <span class="text-xs text-gray-400">Score Escola Sem Barreiras</span>
     </div>
     <span class="inline-block rounded-full px-2 py-0.5 text-xs font-bold" style="background:${municipio.cor}22;color:${municipio.cor}">${municipio.faixa}</span>
   `;

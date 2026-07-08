@@ -1,4 +1,4 @@
-# IncluIA — Especificação de Interface (a partir do protótipo `prototipo_inclua.html`)
+# Escola Sem Barreiras — Especificação de Interface (a partir do protótipo `prototipo_inclua.html`)
 
 > Este documento descreve, tela a tela e componente a componente, a interface navegável já prototipada em HTML/CSS/JS estático (dados mockados, mapa e IBGE reais). Serve como a fonte única de verdade da UI para a implementação em Next.js + Tailwind, e como base para os arquivos de requisitos e regras de negócio.
 
@@ -23,7 +23,7 @@
 
 **Componentes reutilizáveis** (usados em várias telas — devem virar componentes React compartilhados):
 - **Header gov.br** (`.gtop`): barra escura fixa no topo com selo tricolor (verde/amarelo/azul), texto "gov.br" e nome do sistema/órgão à direita (`Ministério da Educação · INEP`).
-- **Header do app** (`.gmain`): faixa azul com logo "IncluIA" (clicável → volta ao mapa), subtítulo, e no canto direito usuário logado (`👤 Nome — Cargo · Município/UF`) + botão "Sair".
+- **Header do app** (`.gmain`): faixa azul com logo "Escola Sem Barreiras" (clicável → volta ao mapa), subtítulo, e no canto direito usuário logado (`👤 Nome — Cargo · Município/UF`) + botão "Sair".
 - **Badge** (`.badge`): pílula colorida (verde/amarelo/laranja/vermelho/azul) para status textual (ex.: "Adequado", "Crítico", "Conforme").
 - **Painel** (`.panel` / `.ph` / `.pb`): card branco com cabeçalho (título + ação opcional à direita) e corpo com padding.
 - **KPI** (`.kpi`): bloco com borda colorida à esquerda, rótulo em caixa alta, valor grande, subtítulo.
@@ -43,7 +43,7 @@
 Tela de Login
      │ (Entrar)
      ▼
-App (header gov.br + header IncluIA sempre visíveis)
+App (header gov.br + header Escola Sem Barreiras sempre visíveis)
      │
      ▼
 Tela "Mapa da Inclusão"  ←───────────────┐
@@ -66,16 +66,16 @@ Não existe menu de módulos numerados nem sidebar de navegação — a navegaç
 Layout de tela cheia dividida em duas colunas (grid 1fr/1fr), com o header gov.br fixo no topo e um footer institucional.
 
 **Coluna esquerda** (fundo gradiente azul escuro → azul institucional):
-- Logo "IncluIA" (48px, branco, bold)
+- Logo "Escola Sem Barreiras" (48px, branco, bold)
 - Tagline: "Dados do Censo Escolar 2025 transformados em decisões de inclusão para gestores públicos."
 - Selo/pill: "⚖️ Alinhado à PNEEI (Decreto 12.686/2025)"
 - 3 estatísticas de impacto, cada uma com valor grande + descrição:
   - **2,45M** — alunos com deficiência matriculados no Brasil
   - **98.310** — escolas sem nenhum AEE registrado no Censo
-  - **5.570** — municípios mapeados com Score IncluIA
+  - **5.570** — municípios mapeados com Score Escola Sem Barreiras
 
 **Coluna direita** (fundo branco), formulário de acesso:
-- Título "Entrar no IncluIA" + subtítulo "Acesso a gestores de secretarias de educação."
+- Título "Entrar na Escola Sem Barreiras" + subtítulo "Acesso a gestores de secretarias de educação."
 - Botão "Entrar com gov.br" — **desabilitado**, com badge "Fase 2" (visualmente presente mas não funcional no MVP)
 - Divisor "acesso MVP"
 - Campo "E-mail institucional" (pré-preenchido no protótipo: `joao.silva@niteroi.rj.gov.br`)
@@ -96,7 +96,7 @@ Primeira tela após o login. Estrutura vertical: faixa de KPIs → área princip
 |---|---|---|
 | Municípios Críticos | 1.843 (vermelho) | "Score < 3,0 · Brasil" |
 | Escolas sem AEE | 98.310 (laranja) | "+1 mi de alunos sem suporte" |
-| Score Médio Nacional | 3,8 (neutro) | "Escala 0–10 · IncluIA 2025" |
+| Score Médio Nacional | 3,8 (neutro) | "Escala 0–10 · Escola Sem Barreiras 2025" |
 | Score Desejado | 7,0 (azul) | "Limiar da faixa Adequado" — ver `docs/business-rules/mapa.md` RN-07 |
 | Municípios Mapeados | 5.570 (verde) | "214 mil escolas analisadas" |
 
@@ -104,11 +104,11 @@ Primeira tela após o login. Estrutura vertical: faixa de KPIs → área princip
 - **Toolbar**: select de UF (`RJ`, `SP`, `MG`, `BA` no protótipo — deve cobrir os 26 estados + DF na versão real) e select de Município da UF selecionada (busca/seleção direta, alternativa a clicar no mapa); texto de apoio "ou clique no mapa". Ao lado do select de município, uma **legenda de score** (badge colorido com o score do município atualmente focado) aparece assim que algum município é focado — via clique no mapa, no ranking lateral (§3.3) ou seleção neste próprio combo; fica oculta enquanto nenhum município estiver focado (RF-11 de `docs/requirements/mapa.md`).
 - **Mapa Leaflet** ocupando o espaço restante:
   - Tiles OpenStreetMap.
-  - Camada coroplética (GeoJSON de municípios da UF via API IBGE), cor de preenchimento por Score IncluIA usando a escala de 5 cores (ver §6 de `context.md`).
+  - Camada coroplética (GeoJSON de municípios da UF via API IBGE), cor de preenchimento por Score Escola Sem Barreiras usando a escala de 5 cores (ver §6 de `context.md`).
   - Estado de carregamento: overlay central com spinner + texto "Carregando mapa IBGE…" enquanto os dados do IBGE não retornam; mensagem de erro "⚠️ Erro ao carregar mapa IBGE." se a requisição falhar.
   - Interações por município: `hover` (destaca borda escura e aumenta opacidade), `click` (abre popup Leaflet com nome, UF, score, badge de status e botão "Ver indicadores do município →").
   - Ao trocar de UF, o mapa recarrega o GeoJSON, reajusta o zoom (`fitBounds`) e repopula o combo de municípios.
-  - **Legenda do Score IncluIA**: card fixo no canto inferior esquerdo do mapa, com um quadrado colorido + nome para cada uma das 5 faixas (Crítico → Referência) — explica as cores do mapa coroplético sem precisar clicar em nenhum município (RF-12 de `docs/requirements/mapa.md`).
+  - **Legenda do Score Escola Sem Barreiras**: card fixo no canto inferior esquerdo do mapa, com um quadrado colorido + nome para cada uma das 5 faixas (Crítico → Referência) — explica as cores do mapa coroplético sem precisar clicar em nenhum município (RF-12 de `docs/requirements/mapa.md`).
 
 ### 3.3 Painel de Ranking (coluna direita, 300px fixo)
 - Título dinâmico: "Ranking — {Nome da UF}"
@@ -125,7 +125,7 @@ Primeira tela após o login. Estrutura vertical: faixa de KPIs → área princip
 Aparece fixa no topo assim que um município é aberto, substituindo a tela de mapa. Contém, da esquerda para a direita:
 1. Botão "← Mapa" — retorna à tela do mapa (mantendo a UF selecionada).
 2. Nome do município (destaque) + "Nome do Estado — UF" (subtítulo).
-3. **Score geral do município**, alinhado à direita: valor numérico grande colorido conforme a faixa, rótulo "Score IncluIA" e badge de status (ex.: "Adequado").
+3. **Score geral do município**, alinhado à direita: valor numérico grande colorido conforme a faixa, rótulo "Score Escola Sem Barreiras" e badge de status (ex.: "Adequado").
 4. **3 abas de navegação**, sempre visíveis, com indicador de aba ativa (sublinhado amarelo `#FFCD07`):
    - `📋 Indicadores` (aba padrão ao abrir um município)
    - `🏫 Escolas`
@@ -185,7 +185,7 @@ Aberto ao clicar em qualquer linha da tabela. Header azul-escuro com nome da esc
 
 Corpo do modal:
 - 4 mini-cards em grade (um por eixo), cada um mostrando apenas o ícone grande (✅/⚠️/❌) e o rótulo do eixo — visão rápida de conformidade.
-- Tabela chave/valor: Alunos com deficiência (ESP) · Bairro/Região · Rede de ensino · **Score IncluIA** (destaque, número grande colorido).
+- Tabela chave/valor: Alunos com deficiência (ESP) · Bairro/Região · Rede de ensino · **Score Escola Sem Barreiras** (destaque, número grande colorido).
 - Botão "Fechar" (largura total) ao final.
 
 > No protótipo o modal não exibe endereço, código INEP nem posição no ranking municipal, apesar de a documentação MVP5 prever esses campos — isso deve ser resolvido no requisito da funcionalidade (ver `docs/requirements/escolas.md`).

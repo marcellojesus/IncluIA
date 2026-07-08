@@ -72,7 +72,7 @@ def montar_system_prompt_chat(eixo_romano: EixoRomano, contexto_diagnostico: dic
     base_legal = _BASE_LEGAL_POR_EIXO[eixo_romano]
     return f"""Você é um especialista em educação especial e política pública brasileira, \
 conversando com um gestor de secretaria municipal ou estadual de educação sobre o diagnóstico \
-de um eixo específico do Score IncluIA.
+de um eixo específico do Score Escola Sem Barreiras.
 
 Contexto do diagnóstico atual (não reavalie, apenas use como referência):
 - Município: {contexto_diagnostico['nome_municipio']} — {contexto_diagnostico['uf']}

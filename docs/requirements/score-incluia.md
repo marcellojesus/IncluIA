@@ -1,10 +1,10 @@
-# Requisitos — Score IncluIA (Engine de Cálculo)
+# Requisitos — Score Escola Sem Barreiras (Engine de Cálculo)
 
 Fonte de contexto: `context.md` §5, `IncluIA_Metodologia_Score_v1`. Esta é uma funcionalidade **transversal**: não tem tela própria, mas alimenta [[mapa]], [[indicadores-municipio]] e [[escolas]].
 
 ## Objetivo
 
-Calcular, a partir dos microdados do Censo Escolar, um índice único de 0 a 10 (Score IncluIA) por escola, agregável para município e estado, refletindo o grau de conformidade com os 4 Eixos da PNEEI (Decreto 12.686/2025).
+Calcular, a partir dos microdados do Censo Escolar, um índice único de 0 a 10 (Score Escola Sem Barreiras) por escola, agregável para município e estado, refletindo o grau de conformidade com os 4 Eixos da PNEEI (Decreto 12.686/2025).
 
 ## Atores
 

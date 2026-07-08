@@ -1,14 +1,26 @@
 @import "tailwindcss";
 
+/* Paleta "Escola Sem Barreiras" — ver o protótipo de referência (contexto da conversa).
+   Os nomes de token (--color-blue, --color-orange, etc.) foram mantidos por compatibilidade
+   com o restante do código; só os valores hexadecimais mudaram, para não exigir renomear
+   `bg-gov-blue`/`text-gov-blue-dark`/etc. em dezenas de arquivos. */
 :root {
-  --color-blue: #1351b4;
-  --color-blue-dark: #071d41;
-  --color-blue-mid: #0c326f;
-  --color-blue-lt: #dbe8fb;
-  --color-green: #168821;
-  --color-orange: #e05c00;
-  --color-red: #e52207;
+  --color-blue: #0e7c6b; /* antes #1351b4 — teal primário (marca, CTAs, cabeçalhos) */
+  --color-blue-dark: #12332e; /* antes #071d41 — teal bem escuro (headers/rodapé) */
+  --color-blue-mid: #0a5c4f; /* antes #0c326f — teal médio (gradientes) */
+  --color-blue-lt: #e7f3ef; /* antes #dbe8fb — tom claro de teal (hover, fundos suaves) */
+  --color-green: #2f9e6b; /* status "conforme/ok" */
+  --color-orange: #e0952b; /* status "parcial/alerta" */
+  --color-red: #d64545; /* status "não conforme/crítico" */
   --color-yellow: #e6b800;
+  --color-cream: #f4f1ea; /* fundo da página */
+  --color-paper: #fffdf8; /* fundo de cartões/painéis */
+  --color-accent: #e5533c; /* laranja-coral de destaque — CTA "Registrar barreira" */
+  --color-accent-dark: #c23a24;
+  --color-ink: #26313d; /* texto principal */
+
+  --font-heading: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
 }
 
 @theme inline {
@@ -20,9 +32,45 @@
   --color-gov-orange: var(--color-orange);
   --color-gov-red: var(--color-red);
   --color-gov-yellow: var(--color-yellow);
+  --color-cream: var(--color-cream);
+  --color-paper: var(--color-paper);
+  --color-accent: var(--color-accent);
+  --color-accent-dark: var(--color-accent-dark);
+  --color-ink: var(--color-ink);
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
 }
 
 body {
-  background: #f8f8f8;
-  color: #333;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+}
+
+/* Barra de acessibilidade (shared/components/BarraAcessibilidade.tsx) — ajuste de fonte via
+   font-size no <html> escala toda a UI, já que as classes do Tailwind usadas no projeto são
+   baseadas em rem. Alto contraste usa o truque de inverter cores da página inteira e reinverter
+   mídia (imagens/ícones/vídeo), para não exigir reescrever a paleta de cada componente. */
+html.fonte-sm {
+  font-size: 87.5%;
+}
+html.fonte-lg {
+  font-size: 112.5%;
+}
+
+html.alto-contraste body {
+  filter: invert(1) hue-rotate(180deg);
+}
+html.alto-contraste img,
+html.alto-contraste svg,
+html.alto-contraste video,
+html.alto-contraste iframe {
+  filter: invert(1) hue-rotate(180deg);
 }

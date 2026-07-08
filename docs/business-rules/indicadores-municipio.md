@@ -1,5 +1,11 @@
 # Regras de Negócio — Indicadores do Município (Módulo 2)
 
+## RN-00 — Esta tela é hoje a "Início" pública do município, não mais uma aba "Indicadores" atrás de login (novo)
+
+O que este documento chama de "aba Indicadores" dentro de uma "tela de Contexto do Município" com 3 abas (Indicadores/Escolas/Diagnóstico IA) hoje é a rota pública `/municipio/[codigoIbge]` — a home do produto para um município, sem exigir login (ver RN-06 de `docs/business-rules/login.md`). Escolas e Diagnóstico IA viraram rotas de nível superior (`/municipio/[codigoIbge]/escolas` e `/diagnostico`), não abas dentro da mesma tela; a navegação entre elas é feita pelos itens de nível superior do cabeçalho (`frontend/src/shared/components/AppHeader.tsx`), não por um componente de tabs local.
+
+A composição atual da Início (`frontend/src/features/indicadores-municipio/components/InicioMunicipio.tsx`), de cima para baixo: hero (título dinâmico + índice geral + CTAs "Ver escolas da rede" e "Registrar uma barreira", ver RN-07), os 4 compromissos da lei (semáforos, RF-02), score por eixo + dados gerais (RF-03/RF-04), a seção "O que você pode fazer" (atalhos para Escolas, Comparar e Registrar barreira) e, por último, "Como [estado] se compara" (RN-06, novo).
+
 ## RN-01 — Semáforo por eixo é uma classificação determinística, não uma opinião da IA (resolvida)
 
 O status ✅/⚠️/❌ de cada eixo é calculado por regra de limiar numérico sobre os dados do Censo — a IA generativa (ver [[diagnostico-ia]]) nunca decide o veredito do semáforo, apenas explica em linguagem natural um veredito já calculado. Isso evita que uma alucinação de modelo altere a "nota" oficial de conformidade do município.
@@ -20,6 +26,8 @@ Todo painel de "Detalhamento — PNEEI (Decreto 12.686/2025)" (ver `docs/legisla
 
 **Por quê**: `context.md` §5 nota explicitamente que "o mapeamento score↔Decreto é aproximação metodológica não validada juridicamente" — isso é um requisito de compliance do produto, não apenas um detalhe de copy. Remover o aviso sem validação jurídica formal é uma regressão de conformidade, não uma melhoria de UI.
 
+**Status atual**: o painel que esta regra rege não é mais renderizado na Início (ver RN-06) — a regra continua valendo integralmente se/quando o painel voltar a ser exibido em qualquer tela.
+
 ## RN-03 — Comparações são sempre com a mesma edição do Censo
 
 O comparativo "média estadual" / "média nacional" e o indicador de tendência (melhora/piora) devem sempre citar explicitamente a edição do Censo usada (ex.: "vs. Censo 2024"). Nunca comparar dados de edições diferentes do Censo sem rotular qual é qual.
@@ -37,3 +45,17 @@ Toda linha de critério na tabela de detalhamento deve citar o nome técnico da 
 **Como aplicar**: ao adicionar um novo critério à tabela, o time deve primeiro localizar a variável correspondente no dicionário de dados do Censo (ver [[score-incluia]] para a lista de variáveis já mapeadas) antes de expor o critério na UI.
 
 **Atualização**: o ETL (`backend/etl/aggregate.py`) agora agrega por município **todas** as variáveis binárias do Censo usadas nos 4 eixos (antes só 3 de ~11 estavam agregadas) — a tabela do Decreto não precisa mais exibir "🔵 Em apuração" por falta de dado. Cada linha usa o mesmo limiar único de conformidade: `≥70%` Conforme, `40%–69%` Parcial, `<40%` Não conforme (mesma régua simplificada usada para os semáforos por eixo, RN-01) — aplicado sobre `pct_escolas_<variável>` (ou `taxa_inclusao_cc` para o critério do Eixo IV).
+
+## RN-06 — Painel "Detalhamento — PNEEI" saiu da Início; entrou o ranking nacional "Como [estado] se compara" (novo)
+
+O painel de detalhamento por critério do Decreto (RN-02) não é mais renderizado na Início — `TabelaDecretoPanel.tsx` continua no repositório (e o tipo/dado `municipio.detalhamentoDecreto` continua existindo), mas nenhuma tela o importa hoje. Em seu lugar, entre o bloco de score/dados gerais e "O que você pode fazer", a Início mostra o ranking nacional de estados (`RankingEstados.tsx`): top 6 estados por score, mais o estado do município atual destacado como 7ª linha se estiver fora do top 6, com link "Ver ranking completo" para `/comparar` (ver [[comparar]]).
+
+**Por quê**: o painel de detalhamento exigia o aviso permanente "Em validação jurídica" (RN-02) e competia por atenção com o restante da tela; o ranking por estado dá ao visitante uma resposta mais imediata à pergunta que dá título à página ("Como está a educação especial inclusiva em [município]?") — como o estado se compara a outros, não apenas como o município se compara ao Decreto.
+
+**Como aplicar**: se o painel de detalhamento voltar a ser exibido no futuro (ex.: numa aba própria), a RN-02 sobre o aviso de validação jurídica continua valendo integralmente.
+
+## RN-07 — Botões "Registrar uma barreira" mostram aviso de funcionalidade futura, nunca navegam (novo)
+
+Todo botão "Registrar uma barreira" do produto (hero da Início, card da seção "O que você pode fazer", pílula do cabeçalho) chama `alertarFuncionalidadeFutura` (`frontend/src/shared/lib/alertas.ts`) — um `window.alert` avisando que a funcionalidade "estará disponível em uma próxima fase" — e não navega para lugar nenhum. Os três botões são implementados pelo mesmo componente `BotaoRegistrarBarreira.tsx` ("use client"), para não haver 3 implementações divergentes do mesmo aviso.
+
+**Por quê**: a funcionalidade de registro de barreiras (canal cidadão) ainda não foi construída; um botão que navegasse para uma rota inexistente ou uma página em branco seria pior experiência do que um aviso honesto — mesmo princípio já aplicado ao botão "Entrar com gov.br" da tela de login (RF-01 de `docs/requirements/login.md`).

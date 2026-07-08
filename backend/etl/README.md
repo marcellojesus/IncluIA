@@ -1,4 +1,4 @@
-# Feature: Score IncluIA (ETL)
+# Feature: Score Escola Sem Barreiras (ETL)
 
 Specs: `docs/requirements/score-incluia.md` · `docs/business-rules/score-incluia.md` · `metodologia_score.md`
 
