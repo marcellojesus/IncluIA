@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# gerado por scripts/sync-metodologia.mjs (predev/prebuild) a partir de ../metodologia_score.md
+/src/content/metodologia_score.md

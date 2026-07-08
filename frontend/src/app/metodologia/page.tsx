@@ -7,11 +7,11 @@ import remarkGfm from "remark-gfm";
 
 import { BarraAcessibilidade } from "@/shared/components/BarraAcessibilidade";
 
-// Lê o .md fonte de verdade direto do repositório (raiz do projeto, um nível acima de
-// frontend/) em vez de manter uma cópia — garante que esta página nunca fica desatualizada
-// em relação a metodologia_score.md.
+// Lê a cópia sincronizada em src/content/ (ver scripts/sync-metodologia.mjs, rodado antes de
+// dev/build) em vez do arquivo original na raiz do monorepo — next.config.ts fixa o root do
+// Turbopack em frontend/, então nada fora dela é acessível de forma confiável no build.
 function lerMetodologia(): string {
-  const caminho = path.join(process.cwd(), "..", "metodologia_score.md");
+  const caminho = path.join(process.cwd(), "src", "content", "metodologia_score.md");
   return fs.readFileSync(caminho, "utf-8");
 }
 
