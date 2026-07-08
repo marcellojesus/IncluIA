@@ -1,12 +1,18 @@
 import path from "node:path";
 import type { NextConfig } from "next";
 
+// Raiz real do monorepo (um nível acima de frontend/) — evita que o Next.js precise adivinhar
+// sozinho por causa de lockfiles, o que pode escolher raízes diferentes em ambientes diferentes
+// (ex.: um package-lock.json solto em C:\Projeto\, no Windows local, fora do nosso controle,
+// vs. o build Linux limpo da Vercel) e causar falhas de build sem mensagem de erro clara.
+// `turbopack.root` e `outputFileTracingRoot` precisam apontar para o mesmo lugar.
+const raizDoMonorepo = path.join(__dirname, "..");
+
 const nextConfig: NextConfig = {
-  // Evita que o Next.js detecte a raiz errada por causa de um package-lock.json
-  // fora do projeto (ex.: em C:\Projeto\), fora do nosso controle.
   turbopack: {
-    root: path.join(__dirname),
+    root: raizDoMonorepo,
   },
+  outputFileTracingRoot: raizDoMonorepo,
 };
 
 export default nextConfig;
