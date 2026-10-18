@@ -1,0 +1,1381 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12332e">
+  <title>Gestão Ativa V2 | Escola Sem Barreiras</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=Nunito+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --teal: #0e7c6b;
+      --teal-dark: #12332e;
+      --teal-mid: #0a5c4f;
+      --teal-pale: #e7f3ef;
+      --coral: #e5533c;
+      --coral-dark: #c23a24;
+      --cream: #f4f1ea;
+      --paper: #fffdf8;
+      --ink: #26313d;
+      --muted: #6d7774;
+      --line: #e4e7e2;
+      --green: #2f9e6b;
+      --green-pale: #e7f3ec;
+      --amber: #e0952b;
+      --amber-pale: #fff4df;
+      --red: #d64545;
+      --red-pale: #fbe9e7;
+      --blue: #426b95;
+      --blue-pale: #eaf0f6;
+      --shadow: 0 2px 12px rgba(31, 54, 47, .07);
+      --radius: 8px;
+      --font-head: "Bricolage Grotesque", sans-serif;
+      --font-body: "Nunito Sans", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--cream); color: var(--ink); font: 15px/1.5 var(--font-body); }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .topline { height: 5px; background: linear-gradient(90deg, #168821 0 33%, #ffcd07 33% 66%, #1351b4 66%); }
+    .app-header { background: var(--paper); border-bottom: 1px solid rgba(18, 51, 46, .09); }
+    .header-main { max-width: 1440px; min-height: 68px; margin: auto; padding: 10px 30px; display: flex; align-items: center; gap: 26px; }
+    .brand { display: flex; align-items: center; gap: 11px; min-width: 220px; color: inherit; text-decoration: none; }
+    .brand-mark { display: block; width: 38px; height: 38px; flex: none; }
+    .brand-title { font: 700 17px/1.1 var(--font-head); color: var(--teal-dark); }
+    .brand-sub { margin-top: 3px; font-size: 10px; color: var(--muted); }
+    .public-nav { display: flex; align-items: center; gap: 4px; }
+    .nav-link { padding: 8px 10px; border-radius: 5px; color: #59645f; font-size: 13px; text-decoration: none; }
+    .nav-link:hover { color: var(--teal-dark); background: var(--teal-pale); }
+    .header-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .user-chip { display: none; color: #53615b; font-size: 12px; }
+    .user-chip strong { color: var(--teal-dark); }
+    .button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; gap: 8px; padding: 9px 15px; border: 1px solid transparent; border-radius: 6px; font-weight: 800; font-size: 13px; text-decoration: none; transition: background .16s ease, transform .16s ease, border-color .16s ease; }
+    .button:hover { transform: translateY(-1px); }
+    .button-primary { background: var(--teal); color: white; }
+    .button-primary:hover { background: var(--teal-mid); }
+    .button-coral { background: var(--coral); color: white; }
+    .button-coral:hover { background: var(--coral-dark); }
+    .button-outline { background: transparent; border-color: #bcc9c3; color: var(--teal-dark); }
+    .button-outline:hover { background: var(--teal-pale); border-color: var(--teal); }
+    .button-quiet { background: transparent; color: var(--teal); padding-inline: 8px; }
+    .button-small { min-height: 32px; padding: 6px 10px; font-size: 12px; }
+    .button:disabled { cursor: not-allowed; opacity: .55; transform: none; }
+    .access-strip { background: #e9ede8; border-bottom: 1px solid var(--line); }
+    .access-inner { max-width: 1440px; margin: auto; padding: 9px 30px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .access-inner label { display: grid; gap: 2px; color: #707a75; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .access-inner select { min-width: 150px; padding: 6px 28px 6px 9px; border: 1px solid #c8d0ca; border-radius: 5px; background: white; color: var(--teal-dark); font-weight: 700; font-size: 12px; }
+    .access-note { margin-left: auto; color: #78817d; font-size: 11px; }
+    .page-shell { max-width: 1440px; min-height: calc(100vh - 132px); margin: auto; padding: 29px 30px 52px; }
+    .view { display: none; animation: rise .22s ease both; }
+    .view.active { display: block; }
+    @keyframes rise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { font-family: var(--font-head); color: var(--teal-dark); line-height: 1.16; }
+    h1 { margin-bottom: 8px; font-size: 31px; }
+    h2 { margin-bottom: 8px; font-size: 22px; }
+    h3 { margin-bottom: 5px; font-size: 16px; }
+    .eyebrow { margin-bottom: 8px; color: var(--teal); font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .lede { max-width: 780px; margin-bottom: 22px; color: #65716c; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .micro { font-size: 10px; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin: 26px 0 12px; }
+    .section-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .stack { display: grid; gap: 14px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+    .panel { background: var(--paper); border: 1px solid rgba(18, 51, 46, .08); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .panel-head { min-height: 45px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 15px; border-bottom: 1px solid var(--line); }
+    .panel-title { margin: 0; color: var(--teal-dark); font: 700 14px var(--font-head); }
+    .panel-body { padding: 15px; }
+    .panel-body.flush { padding: 0; }
+    .kpi { min-height: 98px; padding: 14px 15px; border-left: 3px solid var(--teal); background: var(--paper); border-radius: 5px; box-shadow: var(--shadow); }
+    .kpi.red { border-left-color: var(--red); }
+    .kpi.amber { border-left-color: var(--amber); }
+    .kpi.green { border-left-color: var(--green); }
+    .kpi-label { margin-bottom: 5px; color: #79827e; font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+    .kpi-value { color: var(--teal-dark); font: 800 27px/.98 var(--font-head); }
+    .kpi-note { margin-top: 6px; color: #77817c; font-size: 11px; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 20px; font-size: 11px; font-weight: 900; white-space: nowrap; }
+    .badge-green { color: #24764f; background: var(--green-pale); }
+    .badge-amber { color: #835718; background: var(--amber-pale); }
+    .badge-red { color: #a83131; background: var(--red-pale); }
+    .badge-blue { color: #3d6287; background: var(--blue-pale); }
+    .badge-neutral { color: #59635f; background: #eef0eb; }
+    .axis-card { position: relative; min-width: 0; min-height: 154px; padding: 15px; background: var(--paper); border: 1px solid var(--line); border-top: 3px solid var(--amber); border-radius: 6px; box-shadow: var(--shadow); }
+    .axis-card.critical { border-top-color: var(--red); }
+    .axis-card.good { border-top-color: var(--green); }
+    .axis-top { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+    .axis-name { min-width: 0; color: var(--teal-dark); font: 700 14px var(--font-head); overflow-wrap: anywhere; }
+    .axis-score { margin-top: 12px; font: 800 30px/1 var(--font-head); color: var(--teal-dark); }
+    .axis-description { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+    .progress { height: 6px; margin-top: 12px; overflow: hidden; background: #e8ece7; border-radius: 6px; }
+    .progress span { display: block; height: 100%; background: var(--amber); border-radius: inherit; }
+    .critical .progress span { background: var(--red); }
+    .good .progress span { background: var(--green); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { padding: 10px 12px; background: var(--teal-dark); color: white; text-align: left; font-size: 10px; letter-spacing: .035em; text-transform: uppercase; white-space: nowrap; }
+    td { padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover td { background: #f3f8f5; }
+    .school-name { color: var(--teal-dark); font-weight: 900; }
+    .table-sub { display: block; color: var(--muted); font-size: 10px; }
+    .row-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+    .icon-status { display: inline-flex; min-width: 26px; justify-content: center; font-weight: 900; }
+    .callout { padding: 14px 16px; border-left: 3px solid var(--teal); border-radius: 0 6px 6px 0; background: var(--teal-pale); color: #31524a; font-size: 13px; }
+    .callout.warning { border-color: var(--amber); background: var(--amber-pale); color: #684c1e; }
+    .callout.danger { border-color: var(--red); background: var(--red-pale); color: #763636; }
+    .callout strong { color: var(--teal-dark); }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(250px, .7fr); gap: 22px; align-items: stretch; }
+    .hero-copy { padding: 10px 0; }
+    .hero-score { padding: 21px; color: white; background: var(--teal-dark); border-radius: 8px; }
+    .hero-score .score { margin: 10px 0 2px; font: 800 56px/.95 var(--font-head); }
+    .hero-score h3 { color: white; }
+    .hero-score p { color: rgba(255,255,255,.72); font-size: 12px; }
+    .hero-score .badge { margin-top: 8px; }
+    .crumbs { display: flex; align-items: center; gap: 7px; margin-bottom: 17px; color: #78817c; font-size: 11px; }
+    .crumbs button { padding: 0; border: 0; background: none; color: var(--teal); font-weight: 900; }
+    .profile-switch { display: flex; gap: 4px; padding: 4px; border-radius: 7px; background: #e8ece7; }
+    .profile-switch button { flex: 1; min-height: 38px; border: 0; border-radius: 5px; background: transparent; color: #64716b; font-size: 12px; font-weight: 900; }
+    .profile-switch button.active { background: var(--paper); color: var(--teal-dark); box-shadow: 0 1px 4px rgba(18,51,46,.11); }
+    .step-line { display: flex; align-items: center; margin: 16px 0 22px; }
+    .step { display: flex; align-items: center; gap: 8px; color: #8a938e; font-size: 11px; font-weight: 800; }
+    .step b { display: grid; width: 25px; height: 25px; place-items: center; border: 1px solid #c8d1cb; border-radius: 50%; color: #66726c; background: var(--paper); font-size: 11px; }
+    .step.current { color: var(--teal-dark); }
+    .step.current b, .step.done b { color: white; border-color: var(--teal); background: var(--teal); }
+    .step-rule { flex: 1; min-width: 18px; height: 1px; margin: 0 9px; background: #d5dcd6; }
+    .chat { display: grid; gap: 12px; padding: 16px; background: #f6f7f3; border-radius: 7px; }
+    .message { max-width: 86%; padding: 11px 13px; border-radius: 8px; font-size: 13px; }
+    .message.ai { justify-self: start; border: 1px solid #dce7e0; background: white; }
+    .message.user { justify-self: end; color: white; background: var(--teal); }
+    .message-label { display: block; margin-bottom: 4px; color: #738079; font-size: 10px; font-weight: 900; }
+    .message.user .message-label { color: rgba(255,255,255,.72); }
+    .plan-workspace { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, .85fr); gap: 16px; align-items: start; }
+    .plan-chat-panel { display: grid; gap: 14px; }
+    .plan-chat { min-height: 340px; max-height: 520px; overflow-y: auto; }
+    .plan-composer { display: grid; gap: 9px; padding: 13px; border: 1px solid var(--line); border-radius: 7px; background: var(--paper); }
+    .plan-composer textarea { min-height: 76px; }
+    .plan-choices { display: flex; flex-wrap: wrap; gap: 8px; }
+    .plan-proposal { width: min(100%, 520px); padding: 14px; border: 1px solid #c7ddd2; border-radius: 7px; background: #eef6f1; }
+    .plan-proposal h3 { margin: 8px 0; }
+    .plan-proposal-context { margin: 9px 0 12px; color: #53645b; font-size: 12px; }
+    .plan-link { display: grid; gap: 6px; margin: 10px 0; padding: 10px 12px; border-radius: 6px; background: var(--paper); font-size: 12px; }
+    .plan-link span { color: var(--muted); }
+    .plan-link strong { color: var(--teal-dark); }
+    .plan-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin: 10px 0 12px; }
+    .plan-fields .field-wide { grid-column: span 2; }
+    .plan-proposal .plan-source-list { margin: 0 0 12px; }
+    .axis-action { margin-top: 12px; padding: 0; border: 0; background: none; color: var(--teal); font-size: 12px; font-weight: 800; }
+    .axis-action:hover { color: var(--teal-dark); text-decoration: underline; }
+    .choice-button { width: 100%; margin-bottom: 8px; justify-content: space-between; align-items: center; text-align: left; }
+    .choice-button:hover { border-color: var(--teal); background: var(--teal-pale); }
+    .quote-block { margin-top: 13px; padding: 10px 12px; border-left: 3px solid #cbd5ce; border-radius: 0 6px 6px 0; background: #f6f7f3; font-size: 13px; }
+    .barrier-group { margin-bottom: 12px; }
+    .barrier-group:last-child { margin-bottom: 0; }
+    .barrier-group-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 4px; color: var(--teal-dark); font-size: 12px; }
+    .barrier-item { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 8px; border: 0; border-radius: 5px; background: transparent; color: var(--ink); font-size: 12px; text-align: left; }
+    .barrier-item:hover, .barrier-item.current { background: var(--teal-pale); }
+    .barrier-item.current { box-shadow: inset 3px 0 0 var(--teal); font-weight: 800; }
+    .municipal-action { width: 100%; margin-bottom: 12px; }
+    .municipal-action-head { display: flex; justify-content: space-between; align-items: start; gap: 8px; }
+    .modal-content { max-height: min(76vh, 720px); overflow-y: auto; }
+    .position-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); }
+    .position-actions .button-quiet { padding-inline: 0; }
+    .private-strip { min-height: 50px; color: var(--teal-dark); font-size: 13px; }
+    .gate-panel { margin-bottom: 16px; border-left: 3px solid var(--amber); }
+    .flag-list { display: grid; gap: 6px; margin: 10px 0 0; padding-left: 18px; font-size: 12px; color: #684c1e; }
+    .public-declaration { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .plan-summary { position: sticky; top: 16px; }
+    .plan-source-list { display: grid; gap: 7px; margin: 12px 0 0; padding-left: 18px; color: var(--muted); font-size: 11px; }
+    .plan-empty { padding: 12px; border: 1px dashed #cbd5ce; border-radius: 6px; color: var(--muted); font-size: 12px; }
+    textarea, input[type="text"], input[type="email"], input[type="password"], select { width: 100%; min-height: 41px; padding: 9px 11px; border: 1px solid #ccd5cf; border-radius: 5px; outline: 0; background: white; color: var(--ink); }
+    textarea { min-height: 100px; resize: vertical; }
+    textarea:focus, input:focus, select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(14,124,107,.12); }
+    label.field { display: grid; gap: 5px; color: #55615b; font-size: 11px; font-weight: 900; }
+    .form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    .choice { display: flex; gap: 9px; align-items: start; padding: 13px; border: 1px solid var(--line); border-radius: 6px; background: white; }
+    .choice input { margin-top: 3px; accent-color: var(--teal); }
+    .choice strong { display: block; color: var(--teal-dark); font-size: 13px; }
+    .choice small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .action-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 16px; }
+    .action-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .split { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(265px, .75fr); gap: 15px; }
+    .axis-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+    .axis-row:last-child { border-bottom: 0; }
+    .school-priority { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 9px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+    .school-priority:last-child { border-bottom: 0; }
+    .rank-no { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; background: var(--red-pale); color: var(--red); font-size: 11px; font-weight: 900; }
+    .timeline { display: grid; gap: 0; }
+    .timeline-item { position: relative; padding: 0 0 18px 27px; border-left: 1px solid #cbd7d0; }
+    .timeline-item:last-child { border-color: transparent; padding-bottom: 0; }
+    .timeline-item::before { position: absolute; top: 2px; left: -5px; width: 9px; height: 9px; border: 2px solid white; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 1px var(--teal); content: ""; }
+    .timeline-title { color: var(--teal-dark); font-size: 12px; font-weight: 900; }
+    .timeline-copy { margin-top: 2px; color: var(--muted); font-size: 11px; }
+    .auth-layout { display: grid; min-height: 570px; grid-template-columns: minmax(0,1.1fr) minmax(320px,.9fr); overflow: hidden; background: var(--paper); border: 1px solid var(--line); border-radius: 9px; box-shadow: var(--shadow); }
+    .auth-story { padding: 36px; color: white; background: linear-gradient(145deg, var(--teal-dark), #185a4e 70%, var(--teal)); }
+    .auth-story h1 { margin-top: 26px; color: white; font-size: 35px; }
+    .auth-story p { max-width: 490px; color: rgba(255,255,255,.76); }
+    .auth-list { display: grid; gap: 9px; margin-top: 25px; color: rgba(255,255,255,.92); font-size: 12px; }
+    .auth-list span::before { margin-right: 9px; color: #b7e1cd; content: "✓"; font-weight: 900; }
+    .auth-form { align-self: center; padding: 34px; }
+    .auth-form h2 { margin-top: 19px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 20; max-width: min(390px, calc(100vw - 32px)); padding: 13px 16px; border-radius: 7px; background: var(--teal-dark); color: white; box-shadow: 0 6px 25px rgba(0,0,0,.2); font-size: 13px; opacity: 0; pointer-events: none; transform: translateY(9px); transition: .2s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .modal-scrim { position: fixed; inset: 0; z-index: 30; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(18,35,31,.55); }
+    .modal-scrim.open { display: flex; }
+    .modal { width: min(580px,100%); overflow: hidden; border-radius: 8px; background: var(--paper); box-shadow: 0 12px 50px rgba(0,0,0,.25); }
+    .modal-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; padding: 15px 18px; background: var(--teal-dark); color: white; }
+    .modal-head h2 { margin: 0; color: white; font-size: 17px; }
+    .modal-close { padding: 0 3px; border: 0; background: transparent; color: white; font-size: 22px; }
+    .modal-content { padding: 18px; }
+    .footer { padding: 19px 30px; border-top: 1px solid rgba(18,51,46,.08); color: #808985; text-align: center; font-size: 11px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); border: 0; }
+    @media (max-width: 1000px) {
+      .header-main { flex-wrap: wrap; gap: 9px 16px; padding-inline: 18px; }
+      .brand { min-width: 0; }
+      .public-nav { order: 3; width: 100%; overflow-x: auto; }
+      .header-actions { margin-left: auto; }
+      .access-inner, .page-shell { padding-inline: 18px; }
+      .grid-5 { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    }
+    @media (max-width: 720px) {
+      .header-main { min-height: 60px; }
+      .brand-title { font-size: 15px; }
+      .brand-sub { display: none; }
+      .public-nav { gap: 0; }
+      .nav-link { padding: 7px 8px; font-size: 12px; white-space: nowrap; }
+      .header-actions .button { min-height: 36px; padding: 7px 10px; font-size: 11px; }
+      .user-chip { display: none !important; }
+      .access-inner { gap: 8px; padding-block: 8px; }
+      .access-inner label { flex: 1; min-width: 125px; }
+      .access-inner select { width: 100%; min-width: 0; }
+      .access-note { width: 100%; margin: 0; }
+      .page-shell { min-height: calc(100vh - 170px); padding: 22px 16px 36px; }
+      h1 { font-size: 26px; }
+      h2 { font-size: 20px; }
+      .hero, .split, .auth-layout { grid-template-columns: 1fr; }
+      .plan-workspace { grid-template-columns: 1fr; }
+      .plan-fields { grid-template-columns: 1fr; }
+      .plan-fields .field-wide { grid-column: auto; }
+      .plan-summary { position: static; }
+      .hero-score { order: -1; }
+      .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .grid-5 .kpi:last-child { grid-column: span 2; }
+      .form-grid { grid-template-columns: 1fr; }
+      .section-head { align-items: start; flex-direction: column; }
+      .panel-head { align-items: start; }
+      .action-bar { align-items: stretch; flex-direction: column; }
+      .action-group { width: 100%; }
+      .action-group .button { flex: 1; }
+      .auth-story, .auth-form { padding: 25px 21px; }
+      .auth-story h1 { margin-top: 18px; font-size: 29px; }
+      .step { gap: 5px; font-size: 9px; }
+      .step-rule { margin-inline: 4px; }
+      .message { max-width: 96%; }
+      .footer { padding-inline: 16px; }
+    }
+    @media (max-width: 430px) {
+      .header-actions { gap: 5px; }
+      .header-actions .button { padding-inline: 8px; }
+      .brand-mark { width: 33px; height: 33px; }
+      .brand-title { max-width: 118px; font-size: 13px; }
+      .grid-4 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .grid-5 { grid-template-columns: 1fr 1fr; }
+      .kpi { min-height: 88px; padding: 11px; }
+      .kpi-value { font-size: 23px; }
+      th, td { padding-inline: 9px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topline"></div>
+  <header class="app-header">
+    <div class="header-main">
+      <a class="brand" href="#inicio" onclick="showView('public')" aria-label="Escola Sem Barreiras, início">
+        <svg class="brand-mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Escola Sem Barreiras">
+          <rect width="44" height="44" rx="13" fill="#0e7c6b" />
+          <path d="M11 36 L11 19 A11 11 0 0 1 33 19 L33 36" stroke="#ffffff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          <circle cx="22" cy="19.5" r="3.3" fill="#e5533c" />
+          <rect x="18.4" y="23.8" width="7.2" height="12.2" rx="3.6" fill="#e5533c" />
+        </svg>
+        <span><span class="brand-title">Escola Sem Barreiras</span><span class="brand-sub">Controle social da educação inclusiva</span></span>
+      </a>
+      <nav class="public-nav" aria-label="Navegação principal">
+        <a class="nav-link" href="#public" onclick="showView('public');return false">Início</a>
+        <a class="nav-link" href="#public-schools" onclick="showView('public-schools');return false">Escolas</a>
+        <a class="nav-link" href="#comparar" onclick="toast('Tela existente da Fase 1, sem mudança.');return false">Comparar</a>
+        <a class="nav-link" href="#metodologia" onclick="toast('Em produção: /metodologia, com as abas Score e Barreiras.');return false">Metodologia</a>
+        <a class="nav-link" href="#participar" onclick="showView('participar');return false">Participar</a>
+      </nav>
+      <div class="header-actions">
+        <span class="user-chip" id="userChip">Prévia como <strong id="userRoleName">Visitante</strong></span>
+        <button class="button button-quiet button-small" id="switchProfile" style="display:none" onclick="showView('login')">Trocar perfil</button>
+        <button class="button button-primary" id="activeButton" onclick="openManagement()">Gestão Ativa</button>
+      </div>
+    </div>
+  </header>
+  <div class="access-strip">
+    <div class="access-inner" id="publicStrip">
+      <label>Região<select aria-label="Região"><option>Centro-Oeste</option><option>Nordeste</option><option>Norte</option><option>Sudeste</option><option>Sul</option></select></label>
+      <label>Estado<select aria-label="Estado"><option>DF — Distrito Federal</option><option>GO — Goiás</option><option>RJ — Rio de Janeiro</option></select></label>
+      <label>Município<select aria-label="Município"><option>Brasília</option><option>Goiânia</option><option>Niterói</option></select></label>
+      <span class="access-note">Visualização pública · Censo Escolar 2025</span>
+    </div>
+    <div class="access-inner private-strip" id="privateStrip" style="display:none">
+      <span class="badge badge-neutral">Área restrita</span>
+      <strong id="privateScope"></strong>
+      <span class="access-note">Gestão Ativa · dados privados, sem troca de rede · Censo Escolar 2025</span>
+    </div>
+  </div>
+
+  <main class="page-shell">
+    <section class="view active" id="view-public">
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">Início · Brasília, DF</div>
+          <h1>Como está a educação especial inclusiva em Brasília?</h1>
+          <p class="lede">Um retrato baseado no Censo Escolar do INEP e nos quatro eixos da PNEEI, aberto para a sociedade acompanhar e comparar.</p>
+          <div class="action-group">
+            <button class="button button-primary" onclick="showView('public-schools')">Ver escolas da rede</button>
+            <button class="button button-outline" onclick="showView('participar')">Sou diretor ou secretário</button>
+          </div>
+        </div>
+        <aside class="hero-score">
+          <div class="micro" style="color:rgba(255,255,255,.66);font-weight:900;letter-spacing:.08em;text-transform:uppercase">Índice de inclusão</div>
+          <div class="score">4,7</div>
+          <span class="badge badge-amber">Insuficiente</span>
+          <p style="margin:14px 0 0">Escala de 0 a 10 · Censo Escolar 2025 · metodologia do score v1.1</p>
+        </aside>
+      </div>
+      <div class="section-head"><div><h2>Os quatro compromissos da política</h2><p>Situação agregada nos eixos da PNEEI.</p></div><span class="badge badge-neutral">Área pública</span></div>
+      <div class="grid-4">
+        <article class="axis-card critical"><div class="axis-top"><span class="axis-name">Eixo I · AEE</span><span class="badge badge-red">Crítico</span></div><div class="axis-score">4,6</div><p class="axis-description">Oferta de atendimento especializado</p><div class="progress"><span style="width:46%"></span></div></article>
+        <article class="axis-card"><div class="axis-top"><span class="axis-name">Eixo II · Acessibilidade</span><span class="badge badge-amber">Atenção</span></div><div class="axis-score">6,1</div><p class="axis-description">Acessibilidade física nas escolas</p><div class="progress"><span style="width:61%"></span></div></article>
+        <article class="axis-card critical"><div class="axis-top"><span class="axis-name">Eixo III · Profissionais</span><span class="badge badge-red">Crítico</span></div><div class="axis-score">0,5</div><p class="axis-description">Libras e Braille</p><div class="progress"><span style="width:5%"></span></div></article>
+        <article class="axis-card good"><div class="axis-top"><span class="axis-name">Eixo IV · Classe comum</span><span class="badge badge-green">Adequado</span></div><div class="axis-score">9,3</div><p class="axis-description">Inclusão em classe comum</p><div class="progress"><span style="width:93%"></span></div></article>
+      </div>
+      <div class="split" style="margin-top:22px">
+        <article class="panel"><div class="panel-head"><h2 class="panel-title">Leitura do município</h2><span class="badge badge-blue">Texto gerado por IA</span></div><div class="panel-body"><p class="small">Brasília tem score 4,7, na faixa Insuficiente. O ponto mais crítico é o Eixo III: 95,7% das escolas não registram tradutor e intérprete de Libras e 99,5% não registram revisor de Braille. No Eixo I, 74,6% não registram oferta de AEE. A inclusão em classe comum é o melhor resultado da rede (9,3).</p><p class="micro muted" style="margin:0">Gerado em lote para o Censo Escolar 2025. Os números vêm do cálculo oficial do score e da metodologia de barreiras; a IA apenas redige o texto.</p></div></article>
+        <article class="panel"><div class="panel-head"><h2 class="panel-title">Declarações das escolas</h2><span class="badge badge-neutral">Gestão Ativa</span></div><div class="panel-body"><div class="kpi-value" id="publicDeclaredCount">0</div><p class="small muted" style="margin:6px 0 12px">de 1.332 escolas publicaram Declaração de Obstáculos.</p><button class="button button-outline button-small" onclick="showPublishedSchools()">Ver escolas com Declaração</button></div></article>
+      </div>
+      <div class="section-head"><div><h2>O que você pode fazer</h2><p>Atalhos da área pública.</p></div></div>
+      <div class="grid-3">
+        <article class="panel panel-body"><div class="eyebrow">Escolas</div><h3>Consultar a rede</h3><p class="muted small">Veja score, barreiras e declarações publicadas de cada escola.</p><button class="button button-outline button-small" onclick="showView('public-schools')">Abrir escolas</button></article>
+        <article class="panel panel-body"><div class="eyebrow">Comparar</div><h3>Explorar resultados</h3><p class="muted small">Compare municípios e estados usando os indicadores publicados.</p><button class="button button-outline button-small" onclick="toast('Tela existente da Fase 1, sem mudança: comparação entre redes.')">Comparar redes</button></article>
+        <article class="panel panel-body"><div class="eyebrow">Gestão escolar</div><h3>Gestão Ativa</h3><p class="muted small">Diretores e secretários com vínculo validado registram posições, declarações e planos.</p><button class="button button-coral button-small" onclick="showView('participar')">Conhecer a Gestão Ativa</button></article>
+      </div>
+    </section>
+
+    <section class="view" id="view-public-schools">
+      <div class="crumbs"><button onclick="showView('public')">← Início</button><span>/</span><span>Escolas</span></div>
+      <div class="eyebrow">Escolas · Brasília, DF</div><h1>Escolas da rede</h1>
+      <p class="lede">Score, barreiras identificadas no Censo Escolar 2025 e Declarações de Obstáculos publicadas pelas escolas.</p>
+      <div class="action-bar" style="margin:0 0 12px"><label class="choice" style="padding:8px 12px"><input type="checkbox" id="filterPublished" onchange="renderPublicSchools()"><span><strong>Só escolas com Declaração publicada</strong></span></label><span class="micro muted">Demonstração: 6 de 1.332 escolas</span></div>
+      <div class="panel table-wrap"><table><thead><tr><th>Escola</th><th>Score</th><th>Barreiras</th><th>Declaração de Obstáculos</th><th></th></tr></thead><tbody id="publicSchoolsBody"></tbody></table></div>
+      <p class="micro muted" style="margin:8px 0 0">As barreiras seguem a metodologia de barreiras v0.1, publicada ao lado da metodologia do score (/metodologia/barreiras).</p>
+    </section>
+
+    <section class="view" id="view-participar">
+      <div class="crumbs"><button onclick="showView('public')">← Início</button><span>/</span><span>Participar</span></div>
+      <div class="eyebrow">Participar</div><h1>Gestão Ativa</h1>
+      <p class="lede">Espaço de trabalho para diretores e secretários municipais transformarem as barreiras do Censo em declarações públicas e planos de ação acompanháveis.</p>
+      <div class="grid-3">
+        <article class="panel panel-body"><div class="eyebrow">1 · Barreiras</div><h3>Do Censo, por regra pública</h3><p class="muted small">Cada escola tem suas barreiras identificadas pela metodologia de barreiras, sem uso de IA.</p></article>
+        <article class="panel panel-body"><div class="eyebrow">2 · Declaração</div><h3>A escola se posiciona</h3><p class="muted small">O diretor relata obstáculos ou divergências e emite a Declaração. Publicar para todos é uma decisão dele.</p></article>
+        <article class="panel panel-body"><div class="eyebrow">3 · Planos</div><h3>Escola e rede planejam</h3><p class="muted small">O diretor propõe um Plano de Ação; a secretaria analisa e compõe o plano municipal.</p></article>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <article class="panel panel-body"><span class="badge badge-blue">Diretor de escola</span><h3 style="margin-top:10px">Acesso com vínculo validado</h3><p class="muted small">Informe o código INEP da escola. O acesso é liberado após a validação do vínculo pela autoridade educacional.</p><div class="action-group"><button class="button button-primary button-small" onclick="openAccessRequest()">Solicitar acesso</button><button class="button button-outline button-small" onclick="showView('login')">Já tenho acesso</button></div></article>
+        <article class="panel panel-body"><span class="badge badge-blue">Secretário municipal</span><h3 style="margin-top:10px">Acesso por convite</h3><p class="muted small">Contas de secretário são habilitadas pelo administrador do produto, com confirmação por canal institucional oficial.</p><button class="button button-outline button-small" onclick="showView('login')">Entrar</button></article>
+      </div>
+      <div class="callout" style="margin-top:14px"><strong>Sem gov.br no MVP.</strong> A confirmação de e-mail prova o controle do canal; o vínculo com a escola ou a rede é validado à parte.</div>
+    </section>
+
+    <section class="view" id="view-login">
+      <div class="crumbs"><button onclick="showView('public')">← Voltar à área pública</button><span>/</span><span>Gestão Ativa</span></div>
+      <div class="auth-layout">
+        <div class="auth-story">
+          <span class="badge" style="background:rgba(255,255,255,.13);color:#fff">ÁREA RESTRITA</span>
+          <h1>Gestão Ativa</h1>
+          <p>Espaço de trabalho de diretores e secretários para transformar barreiras registradas em decisões e ações acompanháveis.</p>
+          <div class="auth-list"><span>Acesso vinculado à escola ou à rede municipal</span><span>Planos e decisões com histórico de versões</span><span>Assistência por IA com revisão humana</span></div>
+        </div>
+        <div class="auth-form">
+          <div class="eyebrow">Acesso de demonstração</div>
+          <h2>Entrar na Gestão Ativa</h2>
+          <p class="muted small">Selecione um perfil para explorar as duas jornadas. Este protótipo não autentica nem valida vínculos reais.</p>
+          <div class="profile-switch" role="tablist" aria-label="Perfil de demonstração">
+            <button id="roleDirector" class="active" onclick="setRole('director')">Diretor</button>
+            <button id="roleSecretary" onclick="setRole('secretary')">Secretário municipal</button>
+          </div>
+          <div class="stack" style="margin-top:15px">
+            <label class="field">E-mail institucional<input type="email" id="loginEmail" value="diretora.maria@escola.gov.br"></label>
+            <label class="field">Senha<input type="password" value="demonstracao"></label>
+            <label class="field" id="schoolField">Escola vinculada<select><option>CEF 15 do Gama · INEP 53001080</option><option>Centro Educacional Asa Norte · INEP 53001991</option></select></label>
+            <label class="field" id="municipalityField" style="display:none">Rede municipal<select><option>Brasília · DF</option><option>Goiânia · GO</option></select></label>
+            <button class="button button-primary" onclick="enterWorkspace()">Entrar para demonstração</button>
+            <p class="small muted" style="margin:0">Primeiro acesso de diretor? <button class="button button-quiet button-small" style="padding:0" onclick="openAccessRequest()">Solicitar acesso</button><br>Secretários municipais são habilitados por convite do administrador.</p>
+            <div class="callout warning"><strong>Sem gov.br no MVP.</strong> Em produção, acesso de diretores e secretários dependerá de validação institucional do vínculo.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-director-dashboard">
+      <div class="crumbs"><span>Gestão Ativa</span><span>/</span><strong>Visão da escola</strong></div>
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">Painel do diretor · CEF 15 do Gama</div>
+          <h1>Situação atual da escola</h1>
+          <p class="lede">Uma visão de trabalho da sua escola, com os indicadores do Censo separados dos obstáculos que sua gestão registrou.</p>
+          <div class="action-group"><button class="button button-coral" onclick="startObstacles('all')">Registrar obstáculos de todos os eixos</button></div>
+        </div>
+        <aside class="hero-score">
+          <div class="micro" style="color:rgba(255,255,255,.66);font-weight:900;letter-spacing:.08em;text-transform:uppercase">Score da escola · Censo 2025</div>
+          <div class="score">2,6</div><span class="badge badge-red">Crítico</span>
+          <p style="margin:14px 0 0" id="dashScoreNote"></p>
+          <p class="micro" style="margin:6px 0 0">Indicador calculado a partir do Censo Escolar; não é certificação legal.</p>
+        </aside>
+      </div>
+      <div class="section-head"><div><h2>Leitura dos eixos</h2><p>Indicadores calculados a partir dos dados da escola.</p></div><span class="badge badge-neutral">Dados do Censo Escolar 2025</span></div>
+      <div class="grid-4" id="dashAxes"></div>
+      <div class="section-head"><div><h2>Barreiras e registros</h2><p>O dado do Censo e o relato da gestão permanecem distintos. Barreira sem registro não significa ausência de dificuldade.</p></div><span class="badge badge-neutral" id="dashBarrierCount"></span></div>
+      <div class="panel table-wrap"><table><thead><tr><th>Barreira identificada</th><th>Eixo</th><th>Dado observado · Censo 2025</th><th>Posição da escola</th><th>Estado</th></tr></thead><tbody id="dashBarriers"></tbody></table></div>
+      <div class="section-head"><div><h2>Seus registros e planos</h2><p>Acompanhe a declaração, o plano enviado e a resposta da secretaria.</p></div></div>
+      <div class="grid-3">
+        <article class="panel panel-body"><span class="badge badge-blue" id="dashDeclBadge">Em construção</span><h3 style="margin-top:10px">Declaração de Obstáculos</h3><p class="muted small" id="dashDeclNote"></p><button class="button button-outline button-small" onclick="openDeclaration()">Revisar declaração</button></article>
+        <article class="panel panel-body"><span class="badge badge-amber" id="dashPlanBadge">Rascunho</span><h3 style="margin-top:10px">Plano de Ação escolar</h3><p class="muted small" id="dashPlanNote"></p><button class="button button-primary button-small" id="dashPlanButton" onclick="showView('school-plan')">Continuar plano</button></article>
+        <article class="panel panel-body"><span class="badge badge-neutral" id="dashMunicipalBadge">Secretaria</span><h3 style="margin-top:10px">Ações municipais</h3><p class="muted small" id="dashMunicipalNote">Nenhuma ação municipal vinculada a esta escola.</p></article>
+      </div>
+    </section>
+
+    <section class="view" id="view-obstacles">
+      <div class="crumbs"><button onclick="showView('director-dashboard')">← Dashboard da escola</button><span>/</span><span>Declaração de Obstáculos</span></div>
+      <div class="eyebrow">Diretor · CEF 15 do Gama</div><h1>Registrar obstáculos</h1>
+      <p class="lede">Para cada barreira, relate o obstáculo, informe divergência com o dado do Censo ou indique que não há relato nesta versão. Com todas as barreiras com posição, você emite a Declaração.</p>
+      <div class="callout" id="obstacleScope"></div>
+      <div class="step-line"><div class="step current" id="obStep1"><b>1</b><span>Relatar</span></div><div class="step-rule"></div><div class="step" id="obStep2"><b>2</b><span>Revisar</span></div><div class="step-rule"></div><div class="step" id="obStep3"><b>3</b><span>Confirmar</span></div></div>
+      <div class="split">
+        <div class="stack">
+          <div class="panel"><div class="panel-head"><h2 class="panel-title">Barreira <span id="barrierCount"></span></h2><span class="badge" id="barrierAxis"></span></div><div class="panel-body"><h3 id="barrierTitle"></h3><p class="muted small" id="barrierFact"></p><div class="chat" id="obstacleChat"></div><label class="field" style="margin-top:12px">Sua resposta<textarea id="obstacleReply" placeholder="Conte a situação com suas palavras. Você pode mencionar pedidos feitos, recursos ausentes e o que já tentou."></textarea></label><div class="action-bar"><span class="muted micro">Não inclua nomes ou dados de estudantes.</span><div class="action-group"><button class="button button-outline" id="obstacleReview" onclick="reviewObstacle()">Revisar texto formal</button><button class="button button-primary" id="obstacleSend" onclick="sendObstacle()">Adicionar resposta</button></div></div><div class="position-actions" id="positionActions"></div></div></div>
+        </div>
+        <aside class="stack">
+          <div class="panel"><div class="panel-head"><h2 class="panel-title">Barreiras por eixo</h2><span class="badge badge-neutral" id="obstacleSavedCount"></span></div><div class="panel-body" id="obstacleList"></div></div>
+          <div class="panel"><div class="panel-head"><h2 class="panel-title">Declaração de Obstáculos</h2></div><div class="panel-body"><p class="small muted">Emita quando todas as barreiras tiverem posição. A versão emitida vai para o secretário e é a base do Plano de Ação. Os dados do Censo não são alterados.</p><button class="button button-outline button-small" onclick="openDeclaration()">Revisar e emitir declaração</button></div></div>
+          <div class="callout"><strong>Seu relato, sua confirmação.</strong><br>A IA estrutura o texto; o conteúdo só vira registro após sua revisão.</div>
+          <button class="button button-quiet" onclick="showView('director-dashboard')">Salvar e voltar ao dashboard</button>
+        </aside>
+      </div>
+    </section>
+
+    <section class="view" id="view-school-plan">
+      <div class="crumbs"><button onclick="showView('director-dashboard')">← Dashboard da escola</button><span>/</span><span>Plano de Ação Escolar</span></div>
+      <div class="eyebrow">Diretor · CEF 15 do Gama</div><h1>Plano de Ação Escolar</h1>
+      <p class="lede">Converse com a IA para definir prioridades e construir propostas. O rascunho ao lado acompanha suas escolhas; só entra no plano o que você incluir.</p>
+      <div class="callout warning" style="margin-bottom:16px"><strong>Prévia demonstrativa:</strong> as respostas da IA são roteirizadas. A conversa usa exemplos de indicadores do Censo 2025 e obstáculos relatados; não consulta orçamento nem documentos pedagógicos da escola.</div>
+      <div class="panel panel-body gate-panel" id="planGate" style="display:none"><span class="badge badge-amber">Declaração não emitida</span><h2 style="margin-top:10px">Emita a Declaração de Obstáculos para começar o plano</h2><p class="muted small">A IA usa a versão emitida da Declaração como contexto para propor as ações. <span id="planGateCount"></span></p><button class="button button-coral" onclick="openDeclarationFlow()">Ir para a Declaração</button></div>
+      <div class="callout" id="planBasis" style="display:none;margin-bottom:16px"></div>
+      <div class="callout" id="planDecision" style="display:none;margin-bottom:16px"></div>
+      <div class="plan-workspace" id="planWorkspace">
+        <section class="panel plan-chat-panel" aria-label="Conversa para construir o plano">
+          <div class="panel-head"><h2 class="panel-title">Construir plano com a IA</h2><span class="badge badge-blue">Assistente de planejamento</span></div>
+          <div class="panel-body">
+            <div class="chat plan-chat" id="planChat" aria-live="polite" aria-label="Mensagens da conversa"></div>
+            <div id="planCandidate" aria-live="polite"></div>
+            <div class="plan-composer">
+              <label class="field" for="planReply">Sua mensagem</label>
+              <textarea id="planReply" placeholder="Conte uma prioridade, condição ou ajuste para a proposta."></textarea>
+              <div class="action-bar" style="margin:0"><span class="muted micro">Não inclua nomes ou dados de estudantes.</span><button class="button button-primary" onclick="sendPlanMessage()">Enviar mensagem</button></div>
+            </div>
+          </div>
+        </section>
+        <aside class="panel plan-summary">
+          <div class="panel-head"><h2 class="panel-title">Plano em construção</h2><span class="badge badge-neutral" id="selectedActionCount">0 ações</span></div>
+          <div class="panel-body">
+            <div class="micro muted" id="planStatusLine">CEF 15 do Gama · rascunho não submetido</div>
+            <div id="selectedActions" style="margin-top:12px"><div class="plan-empty">Ainda não há ações no plano. Converse com a IA e inclua as propostas que fizerem sentido.</div></div>
+            <div class="callout" style="margin-top:14px"><strong>Você decide.</strong> Sugestões não são compromissos. Revise cada ação antes de incluir e submeta somente quando estiver pronto.</div>
+            <div class="section-head" style="margin:17px 0 4px"><div><h3 style="margin:0;font-size:13px">Posições da Declaração e cobertura do plano</h3></div></div>
+            <div id="planCoverage"></div>
+            <div class="section-head" style="margin:17px 0 8px"><div><h3 style="margin:0;font-size:13px">Versões submetidas</h3></div></div>
+            <div id="planHistory"></div>
+            <div class="section-head" style="margin:17px 0 8px"><div><h3 style="margin:0;font-size:13px">Contexto demonstrativo</h3></div></div>
+            <ul class="plan-source-list"><li>Indicadores do Censo Escolar 2025, conforme exibidos no protótipo.</li><li>Declaração de Obstáculos emitida pela escola (versão indicada acima).</li><li>Não há consulta a orçamento ou disponibilidade de recursos.</li></ul>
+            <div class="action-bar"><span class="muted micro">A submissão cria uma versão para análise da secretaria.</span><button class="button button-coral" id="submitPlanButton" onclick="submitSchoolPlan()">Revisar e submeter</button></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="view" id="view-secretary-dashboard">
+      <div class="crumbs"><span>Gestão Ativa</span><span>/</span><strong>Visão do município</strong></div>
+      <div class="hero">
+        <div class="hero-copy"><div class="eyebrow">Painel do secretário · Brasília, DF</div><h1>Situação da rede municipal</h1><p class="lede">Visão de gestão municipal. Os dados públicos continuam na página pública; aqui estão reunidas as prioridades e propostas enviadas pelas escolas.</p><div class="action-group"><button class="button button-primary" onclick="showView('secretary-queue')">Analisar Planos de Ação</button><button class="button button-outline" onclick="showView('analytics')">Ver analítico de barreiras</button></div></div>
+        <aside class="hero-score"><div class="micro" style="color:rgba(255,255,255,.66);font-weight:900;letter-spacing:.08em;text-transform:uppercase">Score municipal · Censo 2025</div><div class="score">4,7</div><span class="badge badge-amber">Insuficiente</span><p style="margin:14px 0 0">1.332 escolas · mesmo valor da página pública</p></aside>
+      </div>
+      <div class="section-head"><div><h2>Eixos por criticidade</h2><p>Ordenados pelo score determinístico do eixo, do menor para o maior. A IA não define esta ordem.</p></div><span class="badge badge-neutral">Brasília · Censo 2025</span></div>
+      <div class="grid-4">
+        <article class="axis-card critical"><div class="axis-top"><span class="axis-name">1º · III · Profissionais</span><span class="badge badge-red">Crítico</span></div><div class="axis-score">0,5</div><p class="axis-description">Libras e Braille</p><div class="progress"><span style="width:5%"></span></div></article>
+        <article class="axis-card critical"><div class="axis-top"><span class="axis-name">2º · I · AEE</span><span class="badge badge-red">Crítico</span></div><div class="axis-score">4,6</div><p class="axis-description">Oferta de atendimento especializado</p><div class="progress"><span style="width:46%"></span></div></article>
+        <article class="axis-card"><div class="axis-top"><span class="axis-name">3º · II · Acessibilidade</span><span class="badge badge-amber">Atenção</span></div><div class="axis-score">6,1</div><p class="axis-description">Acessibilidade física</p><div class="progress"><span style="width:61%"></span></div></article>
+        <article class="axis-card good"><div class="axis-top"><span class="axis-name">4º · IV · Classe comum</span><span class="badge badge-green">Adequado</span></div><div class="axis-score">9,3</div><p class="axis-description">Inclusão em classe comum</p><div class="progress"><span style="width:93%"></span></div></article>
+      </div>
+      <div class="section-head"><div><h2>Cobertura dos registros</h2><p>Cada número informa sua base. Escola sem registro ou sem plano não é escola sem dificuldade.</p></div><span class="badge badge-neutral">Exemplo demonstrativo</span></div>
+      <div class="grid-4">
+        <div class="kpi"><div class="kpi-label">Escolas com barreiras</div><div class="kpi-value">1.214</div><div class="kpi-note">de 1.332 escolas da rede</div></div>
+        <div class="kpi"><div class="kpi-label">Com Declaração emitida</div><div class="kpi-value" id="kpiDeclared"></div><div class="kpi-note">de 1.214 escolas com barreiras</div></div>
+        <div class="kpi"><div class="kpi-label">Com plano submetido</div><div class="kpi-value" id="kpiSubmitted"></div><div class="kpi-note">de 1.214 escolas com barreiras</div></div>
+        <div class="kpi amber"><div class="kpi-label">Aguardando análise</div><div class="kpi-value" id="kpiAwaiting"></div><div class="kpi-note">planos com decisão pendente</div></div>
+      </div>
+      <div class="section-head"><div><h2>Prioridades da rede</h2><p>Critério demonstrativo: score escolar ponderado e barreiras por eixo. Gravidade e andamento aparecem separados.</p></div><button class="button button-outline button-small" onclick="showView('analytics')">Entender critérios</button></div>
+      <div class="split">
+        <div class="panel"><div class="panel-head"><h2 class="panel-title">Escolas prioritárias</h2><span class="badge badge-neutral">Top 4 · exemplo</span></div><div class="panel-body" id="priorityList"></div></div>
+        <div class="panel"><div class="panel-head"><h2 class="panel-title">Fila de análise</h2><button class="button button-quiet button-small" onclick="showView('secretary-queue')">Abrir fila →</button></div><div class="panel-body" id="dashQueue"></div></div>
+      </div>
+      <div class="section-head"><div><h2>Ações</h2><p>Fluxos municipais separados por finalidade.</p></div></div>
+      <div class="grid-2"><article class="panel panel-body"><div class="eyebrow">Análise</div><h3>Analítico de Barreiras</h3><p class="muted small">Cruze barreiras, obstáculos e propostas para identificar padrões da rede.</p><button class="button button-outline button-small" onclick="showView('analytics')">Abrir analítico</button></article><article class="panel panel-body"><div class="eyebrow">Planejamento</div><h3>Plano Estratégico Municipal</h3><p class="muted small">Selecione oportunidades municipais e ações que atendam total ou parcialmente as escolas.</p><button class="button button-primary button-small" onclick="showView('municipal-plan')">Construir plano municipal</button></article></div>
+    </section>
+
+    <section class="view" id="view-secretary-queue">
+      <div class="crumbs"><button onclick="showView('secretary-dashboard')">← Dashboard municipal</button><span>/</span><span>Fila de análise</span></div><div class="eyebrow">Secretário · Brasília, DF</div><h1>Planos de Ação submetidos</h1><p class="lede">Analise versões enviadas pelas escolas da sua rede. Sua decisão se aplica à versão aberta e não registra execução ou financiamento.</p>
+      <div class="grid-4" style="margin-bottom:16px"><div class="kpi amber"><div class="kpi-label">Aguardando análise</div><div class="kpi-value" id="qAwaiting"></div><div class="kpi-note">escolas com versão pendente</div></div><div class="kpi"><div class="kpi-label">Ajustes solicitados</div><div class="kpi-value" id="qAdjust"></div><div class="kpi-note">aguardam nova versão</div></div><div class="kpi green"><div class="kpi-label">Aceitos como base</div><div class="kpi-value" id="qAccepted"></div><div class="kpi-note">não significa execução</div></div><div class="kpi red"><div class="kpi-label">Reprovados</div><div class="kpi-value" id="qRejected"></div><div class="kpi-note">com justificativa registrada</div></div></div>
+      <div class="panel table-wrap"><table><thead><tr><th>Escola</th><th>Score</th><th>Última submissão</th><th>Ações no plano</th><th>Estado</th><th>Versão</th><th></th></tr></thead><tbody id="queueBody"></tbody></table></div>
+      <p class="micro muted" id="queueShowing" style="margin:8px 0 0"></p>
+      <div class="callout" style="margin-top:14px"><strong>Fila ≠ prioridade.</strong> A fila contém somente planos submetidos. A lista de escolas prioritárias no dashboard usa critérios de situação da rede; escolas sem submissão não são consideradas sem barreiras.</div>
+    </section>
+
+    <section class="view" id="view-analytics">
+      <div class="crumbs"><button onclick="showView('secretary-dashboard')">← Dashboard municipal</button><span>/</span><span>Analítico de Barreiras</span></div><div class="eyebrow">Secretário · análise assistida</div><h1>Analítico de Barreiras</h1><p class="lede">Barreiras do Censo calculadas pela metodologia de barreiras, cruzadas com as Declarações emitidas e os planos submetidos. Contagens são calculadas por regra; a interpretação da IA é uma hipótese para análise do secretário.</p>
+      <div class="callout warning" style="margin-bottom:15px" id="anCoverage"></div>
+      <div class="grid-4"><div class="kpi"><div class="kpi-label">Declarações emitidas</div><div class="kpi-value" id="anDeclared"></div><div class="kpi-note">de 1.332 escolas</div></div><div class="kpi"><div class="kpi-label">Planos submetidos</div><div class="kpi-value" id="anSubmitted"></div><div class="kpi-note">escolas</div></div><div class="kpi red"><div class="kpi-label">Alta recorrência na rede</div><div class="kpi-value">2</div><div class="kpi-note">barreiras em 90% ou mais das escolas</div></div><div class="kpi amber"><div class="kpi-label">Sem oferta de AEE</div><div class="kpi-value">74,6%</div><div class="kpi-note">B-I-01 · 994 escolas</div></div></div>
+      <div class="section-head"><div><h2>Padrões observados</h2><p>Métricas calculadas e inferências assistidas, separadas.</p></div><button class="button button-outline button-small" onclick="toast('Demonstração: análise atualizada a partir das declarações e planos visíveis.')">Atualizar análise</button></div>
+      <div class="grid-2"><article class="panel"><div class="panel-head"><h2 class="panel-title">Barreiras mais recorrentes</h2><span class="badge badge-neutral">Métrica calculada · Censo 2025</span></div><div class="panel-body">
+        <div class="axis-row"><span><strong>B-III-02 · Sem revisor de texto em Braille</strong><span class="table-sub">1.325 de 1.332 escolas</span></span><span class="action-group"><strong>99,5%</strong><span class="badge badge-red">Alta recorrência</span></span></div>
+        <div class="axis-row"><span><strong>B-III-01 · Sem tradutor e intérprete de Libras</strong><span class="table-sub">1.275 de 1.332 escolas</span></span><span class="action-group"><strong>95,7%</strong><span class="badge badge-red">Alta recorrência</span></span></div>
+        <div class="axis-row"><span><strong>B-II-06 · Sem sinalização sonora</strong><span class="table-sub">1.188 de 1.332 escolas</span></span><strong>89,2%</strong></div>
+        <div class="axis-row"><span><strong>B-II-07 · Sem elevador</strong><span class="table-sub">1.037 escolas · pode não se aplicar a prédios térreos</span></span><strong>77,9%</strong></div>
+        <div class="axis-row"><span><strong>B-II-04 · Sem pisos táteis</strong><span class="table-sub">1.006 de 1.332 escolas</span></span><strong>75,5%</strong></div>
+        <div class="axis-row"><span><strong>B-I-01 · Sem oferta de AEE</strong><span class="table-sub">994 de 1.332 escolas</span></span><strong>74,6%</strong></div>
+      </div></article><article class="panel"><div class="panel-head"><h2 class="panel-title">Síntese assistida por IA</h2><span class="badge badge-blue">Hipótese</span></div><div class="panel-body"><p class="small">As duas barreiras de alta recorrência, Libras e Braille, aparecem em quase todas as escolas da rede, o que sugere resposta municipal, e não de cada escola. Nas declarações emitidas, os obstáculos ligados a intérprete citam dependência de contratação pela rede.</p><p class="muted micro">Base: barreiras do Censo 2025 (métrica calculada) e declarações emitidas visíveis ao secretário. Reaproveita o diagnóstico por eixo da Fase 1. A hipótese precisa de análise do secretário.</p><button class="button button-outline button-small" onclick="toast('Evidências demonstrativas: escolas com a barreira e declarações que citam o tema.')">Ver escolas e evidências</button></div></article></div>
+      <div class="section-head"><div><h2>Oportunidades de resposta</h2><p>Selecione ações para avaliar no Plano Estratégico Municipal.</p></div><button class="button button-primary button-small" onclick="showView('municipal-plan')">Ir ao plano municipal</button></div>
+      <div class="panel table-wrap"><table><thead><tr><th>Possível ação</th><th>Barreira</th><th>Escolas com a barreira</th><th>Relação</th><th></th></tr></thead><tbody><tr><td>Organizar atendimento compartilhado de intérpretes de Libras</td><td>B-III-01 · alta recorrência</td><td>1.275</td><td>Parcial / sistêmica</td><td><button class="button button-outline button-small" onclick="addMunicipalAction('interpretes')">Selecionar</button></td></tr><tr><td>Levantar condições para oferta de AEE (espaço e profissional)</td><td>B-I-01</td><td>994</td><td>Parcial</td><td><button class="button button-outline button-small" onclick="addMunicipalAction('espacos')">Selecionar</button></td></tr></tbody></table></div>
+    </section>
+
+    <section class="view" id="view-municipal-plan">
+      <div class="crumbs"><button onclick="showView('secretary-dashboard')">← Dashboard municipal</button><span>/</span><span>Plano Estratégico Municipal</span></div><div class="eyebrow">Secretário · planejamento da rede</div><h1>Plano Estratégico Municipal</h1><p class="lede">Selecione oportunidades municipais e ações escolares que a rede pode atender por inteiro ou parcialmente.</p>
+      <div class="callout warning" style="margin-bottom:15px"><strong>Cobertura parcial:</strong> incluir uma ação neste plano não aceita nem encerra o restante do plano escolar. Financiamento e execução são estados separados.</div>
+      <div class="split">
+        <div class="stack">
+          <div class="panel"><div class="panel-head"><h2 class="panel-title">Ações selecionadas para o plano</h2><span class="badge badge-blue" id="municipalActionCount">0 ações</span></div><div class="panel-body"><div id="municipalActions"></div><div class="action-bar"><button class="button button-outline button-small" onclick="addMunicipalAction('sistemica')">+ Nova ação sistêmica</button><button class="button button-primary" onclick="confirmMunicipalPlan()">Revisar plano municipal</button></div></div></div>
+          <div class="panel"><div class="panel-head"><h2 class="panel-title">Narrativa executiva · rascunho</h2><span class="badge badge-blue">Assistida por IA</span></div><div class="panel-body"><p class="small">A rede apresenta necessidades recorrentes na oferta de profissionais especializados e na adequação dos espaços de atendimento. As ações selecionadas propõem respostas compartilhadas para parte das escolas que submeteram planos, preservando as demais necessidades para ciclos posteriores.</p><p class="micro muted">Base: ações selecionadas acima e planos submetidos visíveis. Custos e impacto não foram calculados pela IA. A síntese deve ser revisada pelo secretário antes da confirmação.</p><button class="button button-outline button-small" onclick="toast('A IA sugeriria uma narrativa com base nas ações selecionadas.')">Refinar com IA</button></div></div>
+        </div>
+        <aside class="stack">
+          <div class="panel"><div class="panel-head"><h2 class="panel-title">Premissas do plano</h2></div><div class="panel-body stack"><label class="field">Exercício da LOA<select><option>2027 · a confirmar</option></select></label><label class="field">Período do PPA<select><option>2026–2029 · a confirmar</option></select></label><label class="field">Responsável municipal<input type="text" value="Secretaria Municipal de Educação"></label><label class="field">Observações<textarea placeholder="Registre premissas ou condicionantes"></textarea></label><p class="micro muted" style="margin:0">Ano da LOA e horizonte do PPA ainda são decisão pendente do PRD (item 14).</p></div></div>
+          <div class="callout"><strong>Rastreabilidade</strong><br>Cada ação aponta barreira, escolas, itens dos planos escolares atendidos e a cobertura, inteira ou parcial.</div>
+          <div class="panel"><div class="panel-head"><h2 class="panel-title">Versões do plano municipal</h2></div><div class="panel-body small muted" id="municipalHistory">Nenhuma versão confirmada.</div></div>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">Escola Sem Barreiras · Protótipo navegável da Gestão Ativa · Dados e decisões demonstrativos</footer>
+
+  <div class="modal-scrim" id="modalScrim" role="dialog" aria-modal="true" aria-labelledby="modalTitle" onclick="closeModal(event)"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">Analisar plano</h2><span class="micro" id="modalSub">Versão submetida · demonstração</span></div><button class="modal-close" aria-label="Fechar" onclick="closeModal()">×</button></div><div class="modal-content" id="modalContent"></div></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const views = ["public","public-schools","participar","login","director-dashboard","obstacles","school-plan","secretary-dashboard","secretary-queue","analytics","municipal-plan"];
+    const CEF="CEF 15 do Gama";
+    const TODAY=new Date().toLocaleDateString("pt-BR");
+
+    // Fonte única de dados da demonstração: todas as telas leem daqui.
+    // Barreiras, eixos e score são calculados pela metodologia de barreiras v0.1 e pela
+    // metodologia do score v1.1, a partir de campos do Censo de escolas fictícias.
+    const BARRIER_DEFS=[
+      {code:"B-I-01",axis:"I",field:"aee",w:.30,title:"Sem oferta de AEE",fact:"Registra que a escola não oferece AEE"},
+      {code:"B-II-01",axis:"II",field:"rampa",w:.08,title:"Sem rampas",fact:"Não registra rampas nas vias de circulação interna"},
+      {code:"B-II-02",axis:"II",field:"banheiro",w:.07,title:"Sem banheiro acessível",fact:"Não registra banheiro acessível"},
+      {code:"B-II-03",axis:"II",field:"corrimao",w:.06,title:"Sem corrimão e guarda-corpos",fact:"Não registra corrimão e guarda-corpos"},
+      {code:"B-II-04",axis:"II",field:"piso",w:.04,title:"Sem pisos táteis",fact:"Não registra pisos táteis"},
+      {code:"B-II-05",axis:"II",field:"visual",w:.02,title:"Sem sinalização visual",fact:"Não registra sinalização visual (piso/paredes)"},
+      {code:"B-II-06",axis:"II",field:"sonoro",w:.02,title:"Sem sinalização sonora",fact:"Não registra sinalização sonora"},
+      {code:"B-II-07",axis:"II",field:"elevador",w:.01,title:"Sem elevador",fact:"Não registra elevador",note:"pode não se aplicar a prédios térreos"},
+      {code:"B-III-01",axis:"III",field:"libras",w:.15,title:"Sem tradutor e intérprete de Libras",fact:"Não registra tradutor e intérprete de Libras atuando na escola"},
+      {code:"B-III-02",axis:"III",field:"braille",w:.10,title:"Sem revisor de texto em Braille",fact:"Não registra revisor de texto em Braille atuando na escola"}
+    ];
+    const AXIS_NAMES={I:"Eixo I · AEE",II:"Eixo II · Acessibilidade",III:"Eixo III · Profissionais",IV:"Eixo IV · Classe comum"};
+    const FAIXAS=[[8.5,"Referência","badge-blue"],[7,"Adequado","badge-green"],[5,"Em desenvolvimento","badge-amber"],[3,"Insuficiente","badge-amber"],[0,"Crítico","badge-red"]];
+    const fmt=n=>n.toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1});
+    const faixaOf=s=>FAIXAS.find(([limit])=>s>=limit-1e-9);
+    const axisState=s=>s<3-1e-9?["critical","badge-red","Crítico"]:s>=7-1e-9?["good","badge-green","Adequado"]:["","badge-amber","Atenção"];
+    function evaluateSchool(f){
+      const taxa=f.mat>0?f.cc/f.mat:0.93; // sem matrícula: média municipal (valor demonstrativo), sem gerar barreira
+      let sum=.15*taxa;
+      const found=[];
+      BARRIER_DEFS.forEach(d=>{sum+=d.w*f[d.field];if(!f[d.field])found.push({...d,points:10*d.w});});
+      if(f.mat>0&&f.ce>0)found.push({code:"B-IV-01",axis:"IV",w:.15,title:"Matrículas da educação especial em classes exclusivas",fact:`Registra ${f.ce} de ${f.mat} matrículas da educação especial em classes exclusivas`,points:1.5*(1-taxa)});
+      found.sort((a,b)=>(b.points-a.points)||a.code.localeCompare(b.code));
+      const d3=.08*f.rampa+.07*f.banheiro+.06*f.corrimao+.04*f.piso+.02*f.visual+.02*f.sonoro+.01*f.elevador;
+      return {score:10*sum,axes:{I:10*f.aee,II:10*d3/.30,III:10*(.15*f.libras+.10*f.braille)/.25,IV:10*taxa},barriers:found};
+    }
+    const schoolsData=[
+      {name:"CEF 15 do Gama",sub:"Gama · Rede pública",f:{aee:0,libras:0,braille:0,rampa:1,banheiro:0,corrimao:1,piso:0,visual:0,sonoro:0,elevador:0,mat:10,cc:8,ce:2}},
+      {name:"Escola Parque 308",sub:"Plano Piloto · Rede pública",f:{aee:0,libras:0,braille:0,rampa:1,banheiro:0,corrimao:1,piso:0,visual:0,sonoro:0,elevador:0,mat:6,cc:6,ce:0}},
+      {name:"EC Vale Verde",sub:"Planaltina · Rede pública",f:{aee:0,libras:0,braille:0,rampa:1,banheiro:1,corrimao:0,piso:0,visual:0,sonoro:0,elevador:0,mat:9,cc:9,ce:0}},
+      {name:"CEM 02 do Gama",sub:"Gama · Rede pública",f:{aee:1,libras:0,braille:0,rampa:0,banheiro:0,corrimao:0,piso:0,visual:0,sonoro:0,elevador:0,mat:5,cc:1,ce:4}},
+      {name:"EC 10 de Sobradinho",sub:"Sobradinho · Rede pública",f:{aee:1,libras:0,braille:0,rampa:1,banheiro:0,corrimao:0,piso:0,visual:0,sonoro:0,elevador:0,mat:5,cc:3,ce:2}},
+      {name:"CEM 01 do Riacho Fundo",sub:"Riacho Fundo · Rede pública",f:{aee:1,libras:0,braille:0,rampa:0,banheiro:0,corrimao:0,piso:0,visual:0,sonoro:0,elevador:0,mat:10,cc:8,ce:2}}
+    ];
+    schoolsData.forEach(s=>Object.assign(s,evaluateSchool(s.f)));
+    const schoolBy=name=>schoolsData.find(s=>s.name===name);
+    const scoreBadge=name=>{const s=schoolBy(name),[,label,cls]=faixaOf(s.score);return `<span class="badge ${cls}">${fmt(s.score)} · ${label}</span>`;};
+    function priorityList(){
+      return [...schoolsData].sort((a,b)=>a.score-b.score).slice(0,4).map(s=>{
+        const critical=["I","II","III","IV"].filter(id=>s.axes[id]<3-1e-9);
+        const [,label,cls]=faixaOf(s.score);
+        return {name:s.name,sub:`Score ${fmt(s.score)} · ${critical.length?`${critical.length===1?"Eixo":"Eixos"} ${critical.length>1?`${critical.slice(0,-1).join(", ")} e ${critical[critical.length-1]}`:critical[0]} ${critical.length===1?"crítico":"críticos"}`:"sem eixo crítico"}`,sev:[cls,label]};
+      });
+    }
+    const CEF_DATA=schoolBy(CEF);
+    const axes=["I","II","III","IV"].map(id=>{const sc=CEF_DATA.axes[id],[cls,badgeCls,label]=axisState(sc);return {id,name:AXIS_NAMES[id],score:fmt(sc),pct:Math.round(sc*10),cls,badge:badgeCls,label};});
+    // Posições já registradas pela direção no início da demonstração.
+    const SEEDED={
+      "B-I-01":{status:"obstaculo",obstacle:"Sem professor de AEE e sem espaço próprio para o atendimento",formal:"A gestão escolar relata que a escola não tem professor de AEE lotado e que o espaço disponível é dividido com a biblioteca, livre apenas duas manhãs por semana.",original:"Não temos professor de AEE e a sala que usamos é dividida com a biblioteca, só fica livre duas manhãs por semana."},
+      "B-III-01":{status:"obstaculo",obstacle:"Contratação de intérprete depende de processo da rede municipal",formal:"A gestão escolar relata que solicitou intérprete à regional no início do ano letivo; a contratação é conduzida pela rede e ainda não houve resposta.",original:"Pedimos intérprete à regional no início do ano, mas a contratação é feita pela rede e ainda não houve resposta."}
+    };
+    // status da posição: sem | rascunho | obstaculo | divergencia | semrelato
+    const barriers=CEF_DATA.barriers.map(d=>({key:d.code,axis:d.axis,title:d.title,sub:`${d.code} · ${fmt(d.points)} ${d.points===1?"ponto":"pontos"} em jogo${d.note?` · ${d.note}`:""}`,fact:d.fact,points:d.points,status:"sem",replies:[],...(SEEDED[d.code]||{})}));
+    const POSITIONED=["obstaculo","divergencia","semrelato"];
+    const positionInfo={
+      obstaculo:["badge-green","Obstáculo relatado"],
+      divergencia:["badge-blue","Divergência com o Censo"],
+      semrelato:["badge-neutral","Sem relato nesta versão"],
+      rascunho:["badge-amber","Rascunho"],
+      sem:["badge-amber","Sem posição"]
+    };
+
+    const planActions={
+      formalizar:{focus:"AEE",barrierKey:"B-I-01",title:"Formalizar pedido de sala e atendimento de AEE",reason:"O Censo registra que a escola não oferece AEE e a Declaração relata falta de professor e de espaço próprio. Formalizar o pedido documenta a necessidade junto à rede.",horizon:"LOA",responsible:"Direção da escola",deadline:"Até 3 meses"},
+      levantar:{focus:"AEE",barrierKey:"B-I-01",title:"Levantar necessidades e alternativas para oferta de AEE",reason:"Primeiro passo para dimensionar a oferta, sem presumir disponibilidade de espaço ou orçamento.",horizon:"LOA",responsible:"Coordenação pedagógica",deadline:"Até 2 meses"},
+      compartilhado:{focus:"LIBRAS",barrierKey:"B-III-01",title:"Solicitar avaliação de atendimento compartilhado de intérprete",reason:"Sem profissional registrado e com contratação dependente da rede, um atendimento compartilhado pode ser avaliado pela secretaria.",horizon:"PPA",responsible:"Direção da escola",deadline:"Até 6 meses"},
+      mapear:{focus:"LIBRAS",barrierKey:"B-III-01",title:"Mapear a demanda por atendimento de LIBRAS com a rede",reason:"Registrar a demanda ajuda a rede a dimensionar a resposta, sem presumir que já existam recursos disponíveis.",horizon:"LOA",responsible:"Coordenação pedagógica",deadline:"Até 3 meses"}
+    };
+    const planAlternatives={formalizar:"levantar",levantar:"formalizar",compartilhado:"mapear",mapear:"compartilhado"};
+    const planFoci=[["AEE","B-I-01","Oferta de AEE","à oferta de AEE"],["LIBRAS","B-III-01","Intérprete de Libras","ao intérprete de Libras"]];
+
+    const statusInfo={
+      "aguardando análise":["badge-amber","Aguardando análise"],
+      "ajustes solicitados":["badge-blue","Ajustes solicitados"],
+      "aceito":["badge-green","Aceito como base"],
+      "reprovado":["badge-red","Reprovado"]
+    };
+    const queueSchools=[
+      {name:"EC Vale Verde",when:"Ontem",status:"aguardando análise",version:2,declVersion:1,comment:"",history:["v1 · ajustes solicitados: “Detalhar responsáveis e prazos de cada ação.”"],actions:[
+        {title:"Mapear demanda de intérprete com a regional",horizon:"LOA",responsible:"Direção da escola",deadline:"Até 3 meses",barrier:"B-III-01 · Sem tradutor e intérprete de Libras",obstacle:"Sem profissional disponível na regional"},
+        {title:"Instalar corrimão e guarda-corpos nas escadas",horizon:"PPA",responsible:"Direção da escola",deadline:"Até 12 meses",barrier:"B-II-03 · Sem corrimão e guarda-corpos",obstacle:"Obra depende de contratação pela rede"},
+        {title:"Organizar horários de AEE no contraturno",horizon:"LOA",responsible:"Coordenação pedagógica",deadline:"Até 2 meses",barrier:"B-I-01 · Sem oferta de AEE",obstacle:"Sem professor de AEE no turno"}]},
+      {name:"CEM 01 do Riacho Fundo",when:"Há 5 dias",status:"ajustes solicitados",version:1,declVersion:1,comment:"Vincular cada ação a uma barreira identificada no Censo.",history:[],actions:[
+        {title:"Ampliar formação da equipe em Libras",horizon:"PPA",responsible:"Coordenação pedagógica",deadline:"Até 12 meses",barrier:"B-III-01 · Sem tradutor e intérprete de Libras",obstacle:"Equipe sem formação básica em Libras"},
+        {title:"Instalar pisos táteis nos corredores",horizon:"LOA",responsible:"Direção da escola",deadline:"Até 6 meses",barrier:"B-II-04 · Sem pisos táteis",obstacle:"Sem recurso próprio para a instalação"}]},
+      {name:"EC 10 de Sobradinho",when:"Há 12 dias",status:"aceito",version:1,declVersion:2,comment:"",history:[],actions:[
+        {title:"Adaptar banheiro para acessibilidade",horizon:"PPA",responsible:"Direção da escola",deadline:"Até 12 meses",barrier:"B-II-02 · Sem banheiro acessível",obstacle:"Reforma depende de obra da rede"},
+        {title:"Ampliar a matrícula em classe comum com apoio do AEE",horizon:"LOA",responsible:"Coordenação pedagógica",deadline:"Até 6 meses",barrier:"B-IV-01 · Matrículas em classes exclusivas",obstacle:"Transporte escolar não atende o contraturno do AEE"}]}
+    ];
+    // Escolas que não aparecem nas listas da demonstração.
+    const hiddenQueue={"aguardando análise":5,"ajustes solicitados":1,"aceito":2,"reprovado":0};
+    const hiddenDeclared=13;
+    const municipalCatalog={
+      interpretes:{name:"Organizar atendimento compartilhado de intérpretes de Libras",barrier:"B-III-01 · Sem tradutor e intérprete de Libras · alta recorrência",schools:["EC Vale Verde","CEM 01 do Riacho Fundo","+3 escolas com plano"],items:"Ações sobre intérprete nos planos de EC Vale Verde e CEM 01 do Riacho Fundo",coverage:"Parcial: cobre a oferta de intérprete; a formação das equipes segue nos planos das escolas.",responsible:"Diretoria de Educação Inclusiva",deadline:"Até 12 meses",horizon:"PPA",cefKeys:["compartilhado","mapear"]},
+      espacos:{name:"Levantar condições para oferta de AEE (espaço e profissional)",barrier:"B-I-01 · Sem oferta de AEE",schools:["EC Vale Verde","+2 escolas com plano"],items:"Ação sobre AEE no plano de EC Vale Verde",coverage:"Parcial: cobre o levantamento; contratação e obras dependem de ciclo orçamentário próprio.",responsible:"Diretoria de Educação Inclusiva",deadline:"Até 6 meses",horizon:"LOA",cefKeys:["formalizar","levantar"]},
+      sistemica:{name:"Formação e suporte pedagógico compartilhado",barrier:"Múltiplas barreiras",schools:["Rede municipal"],items:"Nenhum item escolar vinculado (ação sistêmica)",coverage:"Sistêmica: não substitui ações dos planos escolares.",responsible:"Secretaria Municipal de Educação",deadline:"Até 12 meses",horizon:"PPA",cefKeys:[]}
+    };
+
+    let role="director", accessActive=false, toastTimer;
+    let obstacleMode="all", obstacleAxis=null, obstacleQueue=[], currentBarrier=0;
+    let declarations=[], declarationDirty=true;
+    let planDeclVersion=null, planFocus="", planCandidate=null, selectedActions=[], planVersions=[];
+    let municipalActions=[], municipalVersions=[];
+
+    const axisOf=id=>axes.find(a=>a.id===id);
+    const isPositioned=b=>POSITIONED.includes(b.status);
+    const positionedCount=()=>barriers.filter(isPositioned).length;
+    const plural=(n,one,many)=>`${n} ${n===1?one:many}`;
+    const lowerFirst=s=>s.charAt(0).toLowerCase()+s.slice(1);
+    const withDot=s=>/[.!?]$/.test(s)?s:`${s}.`;
+    const latestDecl=()=>declarations[declarations.length-1];
+    const declByV=v=>declarations.find(d=>d.v===v);
+    const posOf=(decl,key)=>decl.positions.find(p=>p.key===key);
+    const latestPlan=()=>planVersions[planVersions.length-1];
+    const planLocked=()=>{const l=latestPlan();return !!l&&l.status!=="ajustes solicitados";};
+    const badge=status=>`<span class="badge ${positionInfo[status][0]}">${positionInfo[status][1]}</span>`;
+    function positionText(p){
+      if(p.status==="obstaculo")return escapeHtml(p.obstacle);
+      if(p.status==="divergencia")return `Divergência: ${escapeHtml(p.divergence)}`;
+      if(p.status==="semrelato")return '<span class="muted">Sem relato nesta versão</span>';
+      if(p.status==="rascunho")return '<span class="muted">Relato em andamento, ainda não confirmado</span>';
+      return '<span class="muted">—</span>';
+    }
+
+    function showView(name){
+      views.forEach(v=>document.getElementById(`view-${v}`)?.classList.toggle("active",v===name));
+      window.scrollTo({top:0,behavior:"smooth"});
+      const inside=!["public","public-schools","participar","login"].includes(name);
+      document.getElementById("userChip").style.display=inside?"inline":"none";
+      document.getElementById("switchProfile").style.display=inside?"inline-flex":"none";
+      if(["director-dashboard","obstacles","school-plan"].includes(name)){role="director";syncHeader();}
+      if(["secretary-dashboard","secretary-queue","analytics","municipal-plan"].includes(name)){role="secretary";syncHeader();}
+      document.getElementById("publicStrip").style.display=inside?"none":"flex";
+      document.getElementById("privateStrip").style.display=inside?"flex":"none";
+      document.getElementById("privateScope").textContent=role==="director"?"CEF 15 do Gama · INEP 53001080":"Rede municipal de Brasília · DF";
+      if(name==="public") accessActive=false;
+      if(name==="school-plan"&&latestDecl()&&planDeclVersion===null){planDeclVersion=latestDecl().v;initPlanChat();}
+      renderAll();
+      history.replaceState(null,"",`#${name}`);
+    }
+    function openManagement(){
+      if(!accessActive){showView("login");return;}
+      showView(role==="secretary"?"secretary-dashboard":"director-dashboard");
+    }
+    function setRole(next){
+      role=next;
+      document.getElementById("roleDirector").classList.toggle("active",next==="director");
+      document.getElementById("roleSecretary").classList.toggle("active",next==="secretary");
+      document.getElementById("schoolField").style.display=next==="director"?"grid":"none";
+      document.getElementById("municipalityField").style.display=next==="secretary"?"grid":"none";
+      document.getElementById("loginEmail").value=next==="director"?"diretora.maria@escola.gov.br":"secretaria@educacao.df.gov.br";
+    }
+    function syncHeader(){
+      document.getElementById("userRoleName").textContent=role==="director"?"Diretora · CEF 15":"Secretário · Brasília";
+    }
+    function enterWorkspace(){
+      accessActive=true;
+      syncHeader();
+      showView(role==="director"?"director-dashboard":"secretary-dashboard");
+      toast(role==="director"?"Demonstração: dashboard privado do diretor.":"Demonstração: dashboard privado do secretário.");
+    }
+    function toast(message){
+      const el=document.getElementById("toast"); el.textContent=message; el.classList.add("show");
+      clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove("show"),3600);
+    }
+
+    // ---------- Acesso: solicitação do diretor ----------
+    function openAccessRequest(){
+      openModal("Solicitar acesso de diretor","Gestão Ativa · primeiro acesso",`<div class="stack"><label class="field">Nome completo<input type="text" id="reqName" value="Maria Souza"></label><label class="field">E-mail institucional<input type="email" id="reqEmail" value="diretora.maria@escola.gov.br"></label><label class="field">Código INEP da escola<input type="text" id="reqInep" value="53001080"></label><label class="field">Função<select><option>Diretor(a)</option><option>Vice-diretor(a)</option></select></label></div><div class="callout" style="margin-top:14px">Não pedimos cópia de documento pessoal. O código INEP sozinho não libera o acesso: o vínculo é validado pela autoridade educacional ou mantenedora.</div><div class="action-bar"><button class="button button-outline" onclick="closeModal()">Cancelar</button><button class="button button-primary" onclick="requestAccessCode()">Enviar código de confirmação</button></div>`);
+    }
+    function requestAccessCode(){
+      const email=document.getElementById("reqEmail").value.trim();
+      openModal("Confirmar e-mail","Código de uso único",`<p class="small">Enviamos um código para <strong>${escapeHtml(email)}</strong>.</p><label class="field">Código<input type="text" id="reqCode" placeholder="6 dígitos" inputmode="numeric"></label><p class="micro muted" style="margin:8px 0 0">Demonstração: qualquer código com 6 dígitos é aceito.</p><div class="action-bar"><button class="button button-outline" onclick="openAccessRequest()">Voltar</button><button class="button button-primary" onclick="confirmAccessCode()">Confirmar código</button></div>`);
+    }
+    function confirmAccessCode(){
+      if(!/^\d{6}$/.test(document.getElementById("reqCode").value.trim())){toast("Digite os 6 dígitos do código.");return;}
+      openModal("Solicitação registrada","Aguardando validação do vínculo",`<div class="timeline"><div class="timeline-item"><div class="timeline-title">Solicitação registrada · ${TODAY}</div><div class="timeline-copy">CEF 15 do Gama · INEP 53001080</div></div><div class="timeline-item"><div class="timeline-title">E-mail confirmado</div><div class="timeline-copy">Prova o controle do canal, não o cargo.</div></div><div class="timeline-item"><div class="timeline-title">Vínculo em validação</div><div class="timeline-copy">A autoridade educacional ou mantenedora confere os registros funcionais.</div></div><div class="timeline-item"><div class="timeline-title">Acesso liberado</div><div class="timeline-copy">Somente após a aprovação. Você será avisado por e-mail.</div></div></div><div class="callout warning" style="margin-top:14px">Enquanto a solicitação estiver pendente, a Gestão Ativa permanece bloqueada.</div><div class="action-bar"><span></span><button class="button button-primary" onclick="closeModal()">Entendi</button></div>`);
+    }
+
+    // ---------- Diretor · dashboard ----------
+    function renderDirectorDashboard(){
+      const done=positionedCount();
+      document.getElementById("dashScoreNote").textContent=`${new Set(barriers.map(b=>b.axis)).size} eixos com barreiras · ${done} de ${barriers.length} barreiras com posição`;
+      document.getElementById("dashBarrierCount").textContent=`${barriers.length} barreiras identificadas`;
+      document.getElementById("dashAxes").innerHTML=axes.map(a=>{
+        const list=barriers.filter(b=>b.axis===a.id), c=list.filter(isPositioned).length;
+        return `<article class="axis-card ${a.cls}"><div class="axis-top"><span class="axis-name">${a.name}</span><span class="badge ${a.badge}">${a.label}</span></div><div class="axis-score">${a.score}</div><p class="axis-description">${plural(list.length,"barreira","barreiras")} · ${c} com posição</p><div class="progress"><span style="width:${a.pct}%"></span></div><button type="button" class="axis-action" onclick="startObstacles('axis','${a.id}')" aria-label="Registrar obstáculo do ${a.name}">${c===list.length?"Ver registros do eixo":"Registrar obstáculo"} →</button></article>`;
+      }).join("");
+      document.getElementById("dashBarriers").innerHTML=barriers.map(b=>`<tr><td><span class="school-name">${b.title}</span><span class="table-sub">${b.sub}</span></td><td>${b.axis}</td><td>${b.fact}</td><td>${positionText(b)}</td><td>${badge(b.status)}</td></tr>`).join("");
+      const d=latestDecl(), declBadge=document.getElementById("dashDeclBadge"), declNote=document.getElementById("dashDeclNote");
+      if(!d){declBadge.className="badge badge-amber";declBadge.textContent="Rascunho";declNote.textContent=done===barriers.length?"Todas as barreiras têm posição. Pronta para emitir.":`${done} de ${barriers.length} barreiras com posição · faltam ${barriers.length-done} para emitir`;}
+      else if(declarationDirty){declBadge.className="badge badge-amber";declBadge.textContent=`v${d.v} emitida · há alterações`;declNote.textContent="Emita nova versão para atualizar o secretário e o público.";}
+      else if(d.published){declBadge.className="badge badge-green";declBadge.textContent=`v${d.v} publicada`;declNote.textContent=`Emitida e publicada em ${d.publishedDate}. Visível ao secretário e na página pública.`;}
+      else{const pub=[...declarations].reverse().find(item=>item.published);declBadge.className="badge badge-blue";declBadge.textContent=`v${d.v} emitida`;declNote.textContent=`Emitida em ${d.date}. Visível ao secretário; ainda não publicada.${pub?` A página pública mostra a v${pub.v}.`:""}`;}
+      const l=latestPlan(), pBadge=document.getElementById("dashPlanBadge"), note=document.getElementById("dashPlanNote"), button=document.getElementById("dashPlanButton");
+      if(!d){pBadge.className="badge badge-neutral";pBadge.textContent="Aguardando declaração";note.textContent="Disponível depois de emitir a Declaração de Obstáculos.";button.textContent="Abrir Plano de Ação";}
+      else if(!l){pBadge.className="badge badge-amber";pBadge.textContent="Rascunho";note.textContent=`Em construção · ${plural(selectedActions.length,"ação","ações")} no rascunho · ainda não submetido`;button.textContent="Continuar plano";}
+      else{
+        const [cls,label]=statusInfo[l.status];
+        pBadge.className=`badge ${cls}`;pBadge.textContent=label;
+        note.textContent=l.status==="aguardando análise"?`Versão ${l.v} · ${plural(l.actions.length,"ação","ações")} · submetida à secretaria`
+          :l.status==="ajustes solicitados"?`A secretaria pediu ajustes na v${l.v}: “${l.comment}”`
+          :l.status==="aceito"?`v${l.v} aceita como base · não significa financiamento ou execução`
+          :`v${l.v} reprovada: “${l.comment}”`;
+        button.textContent=l.status==="ajustes solicitados"?`Ajustar e submeter v${l.v+1}`:"Ver plano";
+      }
+      const mBadge=document.getElementById("dashMunicipalBadge"), mNote=document.getElementById("dashMunicipalNote");
+      const lastMunicipal=municipalVersions[municipalVersions.length-1];
+      const involving=lastMunicipal?lastMunicipal.actions.filter(a=>a.schools.includes(CEF)):[];
+      if(involving.length){mBadge.className="badge badge-blue";mBadge.textContent=`Plano municipal v${lastMunicipal.v}`;mNote.innerHTML=`${plural(involving.length,"ação municipal envolve","ações municipais envolvem")} sua escola: ${involving.map(a=>`<strong>${escapeHtml(a.name)}</strong> (${escapeHtml(a.coverage.split(":")[0].toLowerCase())})`).join("; ")}. Proposta da rede: não indica financiamento nem execução.`;}
+      else{mBadge.className="badge badge-neutral";mBadge.textContent="Secretaria";mNote.textContent="Nenhuma ação municipal vinculada a esta escola.";}
+    }
+
+    // ---------- Diretor · posições por barreira ----------
+    function startObstacles(mode,axisId){
+      obstacleMode=mode; obstacleAxis=axisId||null;
+      obstacleQueue=barriers.map((b,i)=>i).filter(i=>mode==="all"||barriers[i].axis===axisId);
+      const next=obstacleQueue.find(i=>!isPositioned(barriers[i]));
+      closeModal();
+      showView("obstacles");
+      openBarrier(next!==undefined?next:obstacleQueue[0]);
+    }
+    function openDeclarationFlow(){
+      const next=barriers.findIndex(b=>!isPositioned(b));
+      if(next>=0)startObstacles("all");else{showView("director-dashboard");openDeclaration();}
+    }
+    function openBarrier(i){
+      currentBarrier=i;
+      const b=barriers[i], ax=axisOf(b.axis);
+      const pend=obstacleQueue.filter(k=>!isPositioned(barriers[k])).length;
+      document.getElementById("obstacleScope").innerHTML=obstacleMode==="all"
+        ?`<strong>Registrando todos os eixos.</strong> ${plural(pend,"barreira","barreiras")} sem posição. Ao registrar uma posição, você segue para a próxima barreira.`
+        :`<strong>Registrando ${ax.name}.</strong> ${plural(pend,"barreira","barreiras")} sem posição neste eixo.`;
+      document.getElementById("barrierCount").textContent=`${obstacleQueue.indexOf(i)+1} de ${obstacleQueue.length}`;
+      const axisBadge=document.getElementById("barrierAxis"); axisBadge.className=`badge ${ax.badge}`; axisBadge.textContent=ax.name;
+      document.getElementById("barrierTitle").textContent=b.title;
+      document.getElementById("barrierFact").textContent=`Dado do Censo 2025: ${lowerFirst(b.fact)}.`;
+      const locked=isPositioned(b);
+      ["obstacleReply","obstacleSend","obstacleReview"].forEach(id=>document.getElementById(id).disabled=locked);
+      document.getElementById("obstacleReply").value="";
+      document.getElementById("positionActions").innerHTML=locked
+        ?`<button class="button button-outline button-small" onclick="rectifyPosition()">Retificar posição</button><span class="micro muted">${latestDecl()?"A retificação entra na próxima versão emitida da Declaração.":"A posição ainda pode ser revista antes da emissão."}</span>`
+        :`<span class="micro muted">Outras posições:</span><button class="button button-quiet button-small" onclick="markDivergence()">Informar divergência com o dado do Censo</button><button class="button button-quiet button-small" onclick="markNoReport()">Sem relato nesta versão</button>`;
+      renderObstacleChat();
+      setSteps(locked?3:b.replies.length>=2?1:0);
+      renderObstacleList();
+    }
+    function aiMessage(html){return `<div class="message ai"><span class="message-label">ASSISTENTE DE REGISTRO</span>${html}</div>`;}
+    function renderObstacleChat(){
+      const b=barriers[currentBarrier], chat=document.getElementById("obstacleChat");
+      if(b.status==="obstaculo"){chat.innerHTML=aiMessage(`Posição registrada: <strong>obstáculo relatado</strong>. ${escapeHtml(b.obstacle)}.`);return;}
+      if(b.status==="divergencia"){chat.innerHTML=aiMessage(`Posição registrada: <strong>divergência com o dado do Censo</strong>. ${escapeHtml(b.divergence)}`)+aiMessage("O dado do Censo e o score não são alterados.");return;}
+      if(b.status==="semrelato"){chat.innerHTML=aiMessage("Posição registrada: <strong>sem relato nesta versão</strong>. Ela aparece assim na Declaração, nunca como barreira inexistente.");return;}
+      let html=aiMessage(`O que tem impedido a escola de superar esta barreira: <strong>${b.title}</strong>?`);
+      b.replies.forEach((r,k)=>{
+        html+=`<div class="message user"><span class="message-label">VOCÊ</span>${escapeHtml(r)}</div>`;
+        html+=aiMessage(k===0?"Você formalizou esse pedido ou buscou apoio da secretaria? O que aconteceu depois?":"Obrigado. Quando quiser, revise o texto formal deste obstáculo.");
+      });
+      chat.innerHTML=html;
+      chat.scrollTop=chat.scrollHeight;
+    }
+    function setSteps(stage){
+      ["obStep1","obStep2","obStep3"].forEach((id,i)=>{const el=document.getElementById(id);el.classList.toggle("done",i<stage);el.classList.toggle("current",i===stage);});
+    }
+    function renderObstacleList(){
+      const scope=obstacleQueue.map(k=>barriers[k]);
+      document.getElementById("obstacleSavedCount").textContent=`${scope.filter(isPositioned).length} de ${scope.length} com posição`;
+      document.getElementById("obstacleList").innerHTML=axes.filter(a=>obstacleMode==="all"||obstacleAxis===a.id).map(a=>{
+        const list=barriers.map((b,i)=>[b,i]).filter(([b])=>b.axis===a.id);
+        const c=list.filter(([b])=>isPositioned(b)).length;
+        return `<div class="barrier-group"><div class="barrier-group-head"><strong>${a.name}</strong><span class="badge ${c===list.length?"badge-green":"badge-neutral"}">${c}/${list.length}</span></div>${list.map(([b,i])=>`<button type="button" class="barrier-item${i===currentBarrier?" current":""}" onclick="openBarrier(${i})"${i===currentBarrier?' aria-current="true"':""}><span>${b.title}</span>${badge(b.status)}</button>`).join("")}</div>`;
+      }).join("");
+    }
+    function sendObstacle(){
+      const input=document.getElementById("obstacleReply"), text=input.value.trim();
+      if(!text){toast("Escreva uma resposta para continuar.");input.focus();return;}
+      const b=barriers[currentBarrier];
+      b.replies.push(text); b.status="rascunho";
+      input.value="";
+      renderObstacleChat();
+      setSteps(b.replies.length>=2?1:0);
+      renderObstacleList();
+    }
+    function reviewObstacle(){
+      const b=barriers[currentBarrier];
+      if(isPositioned(b))return;
+      if(!b.replies.length){toast("Conte o obstáculo antes de revisar o texto formal.");return;}
+      setSteps(2);
+      const formal=`A gestão escolar relata que ${withDot(lowerFirst(b.replies[0]))}${b.replies[1]?` Sobre os encaminhamentos, informa que ${withDot(lowerFirst(b.replies[1]))}`:""}`;
+      const summary=b.replies[0].length>90?`${b.replies[0].slice(0,87)}…`:b.replies[0];
+      openModal("Revisar obstáculo formalizado",`${axisOf(b.axis).name} · ${b.title}`,`<div class="callout"><strong>Barreira (Censo 2025):</strong> ${b.title} · ${lowerFirst(b.fact)}<br><strong>Escola:</strong> ${CEF}</div><div class="quote-block"><span class="message-label">SEU RELATO ORIGINAL</span>${escapeHtml(b.replies.join(" "))}</div><label class="field" style="margin-top:12px">Texto formal proposto pela IA · factual e neutro · edite antes de confirmar<textarea id="formalObstacle">${escapeHtml(formal)}</textarea></label><label class="field" style="margin-top:12px">Resumo do obstáculo (aparece no dashboard)<input type="text" id="obstacleSummary" value="${escapeHtml(summary)}"></label><p class="micro muted" style="margin:8px 0 0">O relato original e o texto confirmado ficam guardados com autoria e data.</p><div class="action-bar"><button class="button button-outline" onclick="closeModal();setSteps(1)">Voltar à conversa</button><button class="button button-primary" onclick="confirmObstacle()">Confirmar obstáculo</button></div>`);
+    }
+    function confirmObstacle(){
+      const b=barriers[currentBarrier];
+      b.formal=document.getElementById("formalObstacle").value.trim();
+      b.obstacle=document.getElementById("obstacleSummary").value.trim()||b.replies[0];
+      b.original=b.replies.join(" ");
+      b.status="obstaculo";
+      advanceBarrier("Obstáculo confirmado. Dado do Censo preservado.");
+    }
+    function markDivergence(){
+      const b=barriers[currentBarrier];
+      openModal("Divergência com o dado do Censo",`${axisOf(b.axis).name} · ${b.title}`,`<div class="callout"><strong>Dado do Censo 2025:</strong> ${lowerFirst(b.fact)}.</div><label class="field" style="margin-top:12px">Qual é a realidade da escola?<textarea id="divergenceText" placeholder="Ex.: a sala existe desde 2024, mas não foi declarada no Censo."></textarea></label><p class="micro muted" style="margin:8px 0 0">O registro documenta a divergência. Não altera o dado do Censo, o score nem a faixa.</p><div class="action-bar"><button class="button button-outline" onclick="closeModal()">Cancelar</button><button class="button button-primary" onclick="confirmDivergence()">Registrar divergência</button></div>`);
+    }
+    function confirmDivergence(){
+      const text=document.getElementById("divergenceText").value.trim();
+      if(!text){toast("Descreva a realidade da escola para registrar a divergência.");return;}
+      const b=barriers[currentBarrier];
+      b.status="divergencia"; b.divergence=withDot(text);
+      advanceBarrier("Divergência registrada. Dado do Censo preservado.");
+    }
+    function markNoReport(){
+      barriers[currentBarrier].status="semrelato";
+      advanceBarrier("Registrado: sem relato nesta versão.");
+    }
+    function rectifyPosition(){
+      const b=barriers[currentBarrier];
+      b.status="sem"; b.replies=[]; delete b.obstacle; delete b.formal; delete b.divergence;
+      declarationDirty=true;
+      openBarrier(currentBarrier); renderDirectorDashboard();
+      toast("Posição reaberta para retificação.");
+    }
+    function advanceBarrier(message){
+      declarationDirty=true;
+      closeModal();
+      const next=obstacleQueue.find(i=>!isPositioned(barriers[i]));
+      if(next!==undefined){openBarrier(next);toast(message);}
+      else if(positionedCount()===barriers.length){openBarrier(currentBarrier);toast("Todas as barreiras têm posição. A Declaração pode ser emitida.");openDeclaration();}
+      else{openBarrier(currentBarrier);toast(`${axisOf(obstacleAxis).name}: todas as barreiras têm posição.`);}
+      renderDirectorDashboard();
+    }
+
+    // ---------- Diretor · Declaração: emitir e publicar ----------
+    function declarationBody(positions){
+      return axes.map(a=>`<div class="eyebrow" style="margin:14px 0 2px">${a.name}</div>${positions.filter(p=>p.axis===a.id).map(p=>`<div class="axis-row"><span><strong>${p.title}</strong><span class="table-sub">Censo: ${lowerFirst(p.fact)}</span><span class="table-sub">${positionText(p)}</span></span>${badge(p.status)}</div>`).join("")}`).join("");
+    }
+    function openDeclaration(){
+      const d=latestDecl(), missing=barriers.length-positionedCount();
+      const canEmit=missing===0&&declarationDirty;
+      const next=(d?d.v:0)+1;
+      const versionNote=!d?"Nenhuma versão emitida ainda.":`Última versão emitida: v${d.v} em ${d.date}${d.published?`, publicada em ${d.publishedDate}`:", não publicada"}.${declarationDirty?" Há alterações desde então.":""}`;
+      const actions=[`<button class="button button-outline" onclick="closeModal();startObstacles('all')">Continuar registrando</button>`];
+      if(canEmit)actions.push(`<button class="button button-coral" onclick="emitDeclaration()">Emitir declaração v${next}</button>`);
+      else if(missing>0)actions.push(`<button class="button button-coral" disabled>Faltam ${plural(missing,"barreira","barreiras")} sem posição</button>`);
+      else if(d&&!d.published)actions.push(`<button class="button button-primary" onclick="openPublication(${d.v})">Publicar versão v${d.v}</button>`);
+      openModal("Declaração de Obstáculos",`${CEF} · ${positionedCount()} de ${barriers.length} barreiras com posição`,`<div class="callout">Para emitir, toda barreira precisa de uma posição. A versão emitida vai para o secretário da rede e é a base do Plano de Ação. Publicar para o público é uma etapa seguinte. Nenhum dado do Censo ou score é alterado.</div>${declarationBody(barriers)}<p class="micro muted" style="margin:12px 0 0">${versionNote}</p><div class="action-bar"><span></span><div class="action-group">${actions.join("")}</div></div>`);
+    }
+    function emitDeclaration(){
+      const v=declarations.length+1;
+      declarations.push({v,date:TODAY,author:"Diretora Maria Souza",published:false,positions:barriers.map(b=>({key:b.key,title:b.title,axis:b.axis,fact:b.fact,status:b.status,obstacle:b.obstacle||"",formal:b.formal||"",divergence:b.divergence||""}))});
+      declarationDirty=false;
+      renderAll();
+      const planOld=planDeclVersion!==null&&planDeclVersion<v;
+      openModal(`Declaração v${v} emitida`,`${CEF} · ${TODAY}`,`<div class="timeline"><div class="timeline-item"><div class="timeline-title">Emitida e congelada</div><div class="timeline-copy">Autoria: Diretora Maria Souza · ${TODAY}</div></div><div class="timeline-item"><div class="timeline-title">Visível ao secretário da rede</div><div class="timeline-copy">Rede municipal de Brasília</div></div><div class="timeline-item"><div class="timeline-title">Base para o Plano de Ação</div><div class="timeline-copy">${planOld?`O plano atual usa a v${planDeclVersion}; você pode atualizá-lo para a v${v} na tela do plano.`:"A IA usará esta versão como contexto."}</div></div></div><p class="small muted" style="margin-top:12px">A versão ainda não é pública. Publique quando quiser, após a checagem de dados pessoais.</p><div class="action-bar"><button class="button button-outline" onclick="closeModal()">Fechar</button><div class="action-group"><button class="button button-outline" onclick="openPublication(${v})">Publicar agora</button><button class="button button-primary" onclick="closeModal();showView('school-plan')">Ir para o Plano de Ação</button></div></div>`);
+    }
+    const PRIVACY_PATTERNS=[
+      [/(?<!\p{L})únic[oa]s?(?!\p{L})/iu,"pode identificar uma pessoa pelo contexto"],
+      [/(?<!\p{L})(alun[oa]s?|estudantes?|crianças?)(?!\p{L})[^.]*?(\d+º|ano|turma|surd[oa]s?|ceg[oa]s?|autista|TEA)(?!\p{L})/iu,"menciona estudante com característica ou turma"],
+      [/(?<!\p{L})laudos?(?!\p{L})/iu,"menciona laudo"],
+      [/(?<!\p{L})\p{Lu}\p{Ll}+ \p{Lu}\p{Ll}+(?!\p{L})/u,"possível nome próprio"]
+    ];
+    function publicItem(p){
+      if(p.status==="obstaculo")return `A escola relata: ${escapeHtml(p.formal||p.obstacle)}`;
+      if(p.status==="divergencia")return `A escola informa que o dado do Censo não reflete sua realidade: ${escapeHtml(p.divergence)}`;
+      return "A escola não apresentou relato nesta versão.";
+    }
+    function publicBody(d){
+      return axes.map(a=>`<div class="eyebrow" style="margin:14px 0 2px">${a.name}</div>${d.positions.filter(p=>p.axis===a.id).map(p=>`<div class="axis-row"><span><strong>${p.title}</strong><span class="table-sub">Censo 2025: ${lowerFirst(p.fact)}</span><span class="table-sub">${publicItem(p)}</span></span></div>`).join("")}`).join("");
+    }
+    function openPublication(v){
+      const d=declByV(v);
+      const found=new Set();
+      d.positions.forEach(p=>[p.obstacle,p.formal,p.divergence].filter(Boolean).forEach(text=>PRIVACY_PATTERNS.forEach(([re,why])=>{const m=text.match(re);if(m)found.add(`${p.title}: “${m[0].trim()}” · ${why}`);})));
+      const flags=[...found];
+      const check=flags.length?`<div class="callout warning"><strong>Checagem assistida: ${plural(flags.length,"ponto","pontos")} para revisar antes de publicar.</strong><ul class="flag-list">${flags.map(f=>`<li>${escapeHtml(f)}</li>`).join("")}</ul></div>`:'<div class="callout"><strong>Checagem assistida:</strong> nenhum possível dado pessoal ou risco de identificação encontrado. Ainda assim, revise o texto.</div>';
+      openModal(`Publicar Declaração v${v}`,"Versão pública · prévia",`${check}<h3 style="margin-top:14px">Como o público verá</h3>${publicBody(d)}<label class="choice" style="margin-top:14px"><input type="checkbox" id="publishOk"><span><strong>Revisei a versão pública e aprovo a publicação.</strong><small>Para mudar um texto, retifique a posição e emita nova versão.</small></span></label><div class="action-bar"><button class="button button-outline" onclick="closeModal()">Não publicar agora</button><button class="button button-primary" onclick="publishDeclaration(${v})">Publicar na página da escola</button></div>`);
+    }
+    function publishDeclaration(v){
+      if(!document.getElementById("publishOk").checked){toast("Confirme que revisou a versão pública.");return;}
+      const d=declByV(v); d.published=true; d.publishedDate=TODAY;
+      closeModal(); renderAll();
+      toast(`Declaração v${v} publicada na página pública da escola.`);
+    }
+    // ---------- Área pública: escolas, ficha e cobertura ----------
+    function publishedDeclFor(name){
+      if(name!==CEF)return null;
+      return [...declarations].reverse().find(d=>d.published)||null;
+    }
+    function renderPublic(){
+      document.getElementById("publicDeclaredCount").textContent=schoolsData.filter(s=>publishedDeclFor(s.name)).length;
+      renderPublicSchools();
+    }
+    function renderPublicSchools(){
+      const only=document.getElementById("filterPublished").checked;
+      const rows=schoolsData.map((s,i)=>[s,i]).filter(([s])=>!only||publishedDeclFor(s.name));
+      document.getElementById("publicSchoolsBody").innerHTML=rows.length?rows.map(([s,i])=>{
+        const d=publishedDeclFor(s.name);
+        return `<tr><td><span class="school-name">${s.name}</span><span class="table-sub">${s.sub}</span></td><td>${scoreBadge(s.name)}</td><td>${s.barriers.length}</td><td>${d?`<span class="badge badge-green">Publicada · v${d.v}</span>`:'<span class="muted small">Não publicada</span>'}</td><td><button class="button button-outline button-small" onclick="openSchoolCard(${i})">Ver ficha</button></td></tr>`;
+      }).join(""):'<tr><td colspan="5" class="muted">Nenhuma escola com Declaração publicada nesta demonstração. Para ver o fluxo, emita e publique a Declaração como diretor do CEF 15 do Gama.</td></tr>';
+    }
+    function showPublishedSchools(){
+      document.getElementById("filterPublished").checked=true;
+      showView("public-schools");
+    }
+    function openSchoolCard(i){
+      const s=schoolsData[i], d=publishedDeclFor(s.name);
+      const axesHtml=["I","II","III","IV"].map(id=>{const [,cls,label]=axisState(s.axes[id]);return `<div class="axis-row"><span>${AXIS_NAMES[id]}</span><span class="action-group"><strong>${fmt(s.axes[id])}</strong><span class="badge ${cls}">${label}</span></span></div>`;}).join("");
+      const barrierHtml=s.barriers.map(b=>`<div class="axis-row"><span><strong>${b.code} · ${b.title}</strong><span class="table-sub">O Censo 2025 ${lowerFirst(b.fact)}${b.note?` · ${b.note}`:""}.</span></span><span class="small muted">${fmt(b.points)} pts</span></div>`).join("");
+      const declHtml=d
+        ?`<div class="callout"><strong>Declaração de Obstáculos v${d.v}</strong>, publicada em ${d.publishedDate}. É o relato da escola sobre as barreiras acima e não altera o score.</div><div class="action-bar"><span></span><button class="button button-primary" onclick="openPublicDeclaration(${d.v})">Ler Declaração</button></div>`
+        :'<div class="plan-empty">Esta escola ainda não publicou Declaração de Obstáculos.</div>';
+      openModal(s.name,`${s.sub} · Censo Escolar 2025`,`<div class="action-group">${scoreBadge(s.name)}</div><div style="margin-top:8px">${axesHtml}</div><h3 style="margin-top:16px">Barreiras identificadas (${s.barriers.length})</h3><p class="micro muted" style="margin:0 0 6px">Pela metodologia de barreiras v0.1, ordenadas pelos pontos do score em jogo.</p>${barrierHtml}<h3 style="margin-top:16px">Declaração de Obstáculos</h3>${declHtml}`);
+    }
+    function openPublicDeclaration(v){
+      const d=declByV(v);
+      openModal(`Declaração de Obstáculos · ${CEF}`,`Versão ${d.v} · publicada em ${d.publishedDate}`,`<div class="callout">Relato da escola sobre as barreiras identificadas no Censo Escolar 2025. Não altera o score nem os dados oficiais.</div>${publicBody(d)}`);
+    }
+
+    // ---------- Diretor · Plano de Ação ----------
+    function addPlanMessage(text,speaker){
+      const chat=document.getElementById("planChat");
+      const message=document.createElement("div");
+      message.className=`message ${speaker}`;
+      const label=document.createElement("span");
+      label.className="message-label";
+      label.textContent=speaker==="user"?"VOCÊ":"ASSISTENTE DE PLANEJAMENTO · DEMONSTRAÇÃO";
+      message.append(label,document.createTextNode(text));
+      chat.append(message);
+      chat.scrollTop=chat.scrollHeight;
+    }
+    function availableFoci(){
+      const d=declByV(planDeclVersion);
+      return d?planFoci.filter(([,key])=>posOf(d,key)?.status==="obstaculo"):[];
+    }
+    function initPlanChat(){
+      document.getElementById("planChat").innerHTML="";
+      planFocus=""; planCandidate=null; renderPlanCandidate();
+      const foci=availableFoci();
+      addPlanMessage(`Li a sua Declaração de Obstáculos v${planDeclVersion}. ${foci.length?`Ela relata obstáculos ligados ${foci.map(f=>f[3]).join(" e ")}. Qual deles é mais urgente para sua escola?`:"Nesta demonstração, há propostas roteirizadas apenas para os obstáculos de oferta de AEE e de intérprete de Libras, que não estão relatados nesta versão."}`,"ai");
+      if(foci.length)renderPlanChoices(foci.map(([focus,,label])=>[label,`focus:${focus}`]));
+    }
+    function rebasePlan(){
+      planDeclVersion=latestDecl().v;
+      selectedActions=selectedActions.filter(a=>posOf(latestDecl(),a.barrierKey)?.status==="obstaculo").map(a=>({...a,obstacle:posOf(latestDecl(),a.barrierKey).obstacle}));
+      initPlanChat(); renderAll();
+      toast(`Plano atualizado para a Declaração v${planDeclVersion}.`);
+    }
+    function choosePlanFocus(focus){
+      planFocus=focus;
+      document.getElementById("planChoices")?.remove();
+      addPlanMessage(focus==="AEE"?"Oferta de AEE":"Intérprete de Libras","user");
+      addPlanMessage(focus==="AEE"
+        ?"Entendi. O Censo registra que a escola não oferece AEE e a Declaração relata falta de professor e de espaço próprio. Que primeiro passo seria mais viável?"
+        :"Entendi. O Censo não registra intérprete de Libras e a Declaração relata que a contratação depende da rede. Que primeiro passo ajudaria sua escola?","ai");
+      renderAvailablePlanChoices(focus);
+    }
+    function renderAvailablePlanChoices(focus){
+      const options=focus==="AEE"
+        ?[["Formalizar pedido e avaliar espaço","formalizar"],["Levantar necessidades e alternativas","levantar"]]
+        :[["Solicitar atendimento compartilhado","compartilhado"],["Mapear demanda com a rede","mapear"]];
+      const available=options.filter(([,option])=>!selectedActions.some(item=>item.key===option));
+      if(available.length){renderPlanChoices(available);return;}
+      const other=availableFoci().find(([f])=>f!==focus);
+      if(other)renderPlanChoices([[`Explorar: ${other[2]}`,`focus:${other[0]}`]]);
+    }
+    function renderPlanChoices(options){
+      const choices=document.createElement("div");
+      choices.className="plan-choices";
+      choices.id="planChoices";
+      options.forEach(([label,option])=>{
+        const button=document.createElement("button");
+        button.type="button";
+        button.className="button button-outline button-small";
+        button.textContent=label;
+        button.addEventListener("click",()=>option.startsWith("focus:")?choosePlanFocus(option.slice(6)):choosePlanAction(option));
+        choices.append(button);
+      });
+      const chat=document.getElementById("planChat");
+      chat.append(choices);
+      chat.scrollTop=chat.scrollHeight;
+    }
+    function choosePlanAction(option,silent){
+      const action=planActions[option];
+      if(!action)return;
+      const d=declByV(planDeclVersion), p=posOf(d,action.barrierKey);
+      if(!silent)addPlanMessage(action.title,"user");
+      planCandidate={...action,key:option,estimate:"",barrier:`${p.key} · ${p.title}`,obstacle:p.obstacle,sources:[`Censo Escolar 2025: ${lowerFirst(p.fact)}`,`Declaração de Obstáculos v${d.v}, emitida em ${d.date}`]};
+      renderPlanCandidate();
+      addPlanMessage("Preparei uma proposta inicial ligada à barreira e ao obstáculo da Declaração. Revise o texto, o responsável, o prazo e o horizonte. Você pode registrar uma condição na conversa, pedir outra proposta ou decidir se a inclui no rascunho.","ai");
+      document.getElementById("planChoices")?.remove();
+    }
+    function renderPlanCandidate(){
+      const container=document.getElementById("planCandidate");
+      if(!planCandidate){container.innerHTML="";return;}
+      const c=planCandidate;
+      const opt=(values,current)=>values.map(v=>`<option${v===current?" selected":""}>${v}</option>`).join("");
+      const condition=c.condition?`<p class="plan-proposal-context"><strong>Condição informada pela direção:</strong> ${escapeHtml(c.condition)}</p>`:"";
+      container.innerHTML=`<article class="plan-proposal"><span class="badge badge-blue">Proposta da IA · ${escapeHtml(c.focus)}</span>
+        <div class="plan-link"><div><span>Barreira (Censo):</span> <strong>${escapeHtml(c.barrier)}</strong></div><div><span>Obstáculo na Declaração v${planDeclVersion}:</span> <strong>${escapeHtml(c.obstacle)}</strong></div></div>
+        <p class="small">${escapeHtml(c.reason)}</p>${condition}
+        <div class="plan-fields">
+          <label class="field field-wide">Ação<input type="text" id="candTitle" value="${escapeHtml(c.title)}"></label>
+          <label class="field">Responsável<input type="text" id="candResponsible" value="${escapeHtml(c.responsible)}"></label>
+          <label class="field">Prazo<select id="candDeadline">${opt(["Até 2 meses","Até 3 meses","Até 6 meses","Até 12 meses"],c.deadline)}</select></label>
+          <label class="field">Horizonte<select id="candHorizon">${opt(["LOA","PPA"],c.horizon)}</select></label>
+          <label class="field">Estimativa de custo<input type="text" id="candEstimate" value="${escapeHtml(c.estimate)}" placeholder="Opcional · informe premissa"></label>
+        </div>
+        <div class="micro muted" style="margin-bottom:4px">Fontes consultadas</div>
+        <ul class="plan-source-list">${c.sources.map(s=>`<li>${escapeHtml(s)}</li>`).join("")}<li>Sem orçamento ou documentos da escola conectados: a IA não estimou custo.</li></ul>
+        <div class="action-group"><button class="button button-primary button-small" onclick="includeSuggestedAction(this)">Incluir no plano</button><button class="button button-outline button-small" data-alt onclick="requestAlternative()">Pedir outra proposta</button><button class="button button-quiet button-small" onclick="dismissSuggestedAction()">Não pertinente</button></div></article>`;
+    }
+    function syncCandidate(){
+      if(!planCandidate||!document.getElementById("candTitle"))return;
+      planCandidate.title=document.getElementById("candTitle").value.trim()||planCandidate.title;
+      planCandidate.responsible=document.getElementById("candResponsible").value.trim();
+      planCandidate.deadline=document.getElementById("candDeadline").value;
+      planCandidate.horizon=document.getElementById("candHorizon").value;
+      planCandidate.estimate=document.getElementById("candEstimate").value.trim();
+    }
+    function requestAlternative(){
+      if(!planCandidate)return;
+      const alt=planAlternatives[planCandidate.key];
+      addPlanMessage("Pode sugerir outra alternativa?","user");
+      if(!alt||selectedActions.some(item=>item.key===alt)){
+        addPlanMessage("Nesta demonstração não há outra alternativa roteirizada para esta barreira. Você pode ajustar a proposta atual ou descrever na conversa o que precisa ser diferente.","ai");
+        return;
+      }
+      choosePlanAction(alt,true);
+    }
+    function includeSuggestedAction(button){
+      if(!planCandidate)return;
+      if(planLocked()){toast(`A versão ${latestPlan().v} está ${statusInfo[latestPlan().status][1].toLowerCase()} e não pode ser alterada.`);return;}
+      syncCandidate();
+      const original=planActions[planCandidate.key];
+      planCandidate.edited=planCandidate.title!==original.title||planCandidate.responsible!==original.responsible||planCandidate.deadline!==original.deadline||planCandidate.horizon!==original.horizon||!!planCandidate.estimate;
+      if(!selectedActions.some(item=>item.key===planCandidate.key))selectedActions.push({...planCandidate});
+      const card=button.closest(".plan-proposal");
+      card.querySelectorAll("input,select").forEach(el=>el.disabled=true);
+      card.querySelectorAll(".button-quiet,[data-alt]").forEach(el=>el.remove());
+      button.disabled=true;
+      button.textContent="Incluída no rascunho";
+      document.getElementById("planChat").append(card);
+      addPlanMessage(`Ação incluída no rascunho por sua decisão, com horizonte ${planCandidate.horizon}. Você pode continuar a conversa ou revisar o plano antes de submeter.`,"ai");
+      planCandidate=null;
+      renderPlanScreen();
+      renderAvailablePlanChoices(planFocus);
+    }
+    function dismissSuggestedAction(){
+      if(planCandidate)addPlanMessage("Tudo bem. A proposta não foi incluída. Você pode escolher outra alternativa ou explicar o que precisa ser diferente.","ai");
+      planCandidate=null;
+      renderPlanCandidate();
+      renderAvailablePlanChoices(planFocus);
+    }
+    function sendPlanMessage(){
+      const input=document.getElementById("planReply");
+      const text=input.value.trim();
+      if(!text){toast("Escreva uma mensagem para continuar a conversa.");input.focus();return;}
+      addPlanMessage(text,"user");
+      input.value="";
+      if(!planFocus){
+        addPlanMessage("Obrigado por contextualizar. Para organizar uma primeira proposta, escolha um dos obstáculos da Declaração apresentados na conversa.","ai");
+        return;
+      }
+      if(planCandidate){
+        syncCandidate();
+        planCandidate.condition=planCandidate.condition?`${planCandidate.condition} ${text}`:text;
+        renderPlanCandidate();
+        addPlanMessage("Registrei essa condição junto à proposta para sua revisão. A sugestão ainda não foi incluída no plano.","ai");
+        return;
+      }
+      addPlanMessage("Registrei essa informação como contexto da conversa. Escolha uma alternativa de ação para eu organizar uma proposta, ou siga ajustando o que é prioritário.","ai");
+      document.getElementById("planChoices")?.remove();
+      renderAvailablePlanChoices(planFocus);
+    }
+    function renderPlanScreen(){
+      const d=latestDecl();
+      document.getElementById("planGate").style.display=d?"none":"block";
+      document.getElementById("planWorkspace").style.display=d?"grid":"none";
+      document.getElementById("planGateCount").textContent=`${positionedCount()} de ${barriers.length} barreiras já têm posição.`;
+      const basis=document.getElementById("planBasis");
+      if(!d||planDeclVersion===null){basis.style.display="none";}
+      else{
+        const l=latestPlan(), locked=planLocked(), outdated=d.v>planDeclVersion;
+        basis.style.display="block";
+        basis.className=`callout${outdated?" warning":""}`;
+        basis.innerHTML=`<strong>Baseado na Declaração de Obstáculos v${planDeclVersion}</strong>, emitida em ${declByV(planDeclVersion).date}.`+(outdated?` A versão v${d.v} foi emitida depois. ${locked?`A versão ${l.v} do plano continua vinculada à v${planDeclVersion}.`:`<button class="button button-quiet button-small" style="padding:0" onclick="rebasePlan()">Atualizar o plano para a v${d.v}</button>`}`:"");
+      }
+      if(!d)return;
+      const l=latestPlan(), locked=planLocked();
+      document.getElementById("planStatusLine").textContent=!l?`${CEF} · rascunho não submetido`
+        :l.status==="ajustes solicitados"?`${CEF} · rascunho da versão ${l.v+1} · v${l.v} com ajustes solicitados`
+        :`${CEF} · versão ${l.v} · ${statusInfo[l.status][1].toLowerCase()}`;
+      const submit=document.getElementById("submitPlanButton");
+      submit.disabled=locked;
+      submit.textContent=!l?"Revisar e submeter":locked?(l.status==="aguardando análise"?"Versão em análise":"Plano decidido"):`Submeter versão ${l.v+1}`;
+      const decision=document.getElementById("planDecision");
+      if(!l||l.status==="aguardando análise"){decision.style.display="none";}
+      else{
+        decision.style.display="block";
+        decision.className=`callout${l.status==="reprovado"?" danger":l.status==="ajustes solicitados"?" warning":""}`;
+        decision.innerHTML=l.status==="ajustes solicitados"?`<strong>A secretaria pediu ajustes na versão ${l.v}:</strong> “${escapeHtml(l.comment)}” Edite o plano e submeta a versão ${l.v+1}. A versão ${l.v} continua no histórico.`
+          :l.status==="aceito"?`<strong>Versão ${l.v} aceita como base de planejamento.</strong>${l.comment?` Comentário: “${escapeHtml(l.comment)}”.`:""} Aceitação não significa financiamento nem execução.`
+          :`<strong>Versão ${l.v} reprovada.</strong> Justificativa: “${escapeHtml(l.comment)}”. Se a escola pode reenviar ou precisa de um plano novo ainda é decisão pendente do PRD (item 6).`;
+      }
+      document.getElementById("planHistory").innerHTML=planVersions.length?`<div class="timeline">${planVersions.map(p=>`<div class="timeline-item"><div class="timeline-title">Versão ${p.v} · ${statusInfo[p.status][1]}${p.superseded?" · substituída":""}</div><div class="timeline-copy">${plural(p.actions.length,"ação","ações")} · Declaração v${p.declVersion}${p.comment?` · “${escapeHtml(p.comment)}”`:""}</div></div>`).join("")}</div>`:'<span class="micro muted">Nenhuma versão submetida.</span>';
+      renderSelectedActions();
+      renderPlanCoverage();
+    }
+    function renderSelectedActions(){
+      const locked=planLocked();
+      document.getElementById("selectedActionCount").textContent=plural(selectedActions.length,"ação","ações");
+      document.getElementById("selectedActions").innerHTML=selectedActions.length?selectedActions.map((a,i)=>`<div class="axis-row"><span><strong>${i+1}. ${escapeHtml(a.title)}</strong><span class="table-sub">Barreira: ${escapeHtml(a.barrier)} · Obstáculo: ${escapeHtml(a.obstacle)}</span><span class="table-sub">${escapeHtml(a.responsible||"Responsável não definido")} · ${escapeHtml(a.deadline)} · Estimativa: ${a.estimate?escapeHtml(a.estimate):"não informada"}</span>${a.condition?`<span class="table-sub">Condição: ${escapeHtml(a.condition)}</span>`:""}<span class="table-sub">${a.edited?"Sugestão da IA editada pelo diretor":"Sugestão da IA sem edição"}</span>${locked?"":`<button class="button button-quiet button-small" style="padding-left:0" onclick="removeSelectedAction(${i})">Remover</button>`}</span><span class="badge badge-blue">${a.horizon}</span></div>`).join(""):'<div class="plan-empty">Ainda não há ações no plano. Converse com a IA e inclua as propostas que fizerem sentido.</div>';
+    }
+    function renderPlanCoverage(){
+      const d=declByV(planDeclVersion);
+      if(!d){document.getElementById("planCoverage").innerHTML="";return;}
+      const scripted=new Set(Object.values(planActions).map(a=>a.barrierKey));
+      document.getElementById("planCoverage").innerHTML=d.positions.filter(p=>p.status!=="semrelato").map(p=>{
+        let tag;
+        if(p.status==="divergencia")tag='<span class="badge badge-blue">Divergência · sem proposta na demo</span>';
+        else if(selectedActions.some(a=>a.barrierKey===p.key))tag='<span class="badge badge-green">Com ação</span>';
+        else tag=`<span class="badge badge-neutral">${scripted.has(p.key)?"Sem ação":"Sem proposta na demo"}</span>`;
+        return `<div class="axis-row" style="padding:7px 0"><span class="small">${p.title}<span class="table-sub">${positionText(p)}</span></span>${tag}</div>`;
+      }).join("")+`${(n=>n?`<p class="micro muted" style="margin:8px 0 0">${plural(n,"barreira está","barreiras estão")} como “sem relato nesta versão” e não ${n===1?"entra":"entram"} no plano.</p>`:"")(d.positions.filter(p=>p.status==="semrelato").length)}`;
+    }
+    function removeSelectedAction(index){
+      selectedActions.splice(index,1);
+      renderPlanScreen();
+      if(!planCandidate&&planFocus){document.getElementById("planChoices")?.remove();renderAvailablePlanChoices(planFocus);}
+    }
+    function submitSchoolPlan(){
+      if(planLocked())return;
+      if(!selectedActions.length){toast("Selecione ao menos uma ação antes de submeter.");return;}
+      const next=planVersions.length+1;
+      const list=selectedActions.map(a=>`<div class="timeline-item"><div class="timeline-title">${escapeHtml(a.title)}</div><div class="timeline-copy">${a.horizon} · ${escapeHtml(a.responsible||"Responsável não definido")} · ${escapeHtml(a.deadline)} · barreira: ${escapeHtml(a.barrier)}</div></div>`).join("");
+      openModal("Submeter Plano de Ação?",`Versão ${next} · ${CEF} · baseado na Declaração v${planDeclVersion}`,`<div class="callout warning">Após a submissão, a secretaria analisará esta versão junto com a Declaração v${planDeclVersion}. Ela ficará congelada para revisão; alterações futuras criarão uma nova versão.</div><div class="timeline" style="margin-top:14px">${list}</div><p class="small" style="margin-top:12px">Horizonte e estimativas são propostas da escola. Submeter não significa orçamento aprovado ou execução.</p><div class="action-bar"><button class="button button-outline" onclick="closeModal()">Continuar editando</button><button class="button button-coral" onclick="confirmSchoolSubmission()">Confirmar submissão</button></div>`);
+    }
+    function confirmSchoolSubmission(){
+      const l=latestPlan();
+      if(l&&l.status==="ajustes solicitados")l.superseded=true;
+      planVersions.push({v:planVersions.length+1,declVersion:planDeclVersion,actions:selectedActions.map(a=>({...a})),status:"aguardando análise",comment:""});
+      closeModal();showView("director-dashboard");
+      toast(`Plano submetido (v${latestPlan().v}) para análise municipal · aguardando decisão.`);
+    }
+
+    // ---------- Secretário · fila e revisão ----------
+    function getQueue(){
+      const list=[...queueSchools];
+      const l=latestPlan();
+      if(l)list.unshift({isCef:true,name:CEF,when:"Hoje",status:l.status,version:l.v,declVersion:l.declVersion,comment:l.comment,actions:l.actions,
+        history:planVersions.slice(0,-1).map(p=>`v${p.v} · ${statusInfo[p.status][1].toLowerCase()}${p.comment?`: “${p.comment}”`:""}`)});
+      return list;
+    }
+    function queueCounts(){
+      const counts={...hiddenQueue};
+      getQueue().forEach(s=>counts[s.status]++);
+      counts.total=Object.values(counts).reduce((sum,n)=>sum+n,0);
+      return counts;
+    }
+    function renderQueue(){
+      const q=getQueue(), c=queueCounts();
+      document.getElementById("qAwaiting").textContent=c["aguardando análise"];
+      document.getElementById("qAdjust").textContent=c["ajustes solicitados"];
+      document.getElementById("qAccepted").textContent=c["aceito"];
+      document.getElementById("qRejected").textContent=c["reprovado"];
+      document.getElementById("queueBody").innerHTML=q.map((s,i)=>{
+        const [cls,label]=statusInfo[s.status];
+        const action=s.status==="aguardando análise"?`<button class="button button-primary button-small" onclick="openReview(${i})">Analisar</button>`:`<button class="button button-outline button-small" onclick="openReview(${i})">Ver histórico</button>`;
+        return `<tr><td><span class="school-name">${s.name}</span><span class="table-sub">${schoolBy(s.name).sub}</span></td><td>${scoreBadge(s.name)}</td><td>${s.when}</td><td>${s.actions.length}</td><td><span class="badge ${cls}">${label}</span></td><td>v${s.version}</td><td>${action}</td></tr>`;
+      }).join("");
+      document.getElementById("queueShowing").textContent=`Mostrando ${q.length} de ${c.total} escolas com plano submetido.${latestPlan()?"":" Para ver o ciclo completo, emita a Declaração e submeta o Plano de Ação como diretor do CEF 15 do Gama."}`;
+    }
+    function openReview(i){
+      const s=getQueue()[i];
+      const actions=s.actions.map(a=>`<div class="timeline-item"><div class="timeline-title">${escapeHtml(a.title)}</div><div class="timeline-copy">${a.horizon} · ${escapeHtml(a.responsible||"Responsável não definido")} · ${escapeHtml(a.deadline)}${a.estimate?` · estimativa: ${escapeHtml(a.estimate)}`:""}<br>Barreira: ${escapeHtml(a.barrier)} · Obstáculo: ${escapeHtml(a.obstacle)}</div></div>`).join("");
+      let declaration, declNote="";
+      if(s.isCef){
+        const d=declByV(s.declVersion);
+        declaration=d.positions.map(p=>`<li><strong>${p.title}:</strong> ${positionInfo[p.status][1].toLowerCase()}${p.status==="obstaculo"?` · ${escapeHtml(p.obstacle)}`:p.status==="divergencia"?` · ${escapeHtml(p.divergence)}`:""}</li>`).join("");
+        if(latestDecl().v>s.declVersion)declNote=`<div class="callout warning" style="margin-top:8px">A escola emitiu a Declaração v${latestDecl().v} depois desta submissão. O plano em análise usa a v${s.declVersion}.</div>`;
+      }else{
+        declaration=[...new Map(s.actions.map(a=>[a.barrier,a.obstacle])).entries()].map(([barrier,obstacle])=>`<li><strong>${escapeHtml(barrier)}:</strong> ${escapeHtml(obstacle)}</li>`).join("");
+      }
+      const history=s.history.length?`<ul class="plan-source-list" style="margin:0">${s.history.map(h=>`<li>${escapeHtml(h)}</li>`).join("")}</ul>`:'<p class="micro muted" style="margin:0">Primeira versão submetida.</p>';
+      const decisionArea=s.status==="aguardando análise"
+        ?`<label class="field" style="margin-top:15px">Comentário ao diretor<textarea id="reviewComment" placeholder="Obrigatório para solicitar ajustes ou reprovar"></textarea></label><div class="action-group" style="margin-top:14px"><button class="button button-primary" onclick="decidePlan(${i},'aceito')">Aceitar como base</button><button class="button button-outline" onclick="decidePlan(${i},'ajustes solicitados')">Solicitar ajustes</button><button class="button button-coral" onclick="decidePlan(${i},'reprovado')">Reprovar</button></div><p class="micro muted" style="margin:10px 0 0">Aceitar só parte das ações do plano é decisão pendente do PRD (item 7).</p>`
+        :`<div class="callout${s.status==="reprovado"?" danger":s.status==="ajustes solicitados"?" warning":""}" style="margin-top:15px"><strong>Decisão sobre a v${s.version}: ${statusInfo[s.status][1]}.</strong>${s.comment?` “${escapeHtml(s.comment)}”`:""}${s.status==="ajustes solicitados"?" Aguardando nova versão da escola.":""}</div>`;
+      openModal(`Plano de Ação · ${s.name}`,`Versão ${s.version} · submetida ${lowerFirst(s.when)}`,`<div class="callout"><strong>Contexto:</strong> score ${fmt(schoolBy(s.name).score)} · ${faixaOf(schoolBy(s.name).score)[1].toLowerCase()} · Censo 2025 · ${plural(schoolBy(s.name).barriers.length,"barreira identificada","barreiras identificadas")}.</div><div class="section-head" style="margin:16px 0 8px"><div><h3>Plano submetido · v${s.version}</h3><p>${plural(s.actions.length,"ação","ações")}</p></div></div><div class="timeline">${actions}</div><div class="section-head" style="margin:16px 0 6px"><div><h3>Declaração de Obstáculos · v${s.declVersion}</h3><p>Versão em que o plano se baseia</p></div></div><ul class="plan-source-list" style="margin:0">${declaration}</ul>${declNote}<div class="section-head" style="margin:16px 0 6px"><div><h3>Histórico</h3></div></div>${history}${decisionArea}`);
+    }
+    function decidePlan(i,decision){
+      const note=document.getElementById("reviewComment")?.value.trim()||"";
+      if((decision==="ajustes solicitados"||decision==="reprovado")&&!note){toast("Inclua um comentário ou justificativa para esta decisão.");document.getElementById("reviewComment")?.focus();return;}
+      const s=getQueue()[i];
+      if(s.isCef){const l=latestPlan();l.status=decision;l.comment=note;}
+      else{const original=queueSchools.find(item=>item.name===s.name);original.status=decision;original.comment=note;}
+      closeModal();renderAll();
+      toast(`Plano de ${s.name}: ${statusInfo[decision][1].toLowerCase()}. ${decision==="aceito"?"Aceitação não significa financiamento.":"Decisão registrada no histórico e visível à escola."}`);
+    }
+
+    // ---------- Secretário · dashboard e analítico ----------
+    function workflowText(name){
+      const parts=[];
+      if(name===CEF){const d=latestDecl();parts.push(d?`Declaração v${d.v} emitida${d.published?" e publicada":""}`:"Declaração não emitida");}
+      const s=getQueue().find(item=>item.name===name);
+      parts.push(s?`plano v${s.version} · ${statusInfo[s.status][1].toLowerCase()}`:"sem plano submetido");
+      return `Andamento: ${parts.join(" · ")}`;
+    }
+    function renderSecretary(){
+      const c=queueCounts(), declared=hiddenDeclared+(latestDecl()?1:0);
+      document.getElementById("kpiDeclared").textContent=declared;
+      document.getElementById("kpiSubmitted").textContent=c.total;
+      document.getElementById("kpiAwaiting").textContent=c["aguardando análise"];
+      document.getElementById("priorityList").innerHTML=priorityList().map((p,i)=>`<div class="school-priority"><span class="rank-no">${i+1}</span><div><strong class="school-name">${p.name}</strong><span class="table-sub">${p.sub}</span><span class="table-sub">${workflowText(p.name)}</span></div><span class="badge ${p.sev[0]}">${p.sev[1]}</span></div>`).join("");
+      const waiting=getQueue().filter(s=>s.status==="aguardando análise");
+      document.getElementById("dashQueue").innerHTML=(waiting.length?waiting.map(s=>`<p class="small"><strong>${s.name}</strong><span class="table-sub">Versão ${s.version} · ${lowerFirst(s.when)} · ${plural(s.actions.length,"ação proposta","ações propostas")}</span></p>`).join(""):'<p class="small muted">Nenhum plano aguardando análise entre os exibidos.</p>')+`<p class="micro muted" style="margin:0">${plural(c["aguardando análise"],"plano aguarda","planos aguardam")} análise na rede.</p>`;
+      document.getElementById("anSubmitted").textContent=c.total;
+      document.getElementById("anDeclared").textContent=declared;
+      document.getElementById("anCoverage").innerHTML=`<strong>Cobertura desta demonstração:</strong> ${declared} de 1.332 escolas emitiram Declaração e ${c.total} submeteram plano. Rascunhos não entram na análise. A ausência de declaração não significa ausência de dificuldade.`;
+    }
+
+    // ---------- Secretário · Plano Estratégico Municipal ----------
+    function cefPlanAction(keys){
+      const l=latestPlan();
+      if(!l||l.status==="reprovado")return null;
+      return l.actions.find(a=>keys.includes(a.key))||null;
+    }
+    function addMunicipalAction(key){
+      if(municipalActions.some(item=>item.key===key)){toast("Esta ação já está no rascunho municipal.");return;}
+      const base=municipalCatalog[key], entry={...base,key,schools:[...base.schools],estimate:""};
+      const cefAction=cefPlanAction(base.cefKeys);
+      if(cefAction){entry.schools.unshift(CEF);entry.items=`${base.items}; ${CEF}: “${cefAction.title}”`;}
+      municipalActions.push(entry);
+      renderMunicipalActions();
+      toast("Ação adicionada ao rascunho municipal.");
+    }
+    function updateMunicipal(i,field,value){municipalActions[i][field]=value;}
+    function renderMunicipalActions(){
+      const opt=(values,current)=>values.map(v=>`<option${v===current?" selected":""}>${v}</option>`).join("");
+      document.getElementById("municipalActionCount").textContent=plural(municipalActions.length,"ação","ações");
+      document.getElementById("municipalActions").innerHTML=municipalActions.length?municipalActions.map((a,i)=>`<article class="plan-proposal municipal-action"><div class="municipal-action-head"><strong class="school-name">${i+1}. ${escapeHtml(a.name)}</strong><button class="button button-quiet button-small" onclick="removeMunicipalAction(${i})">Remover</button></div>
+        <div class="plan-link"><div><span>Barreira:</span> <strong>${escapeHtml(a.barrier)}</strong></div><div><span>Escolas:</span> <strong>${a.schools.map(escapeHtml).join(", ")}</strong></div><div><span>Itens escolares atendidos:</span> <strong>${escapeHtml(a.items)}</strong></div><div><span>Cobertura:</span> <strong>${escapeHtml(a.coverage)}</strong></div></div>
+        <div class="plan-fields"><label class="field">Responsável<input type="text" value="${escapeHtml(a.responsible)}" onchange="updateMunicipal(${i},'responsible',this.value)"></label><label class="field">Prazo<select onchange="updateMunicipal(${i},'deadline',this.value)">${opt(["Até 3 meses","Até 6 meses","Até 12 meses","Até 24 meses"],a.deadline)}</select></label><label class="field">Horizonte<select onchange="updateMunicipal(${i},'horizon',this.value)">${opt(["LOA","PPA"],a.horizon)}</select></label><label class="field">Estimativa de custo<input type="text" value="${escapeHtml(a.estimate)}" placeholder="Estimativa humana · informe a fonte" onchange="updateMunicipal(${i},'estimate',this.value)"></label></div></article>`).join(""):'<div class="plan-empty">Selecione ações no Analítico de Barreiras ou adicione uma intervenção sistêmica.</div>';
+      document.getElementById("municipalHistory").innerHTML=municipalVersions.length?municipalVersions.map(v=>`<div>Versão ${v.v} · ${plural(v.actions.length,"ação","ações")} · confirmada como proposta</div>`).join(""):"Nenhuma versão confirmada.";
+    }
+    function removeMunicipalAction(index){municipalActions.splice(index,1);renderMunicipalActions();}
+    function confirmMunicipalPlan(){
+      if(!municipalActions.length){toast("Adicione ao menos uma ação ao plano municipal.");return;}
+      const list=municipalActions.map(a=>`<div class="timeline-item"><div class="timeline-title">${escapeHtml(a.name)}</div><div class="timeline-copy">${a.horizon} · ${escapeHtml(a.responsible||"Responsável não definido")} · ${escapeHtml(a.deadline)} · estimativa: ${a.estimate?escapeHtml(a.estimate):"não informada"}<br>${a.schools.map(escapeHtml).join(", ")} · ${escapeHtml(a.coverage.split(":")[0])}</div></div>`).join("");
+      openModal("Revisar Plano Estratégico Municipal",`Versão ${municipalVersions.length+1} · Brasília, DF`,`<div class="callout warning">A confirmação registra uma proposta/meta municipal. Não significa orçamento aprovado, financiamento ou execução. As ações escolares não selecionadas permanecem inalteradas.</div><div class="timeline" style="margin-top:14px">${list}</div><p class="small" style="margin-top:12px">Cada escola verá apenas as ações municipais que a envolvem.</p><div class="action-bar"><button class="button button-outline" onclick="closeModal()">Voltar ao rascunho</button><button class="button button-primary" onclick="confirmMunicipalVersion()">Confirmar versão municipal</button></div>`);
+    }
+    function confirmMunicipalVersion(){
+      municipalVersions.push({v:municipalVersions.length+1,actions:municipalActions.map(a=>({...a,schools:[...a.schools]}))});
+      closeModal();showView("secretary-dashboard");
+      const reachesCef=municipalActions.some(a=>a.schools.includes(CEF));
+      toast(`Plano municipal v${municipalVersions.length} confirmado como proposta.${reachesCef?" O CEF 15 do Gama verá as ações que o envolvem.":""}`);
+    }
+
+    function renderAll(){
+      renderPublic();
+      renderDirectorDashboard();
+      renderPlanScreen();
+      renderSecretary();
+      renderQueue();
+      renderMunicipalActions();
+    }
+    function openModal(title,subtitle,html){
+      document.getElementById("modalTitle").textContent=title;
+      document.getElementById("modalSub").textContent=subtitle||"";
+      document.getElementById("modalContent").innerHTML=html;
+      document.getElementById("modalScrim").classList.add("open");
+      setTimeout(()=>document.querySelector("#modalContent input:not([type=checkbox]), #modalContent textarea, #modalContent button:not([disabled]), .modal-close")?.focus(),30);
+    }
+    function closeModal(event){if(event&&event.target!==document.getElementById("modalScrim"))return;document.getElementById("modalScrim").classList.remove("open");}
+    function escapeHtml(value){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
+
+    renderAll();
+    const initialView=location.hash.slice(1);
+    if(initialView==="obstacles"){accessActive=true;startObstacles("all");}
+    else if(views.includes(initialView)&&initialView!=="public"){accessActive=initialView!=="login";showView(initialView);}
+    document.addEventListener("keydown",event=>{if(event.key==="Escape")closeModal();if(event.key==="Enter"&&event.target.id==="obstacleReply"&&!event.shiftKey){event.preventDefault();sendObstacle();}if(event.key==="Enter"&&event.target.id==="planReply"&&!event.shiftKey){event.preventDefault();sendPlanMessage();}});
+  </script>
+</body>
+</html>

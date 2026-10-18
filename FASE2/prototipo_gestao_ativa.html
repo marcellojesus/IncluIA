@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#12332e">
+  <title>Gestão Ativa | Escola Sem Barreiras</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;600;700;800&family=Nunito+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --teal: #0e7c6b;
+      --teal-dark: #12332e;
+      --teal-mid: #0a5c4f;
+      --teal-pale: #e7f3ef;
+      --coral: #e5533c;
+      --coral-dark: #c23a24;
+      --cream: #f4f1ea;
+      --paper: #fffdf8;
+      --ink: #26313d;
+      --muted: #6d7774;
+      --line: #e4e7e2;
+      --green: #2f9e6b;
+      --green-pale: #e7f3ec;
+      --amber: #e0952b;
+      --amber-pale: #fff4df;
+      --red: #d64545;
+      --red-pale: #fbe9e7;
+      --blue: #426b95;
+      --blue-pale: #eaf0f6;
+      --shadow: 0 2px 12px rgba(31, 54, 47, .07);
+      --radius: 8px;
+      --font-head: "Bricolage Grotesque", sans-serif;
+      --font-body: "Nunito Sans", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--cream); color: var(--ink); font: 15px/1.5 var(--font-body); }
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+    .topline { height: 5px; background: linear-gradient(90deg, #168821 0 33%, #ffcd07 33% 66%, #1351b4 66%); }
+    .app-header { background: var(--paper); border-bottom: 1px solid rgba(18, 51, 46, .09); }
+    .header-main { max-width: 1440px; min-height: 68px; margin: auto; padding: 10px 30px; display: flex; align-items: center; gap: 26px; }
+    .brand { display: flex; align-items: center; gap: 11px; min-width: 220px; color: inherit; text-decoration: none; }
+    .brand-mark { display: block; width: 38px; height: 38px; flex: none; }
+    .brand-title { font: 700 17px/1.1 var(--font-head); color: var(--teal-dark); }
+    .brand-sub { margin-top: 3px; font-size: 10px; color: var(--muted); }
+    .public-nav { display: flex; align-items: center; gap: 4px; }
+    .nav-link { padding: 8px 10px; border-radius: 5px; color: #59645f; font-size: 13px; text-decoration: none; }
+    .nav-link:hover { color: var(--teal-dark); background: var(--teal-pale); }
+    .header-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .user-chip { display: none; color: #53615b; font-size: 12px; }
+    .user-chip strong { color: var(--teal-dark); }
+    .button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; gap: 8px; padding: 9px 15px; border: 1px solid transparent; border-radius: 6px; font-weight: 800; font-size: 13px; text-decoration: none; transition: background .16s ease, transform .16s ease, border-color .16s ease; }
+    .button:hover { transform: translateY(-1px); }
+    .button-primary { background: var(--teal); color: white; }
+    .button-primary:hover { background: var(--teal-mid); }
+    .button-coral { background: var(--coral); color: white; }
+    .button-coral:hover { background: var(--coral-dark); }
+    .button-outline { background: transparent; border-color: #bcc9c3; color: var(--teal-dark); }
+    .button-outline:hover { background: var(--teal-pale); border-color: var(--teal); }
+    .button-quiet { background: transparent; color: var(--teal); padding-inline: 8px; }
+    .button-small { min-height: 32px; padding: 6px 10px; font-size: 12px; }
+    .button:disabled { cursor: not-allowed; opacity: .55; transform: none; }
+    .access-strip { background: #e9ede8; border-bottom: 1px solid var(--line); }
+    .access-inner { max-width: 1440px; margin: auto; padding: 9px 30px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    .access-inner label { display: grid; gap: 2px; color: #707a75; font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .access-inner select { min-width: 150px; padding: 6px 28px 6px 9px; border: 1px solid #c8d0ca; border-radius: 5px; background: white; color: var(--teal-dark); font-weight: 700; font-size: 12px; }
+    .access-note { margin-left: auto; color: #78817d; font-size: 11px; }
+    .page-shell { max-width: 1440px; min-height: calc(100vh - 132px); margin: auto; padding: 29px 30px 52px; }
+    .view { display: none; animation: rise .22s ease both; }
+    .view.active { display: block; }
+    @keyframes rise { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { font-family: var(--font-head); color: var(--teal-dark); line-height: 1.16; }
+    h1 { margin-bottom: 8px; font-size: 31px; }
+    h2 { margin-bottom: 8px; font-size: 22px; }
+    h3 { margin-bottom: 5px; font-size: 16px; }
+    .eyebrow { margin-bottom: 8px; color: var(--teal); font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .lede { max-width: 780px; margin-bottom: 22px; color: #65716c; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+    .micro { font-size: 10px; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 18px; margin: 26px 0 12px; }
+    .section-head p { margin: 0; color: var(--muted); font-size: 12px; }
+    .stack { display: grid; gap: 14px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .grid-5 { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+    .panel { background: var(--paper); border: 1px solid rgba(18, 51, 46, .08); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .panel-head { min-height: 45px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 15px; border-bottom: 1px solid var(--line); }
+    .panel-title { margin: 0; color: var(--teal-dark); font: 700 14px var(--font-head); }
+    .panel-body { padding: 15px; }
+    .panel-body.flush { padding: 0; }
+    .kpi { min-height: 98px; padding: 14px 15px; border-left: 3px solid var(--teal); background: var(--paper); border-radius: 5px; box-shadow: var(--shadow); }
+    .kpi.red { border-left-color: var(--red); }
+    .kpi.amber { border-left-color: var(--amber); }
+    .kpi.green { border-left-color: var(--green); }
+    .kpi-label { margin-bottom: 5px; color: #79827e; font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+    .kpi-value { color: var(--teal-dark); font: 800 27px/.98 var(--font-head); }
+    .kpi-note { margin-top: 6px; color: #77817c; font-size: 11px; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 20px; font-size: 11px; font-weight: 900; white-space: nowrap; }
+    .badge-green { color: #24764f; background: var(--green-pale); }
+    .badge-amber { color: #835718; background: var(--amber-pale); }
+    .badge-red { color: #a83131; background: var(--red-pale); }
+    .badge-blue { color: #3d6287; background: var(--blue-pale); }
+    .badge-neutral { color: #59635f; background: #eef0eb; }
+    .axis-card { position: relative; min-width: 0; min-height: 154px; padding: 15px; background: var(--paper); border: 1px solid var(--line); border-top: 3px solid var(--amber); border-radius: 6px; box-shadow: var(--shadow); }
+    .axis-card.critical { border-top-color: var(--red); }
+    .axis-card.good { border-top-color: var(--green); }
+    .axis-top { display: flex; justify-content: space-between; gap: 8px; align-items: start; }
+    .axis-name { min-width: 0; color: var(--teal-dark); font: 700 14px var(--font-head); overflow-wrap: anywhere; }
+    .axis-score { margin-top: 12px; font: 800 30px/1 var(--font-head); color: var(--teal-dark); }
+    .axis-description { margin: 5px 0 0; color: var(--muted); font-size: 11px; }
+    .progress { height: 6px; margin-top: 12px; overflow: hidden; background: #e8ece7; border-radius: 6px; }
+    .progress span { display: block; height: 100%; background: var(--amber); border-radius: inherit; }
+    .critical .progress span { background: var(--red); }
+    .good .progress span { background: var(--green); }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th { padding: 10px 12px; background: var(--teal-dark); color: white; text-align: left; font-size: 10px; letter-spacing: .035em; text-transform: uppercase; white-space: nowrap; }
+    td { padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: 0; }
+    tbody tr:hover td { background: #f3f8f5; }
+    .school-name { color: var(--teal-dark); font-weight: 900; }
+    .table-sub { display: block; color: var(--muted); font-size: 10px; }
+    .row-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+    .icon-status { display: inline-flex; min-width: 26px; justify-content: center; font-weight: 900; }
+    .callout { padding: 14px 16px; border-left: 3px solid var(--teal); border-radius: 0 6px 6px 0; background: var(--teal-pale); color: #31524a; font-size: 13px; }
+    .callout.warning { border-color: var(--amber); background: var(--amber-pale); color: #684c1e; }
+    .callout.danger { border-color: var(--red); background: var(--red-pale); color: #763636; }
+    .callout strong { color: var(--teal-dark); }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(250px, .7fr); gap: 22px; align-items: stretch; }
+    .hero-copy { padding: 10px 0; }
+    .hero-score { padding: 21px; color: white; background: var(--teal-dark); border-radius: 8px; }
+    .hero-score .score { margin: 10px 0 2px; font: 800 56px/.95 var(--font-head); }
+    .hero-score h3 { color: white; }
+    .hero-score p { color: rgba(255,255,255,.72); font-size: 12px; }
+    .hero-score .badge { margin-top: 8px; }
+    .crumbs { display: flex; align-items: center; gap: 7px; margin-bottom: 17px; color: #78817c; font-size: 11px; }
+    .crumbs button { padding: 0; border: 0; background: none; color: var(--teal); font-weight: 900; }
+    .profile-switch { display: flex; gap: 4px; padding: 4px; border-radius: 7px; background: #e8ece7; }
+    .profile-switch button { flex: 1; min-height: 38px; border: 0; border-radius: 5px; background: transparent; color: #64716b; font-size: 12px; font-weight: 900; }
+    .profile-switch button.active { background: var(--paper); color: var(--teal-dark); box-shadow: 0 1px 4px rgba(18,51,46,.11); }
+    .step-line { display: flex; align-items: center; margin: 16px 0 22px; }
+    .step { display: flex; align-items: center; gap: 8px; color: #8a938e; font-size: 11px; font-weight: 800; }
+    .step b { display: grid; width: 25px; height: 25px; place-items: center; border: 1px solid #c8d1cb; border-radius: 50%; color: #66726c; background: var(--paper); font-size: 11px; }
+    .step.current { color: var(--teal-dark); }
+    .step.current b, .step.done b { color: white; border-color: var(--teal); background: var(--teal); }
+    .step-rule { flex: 1; min-width: 18px; height: 1px; margin: 0 9px; background: #d5dcd6; }
+    .chat { display: grid; gap: 12px; padding: 16px; background: #f6f7f3; border-radius: 7px; }
+    .message { max-width: 86%; padding: 11px 13px; border-radius: 8px; font-size: 13px; }
+    .message.ai { justify-self: start; border: 1px solid #dce7e0; background: white; }
+    .message.user { justify-self: end; color: white; background: var(--teal); }
+    .message-label { display: block; margin-bottom: 4px; color: #738079; font-size: 10px; font-weight: 900; }
+    .message.user .message-label { color: rgba(255,255,255,.72); }
+    textarea, input[type="text"], input[type="email"], input[type="password"], select { width: 100%; min-height: 41px; padding: 9px 11px; border: 1px solid #ccd5cf; border-radius: 5px; outline: 0; background: white; color: var(--ink); }
+    textarea { min-height: 100px; resize: vertical; }
+    textarea:focus, input:focus, select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(14,124,107,.12); }
+    label.field { display: grid; gap: 5px; color: #55615b; font-size: 11px; font-weight: 900; }
+    .form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    .choice { display: flex; gap: 9px; align-items: start; padding: 13px; border: 1px solid var(--line); border-radius: 6px; background: white; }
+    .choice input { margin-top: 3px; accent-color: var(--teal); }
+    .choice strong { display: block; color: var(--teal-dark); font-size: 13px; }
+    .choice small { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .action-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 16px; }
+    .action-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .split { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(265px, .75fr); gap: 15px; }
+    .axis-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+    .axis-row:last-child { border-bottom: 0; }
+    .school-priority { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 9px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+    .school-priority:last-child { border-bottom: 0; }
+    .rank-no { display: grid; width: 26px; height: 26px; place-items: center; border-radius: 50%; background: var(--red-pale); color: var(--red); font-size: 11px; font-weight: 900; }
+    .timeline { display: grid; gap: 0; }
+    .timeline-item { position: relative; padding: 0 0 18px 27px; border-left: 1px solid #cbd7d0; }
+    .timeline-item:last-child { border-color: transparent; padding-bottom: 0; }
+    .timeline-item::before { position: absolute; top: 2px; left: -5px; width: 9px; height: 9px; border: 2px solid white; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 1px var(--teal); content: ""; }
+    .timeline-title { color: var(--teal-dark); font-size: 12px; font-weight: 900; }
+    .timeline-copy { margin-top: 2px; color: var(--muted); font-size: 11px; }
+    .auth-layout { display: grid; min-height: 570px; grid-template-columns: minmax(0,1.1fr) minmax(320px,.9fr); overflow: hidden; background: var(--paper); border: 1px solid var(--line); border-radius: 9px; box-shadow: var(--shadow); }
+    .auth-story { padding: 36px; color: white; background: linear-gradient(145deg, var(--teal-dark), #185a4e 70%, var(--teal)); }
+    .auth-story h1 { margin-top: 26px; color: white; font-size: 35px; }
+    .auth-story p { max-width: 490px; color: rgba(255,255,255,.76); }
+    .auth-list { display: grid; gap: 9px; margin-top: 25px; color: rgba(255,255,255,.92); font-size: 12px; }
+    .auth-list span::before { margin-right: 9px; color: #b7e1cd; content: "✓"; font-weight: 900; }
+    .auth-form { align-self: center; padding: 34px; }
+    .auth-form h2 { margin-top: 19px; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 20; max-width: min(390px, calc(100vw - 32px)); padding: 13px 16px; border-radius: 7px; background: var(--teal-dark); color: white; box-shadow: 0 6px 25px rgba(0,0,0,.2); font-size: 13px; opacity: 0; pointer-events: none; transform: translateY(9px); transition: .2s ease; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .modal-scrim { position: fixed; inset: 0; z-index: 30; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(18,35,31,.55); }
+    .modal-scrim.open { display: flex; }
+    .modal { width: min(580px,100%); overflow: hidden; border-radius: 8px; background: var(--paper); box-shadow: 0 12px 50px rgba(0,0,0,.25); }
+    .modal-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; padding: 15px 18px; background: var(--teal-dark); color: white; }
+    .modal-head h2 { margin: 0; color: white; font-size: 17px; }
+    .modal-close { padding: 0 3px; border: 0; background: transparent; color: white; font-size: 22px; }
+    .modal-content { padding: 18px; }
+    .footer { padding: 19px 30px; border-top: 1px solid rgba(18,51,46,.08); color: #808985; text-align: center; font-size: 11px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); border: 0; }
+    @media (max-width: 1000px) {
+      .header-main { flex-wrap: wrap; gap: 9px 16px; padding-inline: 18px; }
+      .brand { min-width: 0; }
+      .public-nav { order: 3; width: 100%; overflow-x: auto; }
+      .header-actions { margin-left: auto; }
+      .access-inner, .page-shell { padding-inline: 18px; }
+      .grid-5 { grid-template-columns: repeat(3,minmax(0,1fr)); }
+    }
+    @media (max-width: 720px) {
+      .header-main { min-height: 60px; }
+      .brand-title { font-size: 15px; }
+      .brand-sub { display: none; }
+      .public-nav { gap: 0; }
+      .nav-link { padding: 7px 8px; font-size: 12px; white-space: nowrap; }
+      .header-actions .button { min-height: 36px; padding: 7px 10px; font-size: 11px; }
+      .user-chip { display: none !important; }
+      .access-inner { gap: 8px; padding-block: 8px; }
+      .access-inner label { flex: 1; min-width: 125px; }
+      .access-inner select { width: 100%; min-width: 0; }
+      .access-note { width: 100%; margin: 0; }
+      .page-shell { min-height: calc(100vh - 170px); padding: 22px 16px 36px; }
+      h1 { font-size: 26px; }
+      h2 { font-size: 20px; }
+      .hero, .split, .auth-layout { grid-template-columns: 1fr; }
+      .hero-score { order: -1; }
+      .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .grid-5 .kpi:last-child { grid-column: span 2; }
+      .form-grid { grid-template-columns: 1fr; }
+      .section-head { align-items: start; flex-direction: column; }
+      .panel-head { align-items: start; }
+      .action-bar { align-items: stretch; flex-direction: column; }
+      .action-group { width: 100%; }
+      .action-group .button { flex: 1; }
+      .auth-story, .auth-form { padding: 25px 21px; }
+      .auth-story h1 { margin-top: 18px; font-size: 29px; }
+      .step { gap: 5px; font-size: 9px; }
+      .step-rule { margin-inline: 4px; }
+      .message { max-width: 96%; }
+      .footer { padding-inline: 16px; }
+    }
+    @media (max-width: 430px) {
+      .header-actions { gap: 5px; }
+      .header-actions .button { padding-inline: 8px; }
+      .brand-mark { width: 33px; height: 33px; }
+      .brand-title { max-width: 118px; font-size: 13px; }
+      .grid-4 { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .grid-5 { grid-template-columns: 1fr 1fr; }
+      .kpi { min-height: 88px; padding: 11px; }
+      .kpi-value { font-size: 23px; }
+      th, td { padding-inline: 9px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topline"></div>
+  <header class="app-header">
+    <div class="header-main">
+      <a class="brand" href="#inicio" onclick="showView('public')" aria-label="Escola Sem Barreiras, início">
+        <svg class="brand-mark" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Escola Sem Barreiras">
+          <rect width="44" height="44" rx="13" fill="#0e7c6b" />
+          <path d="M11 36 L11 19 A11 11 0 0 1 33 19 L33 36" stroke="#ffffff" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+          <circle cx="22" cy="19.5" r="3.3" fill="#e5533c" />
+          <rect x="18.4" y="23.8" width="7.2" height="12.2" rx="3.6" fill="#e5533c" />
+        </svg>
+        <span><span class="brand-title">Escola Sem Barreiras</span><span class="brand-sub">Controle social da educação inclusiva</span></span>
+      </a>
+      <nav class="public-nav" aria-label="Navegação principal">
+        <a class="nav-link" href="#inicio" onclick="showView('public')">Início</a>
+        <a class="nav-link" href="#escolas" onclick="showView('public')">Escolas</a>
+        <a class="nav-link" href="#comparar" onclick="showView('public')">Comparar</a>
+        <a class="nav-link" href="#dados" onclick="showView('public')">Dados abertos</a>
+        <a class="nav-link" href="#sobre" onclick="showView('public')">Sobre</a>
+      </nav>
+      <div class="header-actions">
+        <span class="user-chip" id="userChip">Prévia como <strong id="userRoleName">Visitante</strong></span>
+        <button class="button button-primary" id="activeButton" onclick="openManagement()">Gestão Ativa</button>
+      </div>
+    </div>
+  </header>
+  <div class="access-strip">
+    <div class="access-inner">
+      <label>Região<select aria-label="Região"><option>Centro-Oeste</option><option>Nordeste</option><option>Norte</option><option>Sudeste</option><option>Sul</option></select></label>
+      <label>Estado<select aria-label="Estado"><option>DF — Distrito Federal</option><option>GO — Goiás</option><option>RJ — Rio de Janeiro</option></select></label>
+      <label>Município<select aria-label="Município"><option>Brasília</option><option>Goiânia</option><option>Niterói</option></select></label>
+      <span class="access-note">Visualização pública · Censo Escolar 2025</span>
+    </div>
+  </div>
+
+  <main class="page-shell">
+    <section class="view active" id="view-public">
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">Início · Brasília, DF</div>
+          <h1>Como está a educação especial inclusiva em Brasília?</h1>
+          <p class="lede">Um retrato baseado no Censo Escolar do INEP e nos quatro eixos da PNEEI, aberto para a sociedade acompanhar e comparar.</p>
+          <div class="action-group">
+            <button class="button button-primary" onclick="toast('Prévia pública: consulta às escolas da rede.')">Ver escolas da rede</button>
+            <button class="button button-outline" onclick="showView('login')">Registrar obstáculos</button>
+          </div>
+        </div>
+        <aside class="hero-score">
+          <div class="micro" style="color:rgba(255,255,255,.66);font-weight:900;letter-spacing:.08em;text-transform:uppercase">Índice de inclusão</div>
+          <div class="score">4,5</div>
+          <span class="badge badge-amber">Insuficiente</span>
+          <p style="margin:14px 0 0">Escala de 0 a 10 · Censo Escolar 2025</p>
+        </aside>
+      </div>
+      <div class="section-head"><div><h2>Os quatro compromissos da política</h2><p>Situação agregada nos eixos da PNEEI.</p></div><span class="badge badge-neutral">Área pública</span></div>
+      <div class="grid-4">
+        <article class="axis-card critical"><div class="axis-top"><span class="axis-name">Eixo I · AEE</span><span class="badge badge-red">Crítico</span></div><div class="axis-score">4,6</div><p class="axis-description">Oferta de atendimento especializado</p><div class="progress"><span style="width:46%"></span></div></article>
+        <article class="axis-card"><div class="axis-top"><span class="axis-name">Eixo II · Acessibilidade</span><span class="badge badge-amber">Atenção</span></div><div class="axis-score">6,1</div><p class="axis-description">Acessibilidade física nas escolas</p><div class="progress"><span style="width:61%"></span></div></article>
+        <article class="axis-card critical"><div class="axis-top"><span class="axis-name">Eixo III · Profissionais</span><span class="badge badge-red">Crítico</span></div><div class="axis-score">0,5</div><p class="axis-description">LIBRAS e Braille</p><div class="progress"><span style="width:5%"></span></div></article>
+        <article class="axis-card good"><div class="axis-top"><span class="axis-name">Eixo IV · Classe comum</span><span class="badge badge-green">Adequado</span></div><div class="axis-score">7,7</div><p class="axis-description">Inclusão em classe comum</p><div class="progress"><span style="width:77%"></span></div></article>
+      </div>
+      <div class="section-head"><div><h2>O que você pode fazer</h2><p>Atalhos da área pública.</p></div></div>
+      <div class="grid-3">
+        <article class="panel panel-body"><div class="eyebrow">Escolas</div><h3>Consultar a rede</h3><p class="muted small">Veja indicadores e situação das escolas do município.</p><button class="button button-outline button-small" onclick="toast('Prévia: lista pública de escolas.')">Abrir escolas</button></article>
+        <article class="panel panel-body"><div class="eyebrow">Comparar</div><h3>Explorar resultados</h3><p class="muted small">Compare municípios e estados usando os indicadores publicados.</p><button class="button button-outline button-small" onclick="toast('Prévia: comparação entre redes.')">Comparar redes</button></article>
+        <article class="panel panel-body"><div class="eyebrow">Gestão escolar</div><h3>Registrar obstáculos</h3><p class="muted small">Diretores autorizados podem contextualizar as barreiras da própria escola.</p><button class="button button-coral button-small" onclick="showView('login')">Entrar na Gestão Ativa</button></article>
+      </div>
+    </section>
+
+    <section class="view" id="view-login">
+      <div class="crumbs"><button onclick="showView('public')">← Voltar à área pública</button><span>/</span><span>Gestão Ativa</span></div>
+      <div class="auth-layout">
+        <div class="auth-story">
+          <span class="badge" style="background:rgba(255,255,255,.13);color:#fff">ÁREA RESTRITA</span>
+          <h1>Gestão Ativa</h1>
+          <p>Espaço de trabalho de diretores e secretários para transformar barreiras registradas em decisões e ações acompanháveis.</p>
+          <div class="auth-list"><span>Acesso vinculado à escola ou à rede municipal</span><span>Planos e decisões com histórico de versões</span><span>Assistência por IA com revisão humana</span></div>
+        </div>
+        <div class="auth-form">
+          <div class="eyebrow">Acesso de demonstração</div>
+          <h2>Entrar na Gestão Ativa</h2>
+          <p class="muted small">Selecione um perfil para explorar as duas jornadas. Este protótipo não autentica nem valida vínculos reais.</p>
+          <div class="profile-switch" role="tablist" aria-label="Perfil de demonstração">
+            <button id="roleDirector" class="active" onclick="setRole('director')">Diretor</button>
+            <button id="roleSecretary" onclick="setRole('secretary')">Secretário municipal</button>
+          </div>
+          <div class="stack" style="margin-top:15px">
+            <label class="field">E-mail institucional<input type="email" id="loginEmail" value="diretora.maria@escola.gov.br"></label>
+            <label class="field">Senha<input type="password" value="demonstracao"></label>
+            <label class="field" id="schoolField">Escola vinculada<select><option>CEF 15 do Gama · INEP 53001080</option><option>Centro Educacional Asa Norte · INEP 53001991</option></select></label>
+            <label class="field" id="municipalityField" style="display:none">Rede municipal<select><option>Brasília · DF</option><option>Goiânia · GO</option></select></label>
+            <button class="button button-primary" onclick="enterWorkspace()">Entrar para demonstração</button>
+            <div class="callout warning"><strong>Sem gov.br no MVP.</strong> Em produção, acesso de diretores e secretários dependerá de validação institucional do vínculo.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-director-dashboard">
+      <div class="crumbs"><span>Gestão Ativa</span><span>/</span><strong>Visão da escola</strong></div>
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow">Painel do diretor · CEF 15 do Gama</div>
+          <h1>Situação atual da escola</h1>
+          <p class="lede">Uma visão de trabalho da sua escola, com os indicadores do Censo separados dos obstáculos que sua gestão registrou.</p>
+          <div class="action-group"><button class="button button-coral" onclick="showView('obstacles')">Registrar obstáculos</button><button class="button button-outline" onclick="showView('school-plan')">Abrir Plano de Ação</button></div>
+        </div>
+        <aside class="hero-score">
+          <div class="micro" style="color:rgba(255,255,255,.66);font-weight:900;letter-spacing:.08em;text-transform:uppercase">Score da escola · Censo 2025</div>
+          <div class="score">2,4</div><span class="badge badge-red">Crítico</span>
+          <p style="margin:14px 0 0">3 eixos com barreiras · 1 obstáculo registrado</p>
+        </aside>
+      </div>
+      <div class="section-head"><div><h2>Leitura dos eixos</h2><p>Indicadores calculados a partir dos dados da escola.</p></div><span class="badge badge-neutral">Dados do Censo Escolar 2025</span></div>
+      <div class="grid-4">
+        <article class="axis-card critical"><div class="axis-top"><span class="axis-name">Eixo I · AEE</span><span class="badge badge-red">Crítico</span></div><div class="axis-score">2,1</div><p class="axis-description">Barreiras identificadas: 2</p><div class="progress"><span style="width:21%"></span></div></article>
+        <article class="axis-card"><div class="axis-top"><span class="axis-name">Eixo II · Acessibilidade</span><span class="badge badge-amber">Atenção</span></div><div class="axis-score">4,8</div><p class="axis-description">Barreiras identificadas: 3</p><div class="progress"><span style="width:48%"></span></div></article>
+        <article class="axis-card critical"><div class="axis-top"><span class="axis-name">Eixo III · Profissionais</span><span class="badge badge-red">Crítico</span></div><div class="axis-score">1,2</div><p class="axis-description">Barreiras identificadas: 2</p><div class="progress"><span style="width:12%"></span></div></article>
+        <article class="axis-card"><div class="axis-top"><span class="axis-name">Eixo IV · Classe comum</span><span class="badge badge-amber">Atenção</span></div><div class="axis-score">5,7</div><p class="axis-description">Barreiras identificadas: 1</p><div class="progress"><span style="width:57%"></span></div></article>
+      </div>
+      <div class="section-head"><div><h2>Barreiras e registros</h2><p>O dado do Censo e a explicação da gestão permanecem distintos.</p></div><button class="button button-coral button-small" onclick="showView('obstacles')">Registrar obstáculos</button></div>
+      <div class="panel table-wrap"><table><thead><tr><th>Barreira identificada</th><th>Eixo</th><th>Dado observado</th><th>Obstáculo da escola</th><th>Estado</th><th></th></tr></thead><tbody>
+        <tr><td><span class="school-name">Oferta de AEE</span><span class="table-sub">Atendimento Educacional Especializado</span></td><td>I · AEE</td><td>Sem oferta registrada</td><td>Não registrado</td><td><span class="badge badge-red">Pendente</span></td><td><button class="button button-outline button-small" onclick="startObstacle(0)">Registrar</button></td></tr>
+        <tr><td><span class="school-name">Sala de atendimento</span><span class="table-sub">Estrutura informada no Censo</span></td><td>I · AEE</td><td>Não declarada</td><td>Espaço compartilhado</td><td><span class="badge badge-green">Registrado</span></td><td><button class="button button-quiet button-small" onclick="toast('Registro demonstrativo já confirmado pelo diretor.')">Ver</button></td></tr>
+        <tr><td><span class="school-name">Intérprete de LIBRAS</span><span class="table-sub">Profissional especializado</span></td><td>III · Profissionais</td><td>Sem profissional registrado</td><td>Não registrado</td><td><span class="badge badge-red">Pendente</span></td><td><button class="button button-outline button-small" onclick="startObstacle(2)">Registrar</button></td></tr>
+        <tr><td><span class="school-name">Rampa de acesso</span><span class="table-sub">Acessibilidade física</span></td><td>II · Acessibilidade</td><td>Adequação parcial</td><td>Não registrado</td><td><span class="badge badge-red">Pendente</span></td><td><button class="button button-outline button-small" onclick="startObstacle(1)">Registrar</button></td></tr>
+      </tbody></table></div>
+      <div class="section-head"><div><h2>Seus planos</h2><p>Acompanhe a versão enviada e a resposta da secretaria.</p></div></div>
+      <div class="grid-3"><article class="panel panel-body"><span class="badge badge-amber">Rascunho</span><h3 style="margin-top:10px">Plano de Ação escolar</h3><p class="muted small">3 ações sugeridas · ainda não submetido</p><button class="button button-primary button-small" onclick="showView('school-plan')">Continuar plano</button></article><article class="panel panel-body"><span class="badge badge-blue">Declaração</span><h3 style="margin-top:10px">Obstáculos confirmados</h3><p class="muted small">1 registro confirmado · 7 barreiras sem contexto</p><button class="button button-outline button-small" onclick="showView('obstacles')">Revisar declaração</button></article><article class="panel panel-body"><span class="badge badge-neutral">Secretaria</span><h3 style="margin-top:10px">Ações municipais</h3><p class="muted small">Nenhuma ação municipal vinculada a esta escola.</p></article></div>
+    </section>
+
+    <section class="view" id="view-obstacles">
+      <div class="crumbs"><button onclick="showView('director-dashboard')">← Dashboard da escola</button><span>/</span><span>Declaração de Obstáculos</span></div>
+      <div class="eyebrow">Diretor · CEF 15 do Gama</div><h1>Registrar obstáculos</h1>
+      <p class="lede">Registre o que está por trás de cada barreira identificada. A IA ajuda a organizar seu relato; você revisa e confirma cada registro.</p>
+      <div class="step-line"><div class="step current" id="obStep1"><b>1</b><span>Relatar</span></div><div class="step-rule"></div><div class="step" id="obStep2"><b>2</b><span>Revisar</span></div><div class="step-rule"></div><div class="step" id="obStep3"><b>3</b><span>Confirmar</span></div></div>
+      <div class="split">
+        <div class="stack">
+          <div class="panel"><div class="panel-head"><h2 class="panel-title">Barreira <span id="barrierCount">1 de 8</span></h2><span class="badge badge-red" id="barrierAxis">Eixo I · AEE</span></div><div class="panel-body"><h3 id="barrierTitle">Oferta de Atendimento Educacional Especializado</h3><p class="muted small" id="barrierFact">Dado do Censo: não há oferta de AEE registrada para esta escola.</p><div class="chat" id="obstacleChat"><div class="message ai"><span class="message-label">ASSISTENTE DE REGISTRO</span>O que tem impedido a escola de oferecer o Atendimento Educacional Especializado?</div></div><label class="field" style="margin-top:12px">Sua resposta<textarea id="obstacleReply" placeholder="Conte a situação com suas palavras. Você pode mencionar pedidos feitos, recursos ausentes e o que já tentou."></textarea></label><div class="action-bar"><span class="muted micro">Não inclua nomes ou dados de estudantes.</span><button class="button button-primary" onclick="sendObstacle()">Adicionar resposta</button></div></div></div>
+          <div class="panel"><div class="panel-head"><h2 class="panel-title">Declaração em construção</h2><span class="badge badge-neutral" id="obstacleSavedCount">0 confirmados</span></div><div class="panel-body"><p class="small muted">A declaração só inclui relatos que você revisar e confirmar. Os dados observados do Censo não são alterados.</p><button class="button button-outline button-small" onclick="reviewObstacle()">Revisar texto formal</button></div></div>
+        </div>
+        <aside class="stack"><div class="panel"><div class="panel-head"><h2 class="panel-title">Progresso por eixo</h2></div><div class="panel-body"><div class="axis-row"><span>Eixo I · AEE</span><span class="badge badge-amber">0/2</span></div><div class="axis-row"><span>Eixo II · Acessibilidade</span><span class="badge badge-amber">0/3</span></div><div class="axis-row"><span>Eixo III · Profissionais</span><span class="badge badge-amber">0/2</span></div><div class="axis-row"><span>Eixo IV · Classe comum</span><span class="badge badge-amber">0/1</span></div></div></div><div class="callout"><strong>Seu relato, sua confirmação.</strong><br>A IA estrutura o texto; o conteúdo só vira registro após sua revisão.</div><button class="button button-quiet" onclick="showView('director-dashboard')">Salvar e voltar ao dashboard</button></aside>
+      </div>
+    </section>
+
+    <section class="view" id="view-school-plan">
+      <div class="crumbs"><button onclick="showView('director-dashboard')">← Dashboard da escola</button><span>/</span><span>Plano de Ação Escolar</span></div>
+      <div class="eyebrow">Diretor · CEF 15 do Gama</div><h1>Plano de Ação Escolar</h1>
+      <p class="lede">A IA cruza cada barreira com o obstáculo registrado e propõe ações. Você decide o que faz sentido para a sua escola.</p>
+      <div class="callout warning" style="margin-bottom:16px"><strong>Contexto usado nesta demonstração:</strong> barreiras do Censo 2025, Declaração de Obstáculos, plano pedagógico da escola e orçamento informado pela gestão. Fontes e disponibilidade precisam ser confirmadas no produto real.</div>
+      <div class="grid-2">
+        <article class="panel"><div class="panel-head"><h2 class="panel-title">Proposta de ação 1</h2><span class="badge badge-blue">IA · Eixo I</span></div><div class="panel-body"><h3>Formalizar pedido de sala e atendimento de AEE</h3><p class="small">Barreira: oferta de AEE não registrada.<br>Obstáculo: espaço compartilhado e solicitação de adequação sem resposta.</p><div class="callout"><strong>Por que esta ação?</strong><br>Relaciona o obstáculo de infraestrutura e a necessidade de atendimento. A proposta é administrativa e não depende de obra imediata.</div><div class="grid-2" style="margin-top:12px"><label class="field">Horizonte<select><option>LOA · exercício corrente</option><option>PPA · médio prazo</option></select></label><label class="field">Prazo sugerido<input type="text" value="60 dias"></label><label class="field">Responsável sugerido<input type="text" value="Direção escolar"></label><label class="field">Custo estimado<input type="text" value="A estimar pela secretaria"></label></div><div class="action-group" style="margin-top:14px"><button class="button button-primary button-small" onclick="selectAction(this)">Incluir no plano</button><button class="button button-outline button-small" onclick="talkPlan()">Conversar com a IA</button><button class="button button-quiet button-small" onclick="discardAction(this)">Não pertinente</button></div></div></article>
+        <article class="panel"><div class="panel-head"><h2 class="panel-title">Proposta de ação 2</h2><span class="badge badge-blue">IA · Eixo III</span></div><div class="panel-body"><h3>Solicitar atendimento compartilhado de intérprete</h3><p class="small">Barreira: ausência de profissional de LIBRAS.<br>Obstáculo: não há profissional designado e a contratação depende da rede.</p><div class="callout"><strong>Possível solução municipal.</strong><br>A ação pode ser tratada no plano da escola e depois considerada para atendimento compartilhado no planejamento municipal.</div><div class="grid-2" style="margin-top:12px"><label class="field">Horizonte<select><option>PPA · médio prazo</option><option>LOA · exercício corrente</option></select></label><label class="field">Prazo sugerido<input type="text" value="A definir com a secretaria"></label></div><div class="action-group" style="margin-top:14px"><button class="button button-primary button-small" onclick="selectAction(this)">Incluir no plano</button><button class="button button-outline button-small" onclick="talkPlan()">Conversar com a IA</button><button class="button button-quiet button-small" onclick="discardAction(this)">Não pertinente</button></div></div></article>
+      </div>
+      <div class="panel" style="margin-top:15px"><div class="panel-head"><h2 class="panel-title">Ações selecionadas</h2><span class="badge badge-neutral" id="selectedActionCount">0 ações</span></div><div class="panel-body"><div id="selectedActions" class="muted small">Nenhuma ação incluída ainda. Selecione as propostas que considera pertinentes.</div><div class="action-bar"><span class="muted micro">Ao submeter, esta versão fica pendente de análise da secretaria.</span><button class="button button-coral" onclick="submitSchoolPlan()">Revisar e submeter Plano de Ação</button></div></div></div>
+    </section>
+
+    <section class="view" id="view-secretary-dashboard">
+      <div class="crumbs"><span>Gestão Ativa</span><span>/</span><strong>Visão do município</strong></div>
+      <div class="hero">
+        <div class="hero-copy"><div class="eyebrow">Painel do secretário · Brasília, DF</div><h1>Situação da rede municipal</h1><p class="lede">Visão de gestão municipal. Os dados públicos continuam na página pública; aqui estão reunidas as prioridades e propostas enviadas pelas escolas.</p><div class="action-group"><button class="button button-primary" onclick="showView('secretary-queue')">Analisar Planos de Ação</button><button class="button button-outline" onclick="showView('analytics')">Ver analítico de barreiras</button></div></div>
+        <aside class="hero-score"><div class="micro" style="color:rgba(255,255,255,.66);font-weight:900;letter-spacing:.08em;text-transform:uppercase">Score municipal · Censo 2025</div><div class="score">3,1</div><span class="badge badge-amber">Insuficiente</span><p style="margin:14px 0 0">1.332 escolas · visão privada de gestão</p></aside>
+      </div>
+      <div class="section-head"><div><h2>Eixos por criticidade</h2><p>Ordenados pelo score determinístico, não por opinião da IA.</p></div><span class="badge badge-neutral">DF · 2025</span></div>
+      <div class="grid-4">
+        <article class="axis-card critical"><div class="axis-top"><span class="axis-name">III · Profissionais</span><span class="badge badge-red">Mais crítico</span></div><div class="axis-score">1,4</div><p class="axis-description">LIBRAS e Braille</p><div class="progress"><span style="width:14%"></span></div></article>
+        <article class="axis-card critical"><div class="axis-top"><span class="axis-name">I · AEE</span><span class="badge badge-red">Crítico</span></div><div class="axis-score">3,2</div><p class="axis-description">Oferta de atendimento especializado</p><div class="progress"><span style="width:32%"></span></div></article>
+        <article class="axis-card"><div class="axis-top"><span class="axis-name">II · Acessibilidade</span><span class="badge badge-amber">Atenção</span></div><div class="axis-score">4,7</div><p class="axis-description">Acessibilidade física</p><div class="progress"><span style="width:47%"></span></div></article>
+        <article class="axis-card good"><div class="axis-top"><span class="axis-name">IV · Classe comum</span><span class="badge badge-green">Melhor resultado</span></div><div class="axis-score">7,0</div><p class="axis-description">Inclusão em classe comum</p><div class="progress"><span style="width:70%"></span></div></article>
+      </div>
+      <div class="section-head"><div><h2>Prioridades da rede</h2><p>Critério demonstrativo: score escolar ponderado e barreiras por eixo.</p></div><button class="button button-outline button-small" onclick="showView('analytics')">Entender critérios</button></div>
+      <div class="split">
+        <div class="panel"><div class="panel-head"><h2 class="panel-title">Escolas prioritárias</h2><span class="badge badge-neutral">Top 4 · exemplo</span></div><div class="panel-body">
+          <div class="school-priority"><span class="rank-no">1</span><div><strong class="school-name">CEF 15 do Gama</strong><span class="table-sub">Score 2,4 · Eixos I e III críticos</span></div><span class="badge badge-red">Plano enviado</span></div>
+          <div class="school-priority"><span class="rank-no">2</span><div><strong class="school-name">Escola Parque 308</strong><span class="table-sub">Score 2,8 · 4 barreiras sem obstáculo</span></div><span class="badge badge-amber">Sem plano</span></div>
+          <div class="school-priority"><span class="rank-no">3</span><div><strong class="school-name">EC Vale Verde</strong><span class="table-sub">Score 3,0 · Eixo III crítico</span></div><span class="badge badge-blue">Rascunho</span></div>
+          <div class="school-priority"><span class="rank-no">4</span><div><strong class="school-name">CEM 02 do Gama</strong><span class="table-sub">Score 3,2 · Acessibilidade pendente</span></div><span class="badge badge-neutral">Sem plano</span></div>
+        </div></div>
+        <div class="stack"><div class="grid-2"><div class="kpi red"><div class="kpi-label">Planos aguardando análise</div><div class="kpi-value">12</div><div class="kpi-note">em 9 escolas</div></div><div class="kpi amber"><div class="kpi-label">Ajustes solicitados</div><div class="kpi-value">4</div><div class="kpi-note">aguardam nova versão</div></div></div><div class="panel"><div class="panel-head"><h2 class="panel-title">Fila de análise</h2><button class="button button-quiet button-small" onclick="showView('secretary-queue')">Abrir fila →</button></div><div class="panel-body"><p class="small"><strong>CEF 15 do Gama</strong><span class="table-sub">Plano submetido · há 2 dias · 2 ações propostas</span></p><p class="small"><strong>EC Vale Verde</strong><span class="table-sub">Plano submetido · ontem · 3 ações propostas</span></p></div></div></div>
+      </div>
+      <div class="section-head"><div><h2>Ações</h2><p>Fluxos municipais separados por finalidade.</p></div></div>
+      <div class="grid-2"><article class="panel panel-body"><div class="eyebrow">Análise</div><h3>Analítico de Barreiras</h3><p class="muted small">Cruze barreiras, obstáculos e propostas para identificar padrões da rede.</p><button class="button button-outline button-small" onclick="showView('analytics')">Abrir analítico</button></article><article class="panel panel-body"><div class="eyebrow">Planejamento</div><h3>Plano Estratégico Municipal</h3><p class="muted small">Selecione oportunidades municipais e ações que atendam total ou parcialmente as escolas.</p><button class="button button-primary button-small" onclick="showView('municipal-plan')">Construir plano municipal</button></article></div>
+    </section>
+
+    <section class="view" id="view-secretary-queue">
+      <div class="crumbs"><button onclick="showView('secretary-dashboard')">← Dashboard municipal</button><span>/</span><span>Fila de análise</span></div><div class="eyebrow">Secretário · Brasília, DF</div><h1>Planos de Ação submetidos</h1><p class="lede">Analise versões enviadas pelas escolas da sua rede. Sua decisão se aplica à versão aberta e não registra execução ou financiamento.</p>
+      <div class="grid-3" style="margin-bottom:16px"><div class="kpi red"><div class="kpi-label">Aguardando análise</div><div class="kpi-value">12</div><div class="kpi-note">9 escolas</div></div><div class="kpi amber"><div class="kpi-label">Ajustes solicitados</div><div class="kpi-value">4</div><div class="kpi-note">3 escolas</div></div><div class="kpi green"><div class="kpi-label">Aceitos como base</div><div class="kpi-value">7</div><div class="kpi-note">não significa execução</div></div></div>
+      <div class="panel table-wrap"><table><thead><tr><th>Escola</th><th>Score</th><th>Submissão</th><th>Ações no plano</th><th>Estado</th><th>Versão</th><th></th></tr></thead><tbody>
+        <tr><td><span class="school-name">CEF 15 do Gama</span><span class="table-sub">Gama · Rede pública</span></td><td><span class="badge badge-red">2,4 · Crítico</span></td><td>Há 2 dias</td><td>2</td><td><span class="badge badge-amber">Aguardando análise</span></td><td>v1</td><td><button class="button button-primary button-small" onclick="openReview('CEF 15 do Gama')">Analisar</button></td></tr>
+        <tr><td><span class="school-name">EC Vale Verde</span><span class="table-sub">Planaltina · Rede pública</span></td><td><span class="badge badge-red">3,0 · Crítico</span></td><td>Ontem</td><td>3</td><td><span class="badge badge-amber">Aguardando análise</span></td><td>v2</td><td><button class="button button-primary button-small" onclick="openReview('EC Vale Verde')">Analisar</button></td></tr>
+        <tr><td><span class="school-name">CEM 01 do Riacho Fundo</span><span class="table-sub">Riacho Fundo · Rede pública</span></td><td><span class="badge badge-amber">4,2 · Insuficiente</span></td><td>Há 5 dias</td><td>4</td><td><span class="badge badge-blue">Ajustes solicitados</span></td><td>v1</td><td><button class="button button-outline button-small" onclick="openReview('CEM 01 do Riacho Fundo')">Ver histórico</button></td></tr>
+      </tbody></table></div>
+      <div class="callout" style="margin-top:14px"><strong>Fila ≠ prioridade.</strong> A fila contém somente planos submetidos. A lista de escolas prioritárias no dashboard usa critérios de situação da rede; escolas sem submissão não são consideradas sem barreiras.</div>
+    </section>
+
+    <section class="view" id="view-analytics">
+      <div class="crumbs"><button onclick="showView('secretary-dashboard')">← Dashboard municipal</button><span>/</span><span>Analítico de Barreiras</span></div><div class="eyebrow">Secretário · análise assistida</div><h1>Analítico de Barreiras</h1><p class="lede">A IA organiza padrões dos planos e obstáculos submetidos. Contagens e indicadores são calculados por regras reproduzíveis; a interpretação é uma hipótese para análise do secretário.</p>
+      <div class="callout warning" style="margin-bottom:15px"><strong>Cobertura desta demonstração:</strong> 9 de 1.332 escolas submeteram obstáculos ou planos. A ausência de submissão não significa ausência de dificuldade.</div>
+      <div class="grid-4"><div class="kpi"><div class="kpi-label">Escolas com submissão</div><div class="kpi-value">9</div><div class="kpi-note">base analisada</div></div><div class="kpi red"><div class="kpi-label">Barreira recorrente</div><div class="kpi-value">LIBRAS</div><div class="kpi-note">6 escolas · 8 obstáculos</div></div><div class="kpi amber"><div class="kpi-label">Padrão potencialmente sistêmico</div><div class="kpi-value">1</div><div class="kpi-note">alocação de profissionais</div></div><div class="kpi green"><div class="kpi-label">Possível alcance</div><div class="kpi-value">6 escolas</div><div class="kpi-note">estimativa de cobertura</div></div></div>
+      <div class="section-head"><div><h2>Padrões observados</h2><p>Inferências assistidas, com evidências rastreáveis.</p></div><button class="button button-outline button-small" onclick="toast('Demonstração: relatório atualizado a partir das submissões visíveis.')">Atualizar análise</button></div>
+      <div class="grid-2"><article class="panel"><div class="panel-head"><h2 class="panel-title">Barreiras mais recorrentes</h2><span class="badge badge-neutral">Métrica calculada</span></div><div class="panel-body"><div class="axis-row"><span>Ausência de intérprete de LIBRAS</span><strong>6 escolas</strong></div><div class="axis-row"><span>Espaço inadequado para AEE</span><strong>5 escolas</strong></div><div class="axis-row"><span>Rampa/acesso físico incompleto</span><strong>4 escolas</strong></div></div></article><article class="panel"><div class="panel-head"><h2 class="panel-title">Síntese assistida por IA</h2><span class="badge badge-blue">Hipótese</span></div><div class="panel-body"><p class="small">Os registros apontam dificuldade recorrente de disponibilizar intérpretes de LIBRAS. Parte dos relatos menciona dependência de contratação centralizada, indicando uma possível resposta municipal compartilhada.</p><p class="muted micro">Base: 8 obstáculos em 6 escolas · 2 relatos mencionam contratação pela rede. A hipótese precisa de análise do secretário.</p><button class="button button-outline button-small" onclick="toast('Evidências demonstrativas: 6 escolas vinculadas a esta hipótese.')">Ver escolas e evidências</button></div></article></div>
+      <div class="section-head"><div><h2>Oportunidades de resposta</h2><p>Selecione ações para avaliar no Plano Estratégico Municipal.</p></div><button class="button button-primary button-small" onclick="showView('municipal-plan')">Ir ao plano municipal</button></div>
+      <div class="panel table-wrap"><table><thead><tr><th>Possível ação</th><th>Escolas</th><th>Origem</th><th>Relação</th><th></th></tr></thead><tbody><tr><td>Organizar atendimento compartilhado de intérpretes</td><td>6</td><td>4 propostas escolares</td><td>Parcial / sistêmica</td><td><button class="button button-outline button-small" onclick="addMunicipalAction('Atendimento compartilhado de intérpretes', '6 escolas')">Selecionar</button></td></tr><tr><td>Levantar adequações de espaços de AEE</td><td>5</td><td>5 planos escolares</td><td>Parcial</td><td><button class="button button-outline button-small" onclick="addMunicipalAction('Adequações de espaços de AEE', '5 escolas')">Selecionar</button></td></tr></tbody></table></div>
+    </section>
+
+    <section class="view" id="view-municipal-plan">
+      <div class="crumbs"><button onclick="showView('secretary-dashboard')">← Dashboard municipal</button><span>/</span><span>Plano Estratégico Municipal</span></div><div class="eyebrow">Secretário · planejamento da rede</div><h1>Plano Estratégico Municipal</h1><p class="lede">Selecione oportunidades municipais e ações escolares que a rede pode atender por inteiro ou parcialmente.</p>
+      <div class="callout warning" style="margin-bottom:15px"><strong>Cobertura parcial:</strong> incluir uma ação neste plano não aceita nem encerra o restante do plano escolar. Financiamento e execução são estados separados.</div>
+      <div class="split"><div class="stack"><div class="panel"><div class="panel-head"><h2 class="panel-title">Ações selecionadas para o plano</h2><span class="badge badge-blue" id="municipalActionCount">0 ações</span></div><div class="panel-body"><div id="municipalActions" class="muted small">Selecione ações no Analítico de Barreiras ou adicione uma intervenção sistêmica.</div><div class="action-bar"><button class="button button-outline button-small" onclick="addMunicipalAction('Formação e suporte pedagógico compartilhado', 'Rede municipal')">+ Nova ação sistêmica</button><button class="button button-primary" onclick="confirmMunicipalPlan()">Revisar plano municipal</button></div></div></div><div class="panel"><div class="panel-head"><h2 class="panel-title">Narrativa executiva · rascunho</h2><span class="badge badge-blue">Assistida por IA</span></div><div class="panel-body"><p class="small">A rede apresenta necessidades recorrentes na oferta de profissionais especializados e na adequação dos espaços de atendimento. As ações selecionadas propõem respostas compartilhadas para parte das escolas que submeteram planos, preservando as demais necessidades para ciclos posteriores.</p><p class="micro muted">A síntese deve ser revisada pelo secretário antes da confirmação.</p><button class="button button-outline button-small" onclick="toast('A IA sugeriria uma narrativa com base nas ações selecionadas.')">Refinar com IA</button></div></div></div><aside class="stack"><div class="panel"><div class="panel-head"><h2 class="panel-title">Premissas do plano</h2></div><div class="panel-body stack"><label class="field">Horizonte<select><option>LOA · exercício corrente</option><option>PPA · médio prazo</option></select></label><label class="field">Responsável municipal<input type="text" value="Secretaria Municipal de Educação"></label><label class="field">Observações<textarea placeholder="Registre premissas ou condicionantes"></textarea></label></div></div><div class="callout"><strong>Rastreabilidade</strong><br>Cada ação deve apontar escolas, barreiras e partes dos planos escolares que pretende atender.</div></aside></div>
+    </section>
+  </main>
+  <footer class="footer">Escola Sem Barreiras · Protótipo navegável da Gestão Ativa · Dados e decisões demonstrativos</footer>
+
+  <div class="modal-scrim" id="modalScrim" role="dialog" aria-modal="true" aria-labelledby="modalTitle" onclick="closeModal(event)"><div class="modal"><div class="modal-head"><div><h2 id="modalTitle">Analisar plano</h2><span class="micro" id="modalSub">Versão submetida · demonstração</span></div><button class="modal-close" aria-label="Fechar" onclick="closeModal()">×</button></div><div class="modal-content" id="modalContent"></div></div></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const views = ["public","login","director-dashboard","obstacles","school-plan","secretary-dashboard","secretary-queue","analytics","municipal-plan"];
+    const barriers = [
+      { title:"Oferta de Atendimento Educacional Especializado", axis:"Eixo I · AEE", fact:"Dado do Censo: não há oferta de AEE registrada para esta escola." },
+      { title:"Rampa de acesso", axis:"Eixo II · Acessibilidade", fact:"Dado do Censo: acessibilidade física indicada como incompleta." },
+      { title:"Intérprete de LIBRAS", axis:"Eixo III · Profissionais", fact:"Dado do Censo: não há profissional registrado para esta escola." },
+      { title:"Matrícula em classe comum", axis:"Eixo IV · Classe comum", fact:"Dado do Censo: indicador abaixo da referência municipal." }
+    ];
+    let role="director", accessActive=false, currentBarrier=0, obstacleTurns=0, savedObstacles=0, selectedActions=[], municipalActions=[];
+    let toastTimer;
+    function showView(name){
+      views.forEach(v=>document.getElementById(`view-${v}`)?.classList.toggle("active",v===name));
+      document.querySelector(".page-shell").scrollTop=0;
+      window.scrollTo({top:0,behavior:"smooth"});
+      document.getElementById("userChip").style.display=(name==="public"||name==="login")?"none":"inline";
+      if(name==="director-dashboard"||name==="obstacles"||name==="school-plan"){role="director";syncHeader();}
+      if(name==="secretary-dashboard"||name==="secretary-queue"||name==="analytics"||name==="municipal-plan"){role="secretary";syncHeader();}
+      if(name==="public") accessActive=false;
+      history.replaceState(null,"",`#${name}`);
+    }
+    function openManagement(){
+      if(!accessActive){showView("login");return;}
+      showView(role==="secretary"?"secretary-dashboard":"director-dashboard");
+    }
+    function setRole(next){
+      role=next;
+      document.getElementById("roleDirector").classList.toggle("active",next==="director");
+      document.getElementById("roleSecretary").classList.toggle("active",next==="secretary");
+      document.getElementById("schoolField").style.display=next==="director"?"grid":"none";
+      document.getElementById("municipalityField").style.display=next==="secretary"?"grid":"none";
+      document.getElementById("loginEmail").value=next==="director"?"diretora.maria@escola.gov.br":"secretaria@educacao.df.gov.br";
+    }
+    function syncHeader(){
+      const chip=document.getElementById("userChip"); chip.style.display="inline";
+      document.getElementById("userRoleName").textContent=role==="director"?"Diretora · CEF 15":"Secretário · Brasília";
+    }
+    function enterWorkspace(){
+      accessActive=true;
+      syncHeader();
+      showView(role==="director"?"director-dashboard":"secretary-dashboard");
+      toast(role==="director"?"Demonstração: dashboard privado do diretor.":"Demonstração: dashboard privado do secretário.");
+    }
+    function toast(message){
+      const el=document.getElementById("toast"); el.textContent=message; el.classList.add("show");
+      clearTimeout(toastTimer); toastTimer=setTimeout(()=>el.classList.remove("show"),3200);
+    }
+    function startObstacle(index){currentBarrier=index%barriers.length; obstacleTurns=0; updateBarrier(); showView("obstacles");}
+    function updateBarrier(){
+      const item=barriers[currentBarrier];
+      document.getElementById("barrierTitle").textContent=item.title;
+      document.getElementById("barrierAxis").textContent=item.axis;
+      document.getElementById("barrierFact").textContent=item.fact;
+      document.getElementById("barrierCount").textContent=`${currentBarrier+1} de 8`;
+      document.getElementById("obstacleChat").innerHTML=`<div class="message ai"><span class="message-label">ASSISTENTE DE REGISTRO</span>O que tem impedido a escola de superar esta barreira: <strong>${item.title}</strong>?</div>`;
+      document.getElementById("obstacleReply").value="";
+      document.getElementById("obstacleReply").focus();
+    }
+    function sendObstacle(){
+      const input=document.getElementById("obstacleReply"); const text=input.value.trim();
+      if(!text){toast("Escreva uma resposta para continuar.");input.focus();return;}
+      const chat=document.getElementById("obstacleChat");
+      chat.insertAdjacentHTML("beforeend",`<div class="message user"><span class="message-label">VOCÊ</span>${escapeHtml(text)}</div>`);
+      input.value=""; obstacleTurns++;
+      const prompt=obstacleTurns===1?"Você formalizou esse pedido ou buscou apoio da secretaria? O que aconteceu depois?":"Obrigado. Você quer revisar o texto formal deste obstáculo agora?";
+      chat.insertAdjacentHTML("beforeend",`<div class="message ai"><span class="message-label">ASSISTENTE DE REGISTRO</span>${prompt}</div>`);
+      if(obstacleTurns>=2){document.getElementById("obstacleSavedCount").textContent=`${savedObstacles} confirmados · 1 em revisão`;document.getElementById("obStep2").classList.add("current");}
+      chat.scrollTop=chat.scrollHeight;
+    }
+    function reviewObstacle(){
+      if(obstacleTurns===0){toast("Conte o obstáculo antes de revisar a declaração.");return;}
+      document.getElementById("obStep1").classList.add("done");document.getElementById("obStep2").classList.add("done");document.getElementById("obStep3").classList.add("current");
+      openModal("Revisar obstáculo formalizado",barriers[currentBarrier].axis,`<div class="callout"><strong>Barreira:</strong> ${escapeHtml(barriers[currentBarrier].title)}<br><strong>Escola:</strong> CEF 15 do Gama</div><label class="field" style="margin-top:13px">Texto do obstáculo<textarea id="formalObstacle">A escola relata dificuldade relacionada a ${escapeHtml(barriers[currentBarrier].title.toLowerCase())}. A gestão informa que já buscou encaminhamento junto à rede e aguarda condições institucionais para superar a barreira. Este texto deve ser revisado e ajustado pelo diretor antes da confirmação.</textarea></label><div class="action-bar"><button class="button button-outline" onclick="closeModal()">Voltar à conversa</button><button class="button button-primary" onclick="confirmObstacle()">Confirmar obstáculo</button></div>`);
+    }
+    function confirmObstacle(){
+      savedObstacles++; document.getElementById("obstacleSavedCount").textContent=`${savedObstacles} confirmado${savedObstacles===1?"":"s"}`;closeModal();toast("Obstáculo confirmado na demonstração. Dado do Censo preservado.");
+      if(currentBarrier<barriers.length-1){currentBarrier++;obstacleTurns=0;updateBarrier();}else{showView("director-dashboard");}
+    }
+    function selectAction(button){
+      const card=button.closest(".panel");const title=card.querySelector("h3").textContent;
+      if(!selectedActions.includes(title)){selectedActions.push(title);button.textContent="Incluída";button.disabled=true;}
+      renderSelectedActions();
+    }
+    function discardAction(button){button.closest(".panel").style.opacity=".48";button.textContent="Descartada";button.disabled=true;toast("Sugestão descartada nesta demonstração; não entrou no plano.");}
+    function renderSelectedActions(){
+      document.getElementById("selectedActionCount").textContent=`${selectedActions.length} ação${selectedActions.length===1?"":"ões"}`;
+      document.getElementById("selectedActions").innerHTML=selectedActions.length?selectedActions.map((name,i)=>`<div class="axis-row"><span><strong>${i+1}. ${escapeHtml(name)}</strong><span class="table-sub">Selecionada pelo diretor · associada à barreira</span></span><span class="badge badge-blue">Rascunho</span></div>`).join(""):"Nenhuma ação incluída ainda. Selecione as propostas que considera pertinentes.";
+    }
+    function talkPlan(){openModal("Conversar sobre a proposta", "Assistente de Plano de Ação", `<div class="chat"><div class="message ai"><span class="message-label">ASSISTENTE DE PLANO</span>Esta proposta relaciona uma barreira e um obstáculo informado pela escola. O que você considera pertinente ou precisa ajustar?</div></div><label class="field" style="margin-top:12px">Sua mensagem<textarea placeholder="Ex.: Esta ação precisa considerar o calendário da rede..."></textarea></label><div class="action-bar"><span class="muted micro">A IA sugere; você decide.</span><button class="button button-primary" onclick="closeModal();toast('Resposta demonstrativa: ação revisada com contexto escolar.')">Enviar mensagem</button></div>`);}
+    function submitSchoolPlan(){
+      if(!selectedActions.length){toast("Selecione ao menos uma ação antes de submeter.");return;}
+      openModal("Submeter Plano de Ação?","Versão 1 · CEF 15 do Gama",`<div class="callout warning">Após a submissão, a secretaria analisará esta versão. Ela ficará congelada para revisão; alterações futuras criarão uma nova versão.</div><p class="small" style="margin-top:12px">${selectedActions.length} ação(ões) selecionada(s). Submeter não significa orçamento aprovado ou execução.</p><div class="action-bar"><button class="button button-outline" onclick="closeModal()">Continuar editando</button><button class="button button-coral" onclick="closeModal();showView('director-dashboard');toast('Plano submetido para análise municipal · aguardando decisão.')">Confirmar submissão</button></div>`);
+    }
+    function openReview(school){
+      const content=`<div class="callout"><strong>Contexto:</strong> score 2,4 · eixo III crítico · versão submetida pela direção. A proposta contém ações associadas a barreiras e obstáculos confirmados.</div><div class="section-head"><div><h3>Plano submetido · v1</h3><p>2 ações · enviado há 2 dias</p></div></div><div class="timeline"><div class="timeline-item"><div class="timeline-title">Formalizar adequação do espaço de AEE</div><div class="timeline-copy">LOA · barreira: oferta de AEE · obstáculo: sala compartilhada</div></div><div class="timeline-item"><div class="timeline-title">Solicitar atendimento compartilhado de intérprete</div><div class="timeline-copy">PPA · barreira: profissional ausente · obstáculo: contratação centralizada</div></div></div><label class="field" style="margin-top:15px">Comentário ao diretor<textarea id="reviewComment" placeholder="Obrigatório para solicitar ajustes ou reprovar"></textarea></label><div class="action-group" style="margin-top:14px"><button class="button button-primary" onclick="decidePlan('aceito', '${escapeJs(school)}')">Aceitar como base</button><button class="button button-outline" onclick="decidePlan('ajustes solicitados', '${escapeJs(school)}')">Solicitar ajustes</button><button class="button button-coral" onclick="decidePlan('reprovado', '${escapeJs(school)}')">Reprovar</button></div>`;
+      openModal(`Plano de Ação · ${school}`,"Decisão sobre a versão submetida",content);
+    }
+    function decidePlan(decision,school){
+      const note=document.getElementById("reviewComment")?.value.trim()||"";
+      if((decision==="ajustes solicitados"||decision==="reprovado")&&!note){toast("Inclua um comentário ou justificativa para esta decisão.");return;}
+      closeModal();toast(`Demonstração: plano de ${school} ${decision}. ${decision==="aceito"?"Aceitação não significa financiamento.":"Decisão registrada com histórico."}`);
+    }
+    function addMunicipalAction(name,schools){
+      if(!municipalActions.some(item=>item.name===name))municipalActions.push({name,schools});
+      renderMunicipalActions();toast("Ação adicionada ao rascunho municipal.");
+    }
+    function renderMunicipalActions(){
+      document.getElementById("municipalActionCount").textContent=`${municipalActions.length} ação${municipalActions.length===1?"":"ões"}`;
+      document.getElementById("municipalActions").innerHTML=municipalActions.length?municipalActions.map((item,i)=>`<div class="axis-row"><span><strong>${i+1}. ${escapeHtml(item.name)}</strong><span class="table-sub">Cobertura proposta: ${escapeHtml(item.schools)} · parcial até validação</span></span><button class="button button-quiet button-small" onclick="removeMunicipalAction(${i})">Remover</button></div>`).join(""):"Selecione ações no Analítico de Barreiras ou adicione uma intervenção sistêmica.";
+    }
+    function removeMunicipalAction(index){municipalActions.splice(index,1);renderMunicipalActions();}
+    function confirmMunicipalPlan(){
+      if(!municipalActions.length){toast("Adicione ao menos uma ação ao plano municipal.");return;}
+      openModal("Revisar Plano Estratégico Municipal","Rascunho · Brasília, DF",`<div class="callout warning">A confirmação registra uma proposta/meta municipal. Não significa orçamento aprovado, financiamento ou execução. As ações escolares não selecionadas permanecem inalteradas.</div><p class="small" style="margin-top:12px">${municipalActions.length} ação(ões) selecionada(s), com cobertura parcial indicada.</p><div class="action-bar"><button class="button button-outline" onclick="closeModal()">Voltar ao rascunho</button><button class="button button-primary" onclick="closeModal();showView('secretary-dashboard');toast('Plano municipal confirmado na demonstração; escolas vinculadas seriam notificadas.')">Confirmar versão municipal</button></div>`);
+    }
+    function openModal(title,subtitle,html){document.getElementById("modalTitle").textContent=title;document.getElementById("modalSub").textContent=subtitle||"";document.getElementById("modalContent").innerHTML=html;document.getElementById("modalScrim").classList.add("open");}
+    function closeModal(event){if(event&&event.target!==document.getElementById("modalScrim"))return;document.getElementById("modalScrim").classList.remove("open");}
+    function escapeHtml(value){return String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
+    function escapeJs(value){return String(value).replace(/\\/g,"\\\\").replace(/'/g,"\\'");}
+    document.addEventListener("keydown",event=>{if(event.key==="Escape")closeModal();if(event.key==="Enter"&&event.target.id==="obstacleReply"&&!event.shiftKey){event.preventDefault();sendObstacle();}});
+  </script>
+</body>
+</html>
