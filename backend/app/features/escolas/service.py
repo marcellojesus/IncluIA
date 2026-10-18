@@ -2,7 +2,8 @@
 
 RN-01: status/score vêm do mesmo cálculo de score-incluia, sem reinterpretação aqui.
 RN-02: faixa/cor de escola usam a mesma régua de 5 faixas do município (já calculada no ETL).
-RN-05: escolas especiais exclusivas recebem status "na" no Eixo IV, não um falso "nok".
+RN-05: escolas com matrícula da educação especial só em classe exclusiva recebem status "na" no
+Eixo IV, não um falso "nok".
 """
 
 from typing import Optional
@@ -15,15 +16,19 @@ from etl.score import classificar_faixa
 _COLUNAS_SELECT = (
     "co_entidade, no_entidade, bairro, rede, qt_mat_esp, "
     "score_eixo_i, score_eixo_ii, score_eixo_iii, score_eixo_iv, "
-    "score, faixa, cor, in_especial_exclusiva, ranking_no_municipio, qtd_escolas_no_municipio"
+    "score, faixa, cor, in_especial_exclusiva, qt_mat_esp_cc, ranking_no_municipio, "
+    "qtd_escolas_no_municipio"
 )
 
 
 def _linha_para_escola(linha) -> Escola:
     especial_exclusiva = bool(linha["in_especial_exclusiva"])
+    # IN_ESPECIAL_EXCLUSIVA=1 significa "ao menos uma classe exclusiva"; o Eixo IV só não se aplica
+    # quando nenhuma matrícula da educação especial está em classe comum.
+    sem_classe_comum = especial_exclusiva and not linha["qt_mat_esp_cc"]
 
     status_iv: str
-    if especial_exclusiva:
+    if sem_classe_comum:
         status_iv = "na"
     else:
         faixa_iv, _ = classificar_faixa(linha["score_eixo_iv"])

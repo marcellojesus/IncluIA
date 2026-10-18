@@ -20,8 +20,8 @@ O botão "Exportar" pode ser entregue como Fase 2 sem bloquear o lançamento do 
 
 **Por quê**: `context.md` §7.2 lista "Exportação de relatórios PDF por município" como Fase 2 explicitamente — por analogia, exportação de lista de escolas em CSV/XLSX é uma funcionalidade menor, mais simples de entregar no MVP, mas se não entrar, o botão deve refletir esse status (desabilitado + rótulo "em breve"), como já é feito com o botão "Entrar com gov.br" na tela de login.
 
-## RN-05 — Escolas exclusivamente especiais (`IN_ESPECIAL_EXCLUSIVA=1`) aparecem na lista, mas com tratamento especial no Eixo IV
+## RN-05 — Escolas com matrícula da educação especial só em classe exclusiva têm tratamento especial no Eixo IV
 
-Uma escola cuja matrícula é 100% em classe especial exclusiva, por definição, não tem alunos em classe comum — isso não deve ser exibido como "❌ Crítico" no Eixo IV da mesma forma que uma escola regular que simplesmente segrega alunos indevidamente. A interface deve diferenciar (ex.: rótulo "Escola especial exclusiva — Eixo IV não aplicável") em vez de aplicar cegamente a fórmula de taxa de inclusão em classe comum.
+Uma escola com `IN_ESPECIAL_EXCLUSIVA = 1` **e nenhuma** matrícula da educação especial em classe comum (`QT_MAT_ESP_CC = 0`) não deve ser exibida como "❌ Crítico" no Eixo IV da mesma forma que uma escola regular que segrega alunos indevidamente. A interface deve diferenciar (ex.: rótulo "Eixo IV não aplicável") em vez de aplicar cegamente a fórmula de taxa de inclusão em classe comum. Escolas com `IN_ESPECIAL_EXCLUSIVA = 1` que também têm matrículas em classe comum seguem a regra normal do Eixo IV.
 
-**Por quê**: `IncluIA_Metodologia_Score_v1` define essa regra explicitamente para o cálculo do score (`V_taxa_CC=0` por definição para essas escolas), mas o cálculo correto no score não implica que a apresentação visual deva parecer uma falha de gestão — é uma característica estrutural da escola, não um gap a ser corrigido.
+**Por quê**: no dicionário do Censo 2025, `IN_ESPECIAL_EXCLUSIVA = 1` significa que a escola **possui ao menos uma classe especial exclusiva**, não que seja exclusivamente especial (correção da `metodologia_score.md` v1.1). O tratamento de "não aplicável" vale só quando de fato não há classe comum para a educação especial.

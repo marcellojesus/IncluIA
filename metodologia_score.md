@@ -1,13 +1,15 @@
 # Score Escola Sem Barreiras — Metodologia de Cálculo
 
 > Índice de Governança da Inclusão Escolar
-> Versão 1.0 · Julho 2026 · Baseado nos Microdados do Censo Escolar 2025 — INEP/MEC
+> Versão 1.1 · Outubro 2026 · Baseado nos Microdados do Censo Escolar 2025 — INEP/MEC
 
 Esta é a **fonte de verdade oficial** para a fórmula, pesos e regras de cálculo do Score Escola Sem Barreiras — prevalece sobre qualquer resumo de pesos citado em `context.md` ou `arquitetura.md`. As regras de negócio derivadas deste documento estão consolidadas em [docs/business-rules/score-incluia.md](docs/business-rules/score-incluia.md).
 
 > **Correções aplicadas após validação com o dicionário oficial de dados do Censo 2025** (`base/microdados_censo_escolar_2025/Anexos/ANEXO I - Dicionário de Dados`), que têm precedência sobre o texto original do `IncluIA_Metodologia_Score_v1.docx`:
 > 1. **Campo de "Piso tátil" corrigido**: o documento original citava `IN_ACESSIBILIDADE_SINAL_TATIL`, mas esse campo é na verdade "Sinalização tátil (piso/paredes)" — um recurso diferente (placas/sinalização, não o piso em si). O campo correto para piso tátil é **`IN_ACESSIBILIDADE_PISOS_TATEIS`** ("Pisos táteis"). Corrigido em todo este documento.
 > 2. **Significado de `TP_AEE` corrigido**: o documento original descrevia os valores como `0=não oferta`, `1=oferta na própria escola`, `2=oferta em outro estabelecimento`. O dicionário oficial do Censo 2025 define: `0 = Não oferece`, `1 = Sim, não exclusivamente`, `2 = Sim, exclusivamente` — não há distinção de local, e sim se a escola oferta AEE junto com ensino regular (1) ou exclusivamente (2). **Decisão adotada**: como ambos os valores 1 e 2 indicam que a escola efetivamente oferta AEE, `V_AEE = 1,0` para `TP_AEE ∈ {1, 2}` e `V_AEE = 0,0` apenas para `TP_AEE = 0` — a pontuação parcial (0,5) do documento original foi descartada por não fazer mais sentido com a definição real do campo.
+> 3. **Versão 1.1 (outubro de 2026) — `IN_ESPECIAL_EXCLUSIVA` corrigido**: a v1.0 descrevia o campo como "escola que oferta apenas modalidade de ensino especial" e atribuía `V_taxa_CC = 0` a essas escolas. O dicionário oficial define o campo como "Escola possui classe especial exclusiva (ao menos uma turma exclusiva de alunos com deficiência, TEA ou altas habilidades/superdotação)". Na base de 2025, 2.080 escolas com esse indicador tinham matrículas da educação especial em classe comum e recebiam 0 no Eixo IV. **Decisão adotada**: essas escolas passam a usar a taxa real de inclusão em classe comum, como as demais (ver §4.2). Divergência identificada na elaboração da [metodologia de barreiras](metodologia_barreiras.md).
+> 4. **Versão 1.1 — nomes de variáveis alinhados ao dicionário**: `QT_PROF_TRAD_LIBRAS` é "Tradutor e Intérprete de Libras" que atua fora da sala de aula (não "professor de LIBRAS"); `IN_ACESSIBILIDADE_SINAL_VISUAL` é "Sinalização visual (piso/paredes)" (o alarme luminoso é outro campo, `IN_ACESSIBILIDADE_SINALIZACAO`, fora do score). Pesos e fórmulas não mudaram.
 
 ---
 
@@ -45,13 +47,13 @@ Prevalência real de cada indicador na base do Censo Escolar 2025, calculada sob
 | AEE ofertado, exclusivamente | `TP_AEE = 2` | 0,5% |
 | Sem nenhum AEE | `TP_AEE = 0` | 63,3% |
 | Sala de atendimento especial | `IN_SALA_ATENDIMENTO_ESPECIAL = 1` | 25,1% |
-| Professor de LIBRAS | `QT_PROF_TRAD_LIBRAS > 0` | 1,7% |
+| Tradutor e intérprete de Libras | `QT_PROF_TRAD_LIBRAS > 0` | 1,7% |
 | Revisor de Braille | `QT_PROF_REVISOR_BRAILLE > 0` | 0,4% |
 | Rampa de acessibilidade | `IN_ACESSIBILIDADE_RAMPAS = 1` | 53,9% |
 | Banheiro adaptado PNE | `IN_BANHEIRO_PNE = 1` | 41,4% |
 | Corrimão | `IN_ACESSIBILIDADE_CORRIMAO = 1` | 19,8% |
 | Piso tátil | `IN_ACESSIBILIDADE_PISOS_TATEIS = 1` | 3,1% |
-| Sinal visual | `IN_ACESSIBILIDADE_SINAL_VISUAL = 1` | 7,2% |
+| Sinalização visual (piso/paredes) | `IN_ACESSIBILIDADE_SINAL_VISUAL = 1` | 7,2% |
 | Sinal sonoro | `IN_ACESSIBILIDADE_SINAL_SONORO = 1` | 2,2% |
 | Elevador | `IN_ACESSIBILIDADE_ELEVADOR = 1` | 1,5% |
 | Taxa de inclusão em classe comum | `QT_MAT_ESP_CC / QT_MAT_ESP` (Tabela Matrícula) | — |
@@ -83,11 +85,11 @@ Onde `QT_MAT_ESP_CC` = matrículas de alunos com deficiência em classe comum, e
 
 ### Dimensão 2 — Recursos Humanos Especializados (25%)
 
-Profissionais especializados são os recursos mais raros e de mais difícil reposição do sistema. Um professor de LIBRAS ou revisor de Braille representa um investimento de anos de formação. A raridade (1,7% e 0,4% das escolas, respectivamente) justifica o peso elevado: quando presente, representa uma entrega concreta de inclusão.
+Profissionais especializados são os recursos mais raros e de mais difícil reposição do sistema. Um tradutor e intérprete de Libras ou revisor de Braille representa um investimento de anos de formação. A raridade (1,7% e 0,4% das escolas, respectivamente) justifica o peso elevado: quando presente, representa uma entrega concreta de inclusão.
 
 | Variável | Campo | Pontuação | Peso |
 |---|---|---|---|
-| Professor de LIBRAS | `QT_PROF_TRAD_LIBRAS > 0` | 1,0 (binário) | 15% |
+| Tradutor e intérprete de Libras | `QT_PROF_TRAD_LIBRAS > 0` | 1,0 (binário) | 15% |
 | Revisor de Braille | `QT_PROF_REVISOR_BRAILLE > 0` | 1,0 (binário) | 10% |
 
 ### Dimensão 3 — Acessibilidade Física (30%)
@@ -100,7 +102,7 @@ A acessibilidade física é condição necessária mas não suficiente para a in
 | Banheiro adaptado PNE | `IN_BANHEIRO_PNE` | 41,4% | 7% | Necessidade fisiológica fundamental |
 | Corrimão | `IN_ACESSIBILIDADE_CORRIMAO` | 19,8% | 6% | Complementar à rampa |
 | Piso tátil | `IN_ACESSIBILIDADE_PISOS_TATEIS` | 3,1% | 4% | Orientação para deficientes visuais |
-| Sinal visual | `IN_ACESSIBILIDADE_SINAL_VISUAL` | 7,2% | 2% | Sinalização para surdos |
+| Sinalização visual (piso/paredes) | `IN_ACESSIBILIDADE_SINAL_VISUAL` | 7,2% | 2% | Orientação visual nas vias de circulação |
 | Sinal sonoro | `IN_ACESSIBILIDADE_SINAL_SONORO` | 2,2% | 2% | Alertas para deficientes visuais |
 | Elevador | `IN_ACESSIBILIDADE_ELEVADOR` | 1,5% | 1% | Acesso em edificações de múltiplos andares |
 
@@ -136,7 +138,7 @@ Score_municipio = Σ (Score_escola_i × QT_MAT_ESP_i) ÷ Σ QT_MAT_ESP_i
 
 Para municípios onde todas as escolas têm `QT_MAT_ESP = 0`, utiliza-se média simples dos scores das escolas (média não ponderada).
 
-> ⚠️ **Tratamento de escolas exclusivamente especiais**: escolas com `IN_ESPECIAL_EXCLUSIVA = 1` ofertam apenas modalidade de ensino especial — não há integração com ensino regular. Essas escolas recebem `V_taxa_CC = 0` por definição (não há classe comum), mas são mantidas no cálculo para não distorcer o score do município. O campo `IN_ESPECIAL_EXCLUSIVA` é registrado como flag na base para análises desagregadas.
+> ⚠️ **Tratamento de escolas com classe especial exclusiva (v1.1)**: `IN_ESPECIAL_EXCLUSIVA = 1` indica que a escola possui ao menos uma classe especial exclusiva — não que ela seja exclusivamente especial. Essas escolas usam a taxa real de inclusão em classe comum (`QT_MAT_ESP_CC ÷ QT_MAT_ESP`), que já reflete as matrículas em classe exclusiva; uma escola sem nenhuma matrícula em classe comum tem taxa 0 pela própria fórmula. Até a v1.0, essas escolas recebiam `V_taxa_CC = 0` por definição. O campo continua registrado como flag na base para análises desagregadas.
 
 ### 4.3 Agregação para o Nível Estadual
 
@@ -162,7 +164,7 @@ Score_UF = Σ (Score_municipio_j × QT_MAT_ESP_total_municipio_j) ÷ Σ QT_MAT_E
 
 ## 6. Decomposição do Score — Diagnóstico por Dimensão
 
-Além do score total, a Escola Sem Barreiras exibe o score por dimensão (D1, D2, D3), permitindo diagnóstico preciso. Um município pode ter score total 6,0 mas score D2 = 0,0 (sem nenhum professor de LIBRAS ou revisor de Braille) — isso é informação acionável que o score total não revelaria.
+Além do score total, a Escola Sem Barreiras exibe o score por dimensão (D1, D2, D3), permitindo diagnóstico preciso. Um município pode ter score total 6,0 mas score D2 = 0,0 (sem nenhum tradutor e intérprete de Libras ou revisor de Braille) — isso é informação acionável que o score total não revelaria.
 
 | Dimensão | Score Parcial | O que revela ao gestor |
 |---|---|---|

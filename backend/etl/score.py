@@ -73,16 +73,17 @@ def calcular_variaveis(df: pd.DataFrame) -> pd.DataFrame:
     df["V_sinal_sonoro"] = _binario(df["IN_ACESSIBILIDADE_SINAL_SONORO"])
     df["V_elevador"] = _binario(df["IN_ACESSIBILIDADE_ELEVADOR"])
 
-    # V_taxa_cc: taxa real quando há aluno ESP matriculado; senão, média do município (2 passadas);
-    # escolas IN_ESPECIAL_EXCLUSIVA=1 recebem 0 por definição, sobrescrevendo qualquer valor acima.
+    # V_taxa_cc: taxa real quando há aluno ESP matriculado; senão, média do município (2 passadas).
+    # IN_ESPECIAL_EXCLUSIVA=1 não zera mais a taxa (metodologia_score.md v1.1): no dicionário do
+    # Censo 2025 o campo significa "possui ao menos uma classe especial exclusiva", e a taxa real
+    # já reflete as matrículas em classe exclusiva.
     tem_matricula_esp = df["QT_MAT_ESP"] > 0
     taxa_bruta = pd.Series(np.nan, index=df.index)
     taxa_bruta[tem_matricula_esp] = (
         df.loc[tem_matricula_esp, "QT_MAT_ESP_CC"] / df.loc[tem_matricula_esp, "QT_MAT_ESP"]
     )
     media_municipio = taxa_bruta.groupby(df["CO_MUNICIPIO"]).transform("mean")
-    v_taxa_cc = taxa_bruta.fillna(media_municipio).fillna(0.0)
-    df["V_taxa_cc"] = np.where(df["IN_ESPECIAL_EXCLUSIVA"].fillna(0) == 1, 0.0, v_taxa_cc)
+    df["V_taxa_cc"] = taxa_bruta.fillna(media_municipio).fillna(0.0)
 
     return df
 
