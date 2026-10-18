@@ -40,5 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# gerado por scripts/sync-metodologia.mjs (predev/prebuild) a partir de ../metodologia_score.md
+# gerados por scripts/sync-metodologia.mjs (predev/prebuild) a partir das metodologias na raiz do monorepo
 /src/content/metodologia_score.md
+/src/content/metodologia_barreiras.md
