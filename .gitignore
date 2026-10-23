@@ -27,5 +27,5 @@ Thumbs.db
 # Pasta de rascunho vazia (arquivo de 0 bytes) — nunca teve segredo real, mas não deve ir ao repo
 /chave api/
 
-# Logs de execução local do dev server
+# Logs de execução local do dev server (podem conter segredos e mensagens de erro de provedores)
 *.log

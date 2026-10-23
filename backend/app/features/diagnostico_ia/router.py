@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.features.diagnostico_ia import chat_service, service
 from app.features.diagnostico_ia.schemas import DiagnosticoEixo, MensagemChat, MensagemEntrada, RespostaChatIA
 from app.shared.auth import exigir_usuario_autenticado
+from app.shared.guardiao_lgpd import TextoBloqueado
 
 router = APIRouter(tags=["diagnostico-ia"], dependencies=[Depends(exigir_usuario_autenticado)])
 
@@ -35,6 +36,9 @@ async def obter_chat(codigo_ibge: int, eixo: _Eixo) -> list[MensagemChat]:
 async def enviar_chat(codigo_ibge: int, eixo: _Eixo, body: MensagemEntrada) -> RespostaChatIA:
     try:
         return await chat_service.enviar_mensagem(codigo_ibge, eixo, body.mensagem)
+    except TextoBloqueado as exc:
+        # AD-05: dado de risco alto; o gestor reescreve. 422 para o frontend mostrar o motivo.
+        raise HTTPException(status_code=422, detail=str(exc))
     except ValueError:
         raise HTTPException(status_code=404, detail=f"Município {codigo_ibge} não encontrado")
     except RuntimeError:
@@ -47,6 +51,8 @@ async def enviar_chat(codigo_ibge: int, eixo: _Eixo, body: MensagemEntrada) -> R
 async def reprocessar_diagnostico(codigo_ibge: int, eixo: _Eixo) -> DiagnosticoEixo:
     try:
         return await chat_service.reprocessar_diagnostico(codigo_ibge, eixo)
+    except TextoBloqueado as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
     except ValueError:
         raise HTTPException(status_code=404, detail=f"Município {codigo_ibge} não encontrado")
     except RuntimeError:

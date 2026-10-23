@@ -28,7 +28,11 @@ _TERMOS_DO_DOMINIO = {
     "educacenso", "inep", "ibge", "identidade", "lbi", "fundeb", "mec", "loa", "ppa", "paee", "pei", "srm",
     "sus", "tea", "tdah", "ubs", "undime", "consed", "seduc", "sme", "sala de recursos", "secretaria",
     "escola sem barreiras", "lgpd", "seedf", "sedf", "seec", "bncc", "pne", "fnde", "pdde", "eja", "cnpj",
-    "sei", "inss",
+    "sei", "inss", "atendimento educacional especializado", "decreto", "lei", "diagnostico", "eixo",
+    "score", "valor", "taxa", "piso", "elevador", "rampa",
+    # Verbos no imperativo que o modelo confunde com nome no início da frase do chat.
+    "recalcule", "considere", "inclua", "reduza", "aumente", "explique", "detalhe", "priorize", "ajuste",
+    "sugira", "refaca", "compare", "resuma", "liste", "mostre", "revise", "simplifique",
 }
 
 # Nomes de pessoas que são nomes de leis, escolas ou autores, não de quem está no relato.

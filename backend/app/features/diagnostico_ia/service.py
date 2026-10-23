@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from app.database import get_connection
-from app.features.diagnostico_ia.ai_client import gerar_narrativa
+from app.features.diagnostico_ia.ai_client import descrever_falha, gerar_narrativa
 from app.features.diagnostico_ia.cache import calcular_chave, obter_do_cache, salvar_no_cache
 from app.features.diagnostico_ia.schemas import DiagnosticoEixo, RecomendacaoIA
 from app.features.indicadores_municipio.schemas import EixoIndicador
@@ -163,7 +163,9 @@ async def _obter_diagnostico_eixo(
             gerado_em=datetime.now(timezone.utc).isoformat(),
         )
     except Exception as exc:  # noqa: BLE001 — qualquer falha aqui vira o fallback de dados brutos
-        logger.warning("IA indisponível para município %s eixo %s: %s", codigo_ibge, eixo_romano, exc)
+        logger.warning(
+            "IA indisponível para município %s eixo %s: %s", codigo_ibge, eixo_romano, descrever_falha(exc)
+        )
         diagnostico = _fallback_dados_brutos(eixo_romano, eixo_indicador)
 
     salvar_no_cache(chave, codigo_ibge, eixo_romano, diagnostico)

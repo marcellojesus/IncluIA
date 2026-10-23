@@ -13,7 +13,7 @@ RAG de verdade se o corpus legal crescer a ponto de um trecho fixo por eixo não
 
 from typing import Literal
 
-from app.features.diagnostico_ia.prompts import montar_prompt_usuario
+from app.shared.guardiao_lgpd import TextoProtegido
 
 EixoRomano = Literal["I", "II", "III", "IV"]
 
@@ -101,28 +101,30 @@ produto, sem substituir validação jurídica formal.
 {_FORMATO_SAIDA_CHAT}"""
 
 
-def montar_mensagens_chat(historico: list[dict], nova_mensagem: str) -> list[dict]:
+def montar_mensagens_chat(historico: list[dict], nova_mensagem: TextoProtegido) -> list[dict]:
     return [*historico, {"role": "user", "content": nova_mensagem}]
 
 
-def montar_mensagens_reprocessamento(contexto_diagnostico: dict, historico: list[dict]) -> list[dict]:
-    """RN-10: reprocessamento explícito (botão) — reconstrói o mesmo prompt inicial do diagnóstico
-    automático (montar_prompt_usuario, de prompts.py) e anexa toda a conversa do chat, pedindo uma
-    versão final que incorpore os ajustes discutidos. Usa o SYSTEM_PROMPT normal do diagnóstico
-    (não o de chat) porque a saída esperada é o RespostaIA completo (situação/análise/alerta/
-    recomendações), não o RespostaChatIA."""
-    mensagens = [{"role": "user", "content": montar_prompt_usuario(contexto_diagnostico)}]
-    mensagens.extend(historico)
-    mensagens.append(
-        {
-            "role": "user",
-            "content": (
-                "Considerando toda a conversa acima com o gestor, gere a versão final e "
-                "atualizada deste diagnóstico, incorporando os ajustes pedidos e os "
-                "esclarecimentos discutidos. Responda no mesmo formato JSON pedido no início "
-                "desta conversa (situacao, analise, alertaLegal, recomendacoes, "
-                "referenciaMunicipio)."
-            ),
-        }
-    )
-    return mensagens
+INSTRUCAO_REPROCESSAMENTO = (
+    "Considerando toda a conversa acima com o gestor, gere a versão final e "
+    "atualizada deste diagnóstico, incorporando os ajustes pedidos e os "
+    "esclarecimentos discutidos. Responda no mesmo formato JSON pedido no início "
+    "desta conversa (situacao, analise, alertaLegal, recomendacoes, "
+    "referenciaMunicipio)."
+)
+
+
+def montar_mensagens_reprocessamento(
+    prompt_inicial: TextoProtegido, historico: list[dict], instrucao: TextoProtegido
+) -> list[dict]:
+    """RN-10: reprocessamento explícito (botão) — o mesmo prompt inicial do diagnóstico automático
+    (montar_prompt_usuario, de prompts.py) seguido de toda a conversa do chat e da instrução
+    INSTRUCAO_REPROCESSAMENTO, pedindo uma versão final que incorpore os ajustes discutidos. Usa o
+    SYSTEM_PROMPT normal do diagnóstico (não o de chat) porque a saída esperada é o RespostaIA
+    completo (situação/análise/alerta/recomendações), não o RespostaChatIA. Todas as partes chegam
+    já protegidas (AD-05)."""
+    return [
+        {"role": "user", "content": prompt_inicial},
+        *historico,
+        {"role": "user", "content": instrucao},
+    ]

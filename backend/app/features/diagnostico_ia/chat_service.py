@@ -12,8 +12,9 @@ from datetime import datetime, timezone
 from app.database import get_connection
 from app.features.diagnostico_ia.ai_client import gerar_resposta
 from app.features.diagnostico_ia.cache import calcular_chave, salvar_no_cache
-from app.features.diagnostico_ia.prompts import SYSTEM_PROMPT
+from app.features.diagnostico_ia.prompts import SYSTEM_PROMPT, montar_prompt_usuario
 from app.features.diagnostico_ia.prompts_chat import (
+    INSTRUCAO_REPROCESSAMENTO,
     montar_mensagens_chat,
     montar_mensagens_reprocessamento,
     montar_system_prompt_chat,
@@ -21,8 +22,34 @@ from app.features.diagnostico_ia.prompts_chat import (
 from app.features.diagnostico_ia.schemas import DiagnosticoEixo, MensagemChat, RecomendacaoIA, RespostaChatIA, RespostaIA
 from app.features.diagnostico_ia.service import EIXOS_ROMANOS, _montar_contexto_diagnostico, _obter_diagnostico_eixo
 from app.features.indicadores_municipio.service import obter_municipio_detalhe
+from app.shared.guardiao_lgpd import liberar_dados_publicos, proteger, proteger_ou_falhar
 
 logger = logging.getLogger("diagnostico_ia")
+
+_MENSAGEM_REMOVIDA = "[mensagem anterior removida pelo Guardião LGPD]"
+_TRECHO_REMOVIDO = "[trecho removido pelo Guardião LGPD]"
+_MENSAGEM_REPROCESSADO = "✅ Diagnóstico reprocessado com base nesta conversa."
+
+
+def _proteger_historico(historico: list[MensagemChat]) -> list[dict]:
+    """AD-05: o histórico também vai à IA, então passa pelo guardião. Mensagens antigas gravadas
+    antes do guardião podem ter dado de risco alto; essas saem do contexto em vez de travar o chat.
+    A mensagem fixa do sistema não passa pelo reconhecimento de nomes (dava falso positivo)."""
+    mensagens = []
+    for m in historico:
+        if m.conteudo == _MENSAGEM_REPROCESSADO:
+            conteudo = liberar_dados_publicos(_MENSAGEM_REPROCESSADO)
+        else:
+            conteudo = proteger(m.conteudo).texto_protegido or liberar_dados_publicos(_MENSAGEM_REMOVIDA)
+        mensagens.append({"role": m.papel, "content": conteudo})
+    return mensagens
+
+
+def _mascarar_texto_derivado(texto: str) -> str:
+    """Análise e recomendações foram geradas pela IA, possivelmente a partir de conversas; podem
+    ecoar algo que o guardião deixou passar. Vão mascaradas ao system prompt; bloqueadas, saem."""
+    resultado = proteger(texto)
+    return resultado.texto_mascarado if not resultado.bloqueado else _TRECHO_REMOVIDO
 
 
 def obter_historico(codigo_ibge: int, eixo: str) -> list[MensagemChat]:
@@ -85,11 +112,15 @@ def _salvar_ajuste(codigo_ibge: int, eixo: str, recomendacoes: list[Recomendacao
 
 
 async def enviar_mensagem(codigo_ibge: int, eixo: str, mensagem_usuario: str) -> RespostaChatIA:
-    """Levanta ValueError se o município não existir, RuntimeError se todos os provedores de IA
-    falharem (o router converte ambos em respostas HTTP apropriadas)."""
+    """Levanta ValueError se o município não existir, TextoBloqueado se a mensagem tiver dado de
+    risco alto (AD-05) e RuntimeError se o guardião ou todos os provedores de IA falharem (o router
+    converte cada caso na resposta HTTP apropriada)."""
     municipio = obter_municipio_detalhe(codigo_ibge)
     if municipio is None:
         raise ValueError(f"Município {codigo_ibge} não encontrado")
+
+    # Antes de qualquer outra coisa: mensagem bloqueada não é gravada nem enviada.
+    mensagem_protegida = proteger_ou_falhar(mensagem_usuario)
 
     indice = EIXOS_ROMANOS.index(eixo)
     diagnostico_atual = await _obter_diagnostico_eixo(codigo_ibge, indice, eixo, municipio, forcar=False)
@@ -101,18 +132,21 @@ async def enviar_mensagem(codigo_ibge: int, eixo: str, mensagem_usuario: str) ->
         "status": municipio.eixos[indice].status,
         "valor": municipio.eixos[indice].valor,
         "subtexto": municipio.eixos[indice].subtexto,
-        "analise": diagnostico_atual.analise,
-        "recomendacoes": [r.model_dump(mode="json") for r in diagnostico_atual.recomendacoes],
+        "analise": _mascarar_texto_derivado(diagnostico_atual.analise),
+        "recomendacoes": _mascarar_texto_derivado(
+            json.dumps([r.model_dump(mode="json") for r in diagnostico_atual.recomendacoes], ensure_ascii=False)
+        ),
     }
 
-    historico = obter_historico(codigo_ibge, eixo)
-    historico_mensagens = [{"role": m.papel, "content": m.conteudo} for m in historico]
+    historico_mensagens = _proteger_historico(obter_historico(codigo_ibge, eixo))
 
     # Persistida antes da chamada à IA: a mensagem do gestor fica registrada mesmo se a IA falhar.
-    _persistir_mensagem(codigo_ibge, eixo, "user", mensagem_usuario)
+    # Grava a versão mascarada, não o texto original (minimização, AD-03).
+    _persistir_mensagem(codigo_ibge, eixo, "user", str(mensagem_protegida))
 
-    system_prompt = montar_system_prompt_chat(eixo, contexto_diagnostico)
-    mensagens = montar_mensagens_chat(historico_mensagens, mensagem_usuario)
+    # Modelo fixo + dados públicos do município + análise e recomendações já mascaradas acima.
+    system_prompt = liberar_dados_publicos(montar_system_prompt_chat(eixo, contexto_diagnostico))
+    mensagens = montar_mensagens_chat(historico_mensagens, mensagem_protegida)
     resposta, _modelo = await gerar_resposta(system_prompt, mensagens, RespostaChatIA)
 
     _persistir_mensagem(codigo_ibge, eixo, "assistant", resposta.resposta)
@@ -134,11 +168,14 @@ async def reprocessar_diagnostico(codigo_ibge: int, eixo: str) -> DiagnosticoEix
 
     indice = EIXOS_ROMANOS.index(eixo)
     contexto = _montar_contexto_diagnostico(codigo_ibge, indice, eixo, municipio)
-    historico = obter_historico(codigo_ibge, eixo)
-    historico_mensagens = [{"role": m.papel, "content": m.conteudo} for m in historico]
+    historico_mensagens = _proteger_historico(obter_historico(codigo_ibge, eixo))
 
-    mensagens = montar_mensagens_reprocessamento(contexto, historico_mensagens)
-    resposta_ia, modelo = await gerar_resposta(SYSTEM_PROMPT, mensagens, RespostaIA)
+    mensagens = montar_mensagens_reprocessamento(
+        liberar_dados_publicos(montar_prompt_usuario(contexto)),
+        historico_mensagens,
+        liberar_dados_publicos(INSTRUCAO_REPROCESSAMENTO),
+    )
+    resposta_ia, modelo = await gerar_resposta(liberar_dados_publicos(SYSTEM_PROMPT), mensagens, RespostaIA)
 
     agora = datetime.now(timezone.utc).isoformat()
     diagnostico = DiagnosticoEixo(
@@ -158,6 +195,6 @@ async def reprocessar_diagnostico(codigo_ibge: int, eixo: str) -> DiagnosticoEix
     # antigo (RN-09) sobreponha por engano o resultado fresco do reprocessamento.
     _remover_ajuste(codigo_ibge, eixo)
 
-    _persistir_mensagem(codigo_ibge, eixo, "assistant", "✅ Diagnóstico reprocessado com base nesta conversa.")
+    _persistir_mensagem(codigo_ibge, eixo, "assistant", _MENSAGEM_REPROCESSADO)
 
     return diagnostico

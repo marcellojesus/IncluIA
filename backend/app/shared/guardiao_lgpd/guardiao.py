@@ -58,6 +58,29 @@ class ResultadoGuardiao:
         return dict(Counter(t.tipo for t in self.trechos))
 
 
+_ROTULOS_BLOQUEIO = {
+    "CPF": "CPF",
+    "RG": "RG",
+    "NIS": "NIS",
+    "CARTAO_SUS": "cartão do SUS",
+    "DOCUMENTO": "documento de identificação",
+    "SAUDE": "dado de saúde de um estudante",
+    "SENSIVEL": "situação sensível de um estudante",
+}
+
+
+class TextoBloqueado(Exception):
+    """O texto tem dado de risco alto e não pode ir à IA; o usuário precisa reescrevê-lo."""
+
+    def __init__(self, motivos: list[str]):
+        self.motivos = motivos
+        rotulos = ", ".join(_ROTULOS_BLOQUEIO.get(m, m) for m in motivos)
+        super().__init__(
+            f"A mensagem não foi enviada à IA porque contém {rotulos}. "
+            "Reescreva sem esse dado: descreva a necessidade da escola, sem identificar o estudante."
+        )
+
+
 def _selecionar(trechos: list[Trecho]) -> list[Trecho]:
     """Resolve sobreposições: bloqueio vence máscara; entre iguais, o trecho mais longo."""
     escolhidos: list[Trecho] = []
@@ -71,6 +94,10 @@ def proteger(texto: str) -> ResultadoGuardiao:
     """Levanta `GuardiaoIndisponivel` se o modelo local de nomes não carregar."""
     encontrados_nomes = nomes.encontrar(texto)
     candidatos = documentos.encontrar(texto) + encontrados_nomes + contexto_escolar.encontrar(texto, encontrados_nomes)
+    return _aplicar(texto, candidatos)
+
+
+def _aplicar(texto: str, candidatos: list[Trecho]) -> ResultadoGuardiao:
     trechos = _selecionar(candidatos)
 
     partes = []
@@ -91,3 +118,27 @@ def proteger(texto: str) -> ResultadoGuardiao:
     if trechos:
         logger.info("Guardião LGPD: %s%s", resultado.resumo(), " (bloqueado)" if bloqueado else "")
     return resultado
+
+
+def liberar_dados_publicos(texto: str) -> TextoProtegido:
+    """Libera texto montado pelo CÓDIGO a partir de modelos fixos e dados agregados públicos
+    (Censo, score, metodologia, base legal) — nunca texto digitado por usuário nem conteúdo de
+    declarações e planos, que passam por `proteger`.
+
+    Dispensa só a camada de nomes, que degrada prompts estruturados ("Score", "Valor" e nomes de
+    campos viram [NOME]). Documentos, saúde e situações sensíveis continuam verificados: se algum
+    aparecer, é sinal de que texto de usuário entrou por engano, e levanta `TextoBloqueado`.
+    O uso é restrito por chamada: `tests/test_arquitetura_ia.py` só aceita os argumentos listados
+    lá; acrescentar um exige revisão do AgLGPD."""
+    resultado = _aplicar(texto, documentos.encontrar(texto) + contexto_escolar.encontrar(texto, []))
+    if resultado.texto_protegido is None:
+        raise TextoBloqueado(resultado.motivos_bloqueio)
+    return resultado.texto_protegido
+
+
+def proteger_ou_falhar(texto: str) -> TextoProtegido:
+    """Atalho para quem só precisa do texto protegido: levanta `TextoBloqueado` em risco alto."""
+    resultado = proteger(texto)
+    if resultado.texto_protegido is None:
+        raise TextoBloqueado(resultado.motivos_bloqueio)
+    return resultado.texto_protegido

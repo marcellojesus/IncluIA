@@ -45,7 +45,7 @@ _MEDICAMENTOS = (
 )
 _SAUDE = re.compile(
     r"\b(?:laudo|laudad[oa]|"
-    r"diagnostic[a-z]*(?![a-z])(?!\s+(?:pedagogic|de acessibilidade|da escola|escolar|de barreiras|do municipio|da rede|ia\b))|"
+    r"diagnostic(?:o|os|ad[oa]s?|ou)(?![a-z])(?!\s+(?:pedagogic|de acessibilidade|da escola|escolar|de barreiras|do municipio|da rede|ia\b))|"
     r"relatorio medico|atestado|medicac\w*|medicament\w*|remedio\w*|" + _MEDICAMENTOS + r"|\d+\s?mg\b|"
     r"em tratamento|faz tratamento|tratamento (?:medico|psicologic|psiquiatric|com)\w*|"
     r"internad[oa]|internacao|hospital\w*|"

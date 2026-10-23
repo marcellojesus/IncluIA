@@ -1,5 +1,6 @@
 """Ponto de entrada da API do IncluIA — registra os routers de cada feature (ver estrutura em docs/)."""
 
+import logging
 import os
 from contextlib import asynccontextmanager
 
@@ -19,12 +20,20 @@ from app.features.indicadores_municipio.router import router as indicadores_muni
 from app.features.login.db import ensure_schema_and_seed  # noqa: E402
 from app.features.login.router import router as login_router  # noqa: E402
 from app.features.mapa.router import router as mapa_router  # noqa: E402
+from app.shared.guardiao_lgpd import GuardiaoIndisponivel  # noqa: E402
+from app.shared.guardiao_lgpd import carregar as carregar_guardiao_lgpd  # noqa: E402
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     ensure_schema_and_seed()
     ensure_schema_diagnostico_ia()
+    # Carrega o modelo de nomes do Guardião LGPD na subida, para a primeira conversa não esperar.
+    # Se falhar, o servidor sobe mesmo assim e as chamadas à IA falham fechadas (AD-05).
+    try:
+        carregar_guardiao_lgpd()
+    except GuardiaoIndisponivel:
+        logging.getLogger("guardiao_lgpd").error("Guardião LGPD indisponível: chamadas à IA serão recusadas")
     yield
 
 

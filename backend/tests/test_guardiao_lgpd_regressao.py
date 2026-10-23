@@ -108,6 +108,7 @@ PASSA = [
     "Faltam psicólogos e fonoaudiólogos para atender os alunos.",
     "O aluno cadeirante ficou preso no banheiro sem barra de apoio.",
     "A escola tem casos de bullying e precisa de formação.",
+    "Eixo a diagnosticar: o aluno cadeirante precisa de rampa.",
 ]
 
 # Nomes públicos (municípios, escolas, leis, autores) e palavras comuns não viram [NOME].
@@ -126,6 +127,10 @@ INTACTO = [
     "A ferida sara em dois dias.",
     "O tratamento de dados segue a LGPD.",
     "Segundo a LGPD, a SEEDF deve responder.",
+    # falsos positivos da terceira revisão
+    "As escolas não oferecem Atendimento Educacional Especializado.",
+    "O Decreto destaca a sala de recursos.",
+    "Recalcule o custo, pois não temos verba.",
 ]
 
 

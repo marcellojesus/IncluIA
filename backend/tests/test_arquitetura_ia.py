@@ -1,0 +1,201 @@
+"""Spec: docs/sdd/fase-2/arquitetura.md AD-05 — "obrigatório por construção".
+
+Garante que não existe caminho de texto até um provedor de IA sem passar pelo Guardião LGPD:
+só `ai_client.py` acessa a rede, nenhum SDK de provedor é usado, só o guardião cria
+`TextoProtegido`, `liberar_dados_publicos` só recebe argumentos conhecidos, e `gerar_resposta`
+recusa qualquer outra coisa — no system prompt e nas mensagens.
+"""
+
+import ast
+import asyncio
+from pathlib import Path
+
+import pytest
+
+from app.features.diagnostico_ia import ai_client, chat_service
+from app.features.diagnostico_ia.schemas import RespostaChatIA
+from app.shared.guardiao_lgpd import GuardiaoIndisponivel, TextoBloqueado, liberar_dados_publicos, proteger
+
+APP = Path(__file__).resolve().parents[1] / "app"
+AI_CLIENT = APP / "features" / "diagnostico_ia" / "ai_client.py"
+GUARDIAO = APP / "shared" / "guardiao_lgpd"
+
+# Bibliotecas de rede: só o ai_client.py pode importar. Um módulo novo que precise de rede (por
+# exemplo, envio de e-mail, AD-02) entra aqui depois de revisão do AgLGPD.
+_REDE = {"httpx", "requests", "aiohttp", "urllib", "urllib3", "http", "socket"}
+_PODEM_USAR_REDE = {AI_CLIENT}
+
+# SDKs de provedores de IA: proibidos em todo o app (contornariam o ai_client.py).
+_SDKS_DE_IA = {
+    "google.generativeai", "google.genai", "vertexai", "groq", "mistralai", "openai", "anthropic",
+    "cohere", "huggingface_hub", "together", "litellm", "langchain",
+}
+
+# Únicos argumentos aceitos por liberar_dados_publicos fora do guardião: modelos fixos e prompts
+# montados só com dados agregados públicos. Acrescentar um exige revisão do AgLGPD.
+_ARGUMENTOS_LIBERADOS = {
+    "montar_prompt_usuario(contexto)",
+    "SYSTEM_PROMPT",
+    "montar_system_prompt_chat(eixo, contexto_diagnostico)",
+    "INSTRUCAO_REPROCESSAMENTO",
+    "_MENSAGEM_REPROCESSADO",
+    "_MENSAGEM_REMOVIDA",
+}
+
+
+def _arquivos_do_app():
+    return [p for p in APP.rglob("*.py") if "__pycache__" not in p.parts]
+
+
+def _modulos_importados(arvore: ast.AST) -> set[str]:
+    modulos = set()
+    for no in ast.walk(arvore):
+        if isinstance(no, ast.Import):
+            modulos |= {a.name for a in no.names}
+        elif isinstance(no, ast.ImportFrom) and no.module:
+            modulos.add(no.module)
+    return modulos
+
+
+def _comeca_com(modulo: str, raizes: set[str]) -> bool:
+    return any(modulo == r or modulo.startswith(r + ".") for r in raizes)
+
+
+def test_so_ai_client_acessa_a_rede_e_nenhum_sdk_de_ia_e_usado():
+    for arquivo in _arquivos_do_app():
+        modulos = _modulos_importados(ast.parse(arquivo.read_text(encoding="utf-8")))
+        for modulo in modulos:
+            assert not _comeca_com(modulo, _SDKS_DE_IA), f"{arquivo} importa o SDK {modulo}"
+            if arquivo not in _PODEM_USAR_REDE:
+                assert not _comeca_com(modulo, _REDE), f"{arquivo} importa {modulo} fora do ai_client.py"
+
+
+def test_chamadas_de_rede_do_ai_client_sao_privadas():
+    """Toda função que faz requisição é privada e só é alcançada por `gerar_resposta`."""
+    arvore = ast.parse(AI_CLIENT.read_text(encoding="utf-8"))
+    for funcao in ast.walk(arvore):
+        if not isinstance(funcao, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        faz_requisicao = any(
+            isinstance(no, ast.Call) and isinstance(no.func, ast.Attribute) and no.func.attr in {"post", "get", "send", "request", "stream"}
+            for no in ast.walk(funcao)
+        )
+        if faz_requisicao:
+            assert funcao.name.startswith("_"), f"ai_client.{funcao.name} faz requisição e é pública"
+    for arquivo in _arquivos_do_app():
+        if arquivo != AI_CLIENT:
+            assert "ai_client._" not in arquivo.read_text(encoding="utf-8"), f"{arquivo} usa função privada do ai_client"
+
+
+def test_so_o_guardiao_cria_texto_protegido():
+    for arquivo in _arquivos_do_app():
+        if GUARDIAO in arquivo.parents:
+            continue
+        conteudo = arquivo.read_text(encoding="utf-8")
+        assert "_CHAVE" not in conteudo, f"{arquivo} usa a chave interna do guardião"
+        assert "TextoProtegido(" not in conteudo, f"{arquivo} cria TextoProtegido diretamente"
+
+
+def test_liberar_dados_publicos_so_com_argumentos_conhecidos():
+    for arquivo in _arquivos_do_app():
+        if GUARDIAO in arquivo.parents:
+            continue
+        for no in ast.walk(ast.parse(arquivo.read_text(encoding="utf-8"))):
+            if isinstance(no, ast.Call) and getattr(no.func, "id", getattr(no.func, "attr", None)) == "liberar_dados_publicos":
+                argumento = ast.unparse(no.args[0]) if no.args else ""
+                assert argumento in _ARGUMENTOS_LIBERADOS, (
+                    f"{arquivo}:{no.lineno} libera '{argumento}' sem o reconhecimento de nomes; "
+                    "use proteger() ou revise com o AgLGPD"
+                )
+
+
+def test_liberar_dados_publicos_ainda_bloqueia_documento_e_saude():
+    with pytest.raises(TextoBloqueado):
+        liberar_dados_publicos("CPF 529.982.247-25")
+    with pytest.raises(TextoBloqueado):
+        liberar_dados_publicos("O aluno toma Ritalina.")
+
+
+def _provedor_que_nao_pode_ser_chamado(*_args, **_kwargs):
+    raise AssertionError("provedor chamado com texto não protegido")
+
+
+def _sistema():
+    return proteger("Você é um assistente.").texto_protegido
+
+
+def test_gerar_resposta_recusa_texto_cru_nas_mensagens(monkeypatch):
+    monkeypatch.setattr(ai_client, "_PROVEDORES", [("teste", _provedor_que_nao_pode_ser_chamado)])
+    with pytest.raises(TypeError):
+        asyncio.run(
+            ai_client.gerar_resposta(_sistema(), [{"role": "user", "content": "O Pedro é cego"}], RespostaChatIA)
+        )
+
+
+def test_gerar_resposta_recusa_system_prompt_cru(monkeypatch):
+    monkeypatch.setattr(ai_client, "_PROVEDORES", [("teste", _provedor_que_nao_pode_ser_chamado)])
+    mensagem = proteger("Pergunta").texto_protegido
+    with pytest.raises(TypeError):
+        asyncio.run(
+            ai_client.gerar_resposta("O Pedro é cego", [{"role": "user", "content": mensagem}], RespostaChatIA)
+        )
+
+
+def test_gerar_resposta_envia_so_o_texto_mascarado(monkeypatch):
+    recebido = {}
+
+    async def provedor(system_prompt, mensagens):
+        recebido["mensagens"] = mensagens
+        return {"resposta": "ok", "recomendacoesAtualizadas": None}
+
+    monkeypatch.setattr(ai_client, "_PROVEDORES", [("teste", provedor)])
+    protegido = proteger("O Pedro, do 3º ano, é cego.").texto_protegido
+    asyncio.run(ai_client.gerar_resposta(_sistema(), [{"role": "user", "content": protegido}], RespostaChatIA))
+
+    enviado = recebido["mensagens"][0]["content"]
+    assert isinstance(enviado, str)
+    assert "Pedro" not in enviado and "3º ano" not in enviado
+
+
+def _chat_isolado(monkeypatch):
+    gravadas = []
+    monkeypatch.setattr(chat_service, "obter_municipio_detalhe", lambda _codigo: object())
+    monkeypatch.setattr(chat_service, "_persistir_mensagem", lambda *args: gravadas.append(args))
+    monkeypatch.setattr(ai_client, "_PROVEDORES", [("teste", _provedor_que_nao_pode_ser_chamado)])
+    return gravadas
+
+
+def test_chat_bloqueado_nao_grava_nem_chama_a_ia(monkeypatch):
+    gravadas = _chat_isolado(monkeypatch)
+    with pytest.raises(TextoBloqueado):
+        asyncio.run(chat_service.enviar_mensagem(5300108, "I", "O aluno toma Ritalina e tem laudo."))
+    assert gravadas == []
+
+
+def test_chat_com_guardiao_indisponivel_nao_grava_nem_chama_a_ia(monkeypatch):
+    gravadas = _chat_isolado(monkeypatch)
+
+    def indisponivel(_texto):
+        raise GuardiaoIndisponivel("modelo fora")
+
+    monkeypatch.setattr(chat_service, "proteger_ou_falhar", indisponivel)
+    with pytest.raises(GuardiaoIndisponivel):
+        asyncio.run(chat_service.enviar_mensagem(5300108, "I", "Qual a prioridade do eixo?"))
+    assert gravadas == []
+
+
+def test_log_de_falha_nao_carrega_url_nem_resposta():
+    import httpx
+    from pydantic import BaseModel
+
+    requisicao = httpx.Request("POST", "https://exemplo.invalid/v1?key=SEGREDO")
+    erro_http = httpx.HTTPStatusError("erro", request=requisicao, response=httpx.Response(429, request=requisicao))
+    assert "SEGREDO" not in ai_client.descrever_falha(erro_http)
+
+    class Modelo(BaseModel):
+        campo: int
+
+    try:
+        Modelo.model_validate({"campo": "O Pedro é cego"})
+    except Exception as erro_validacao:  # noqa: BLE001
+        assert "Pedro" not in ai_client.descrever_falha(erro_validacao)

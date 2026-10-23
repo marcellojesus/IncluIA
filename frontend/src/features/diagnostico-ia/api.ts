@@ -24,6 +24,11 @@ function headersAutenticados(extra?: Record<string, string>): Record<string, str
 
 async function tratarResposta<T>(res: Response, mensagemErro: string): Promise<T> {
   if (res.status === 401) throw new ErroAutenticacao();
+  // 422: o Guardião LGPD bloqueou a mensagem (dado de risco alto); o backend explica o que reescrever.
+  if (res.status === 422) {
+    const corpo = await res.json().catch(() => null);
+    throw new Error(typeof corpo?.detail === "string" ? corpo.detail : mensagemErro);
+  }
   if (!res.ok) throw new Error(mensagemErro);
   return res.json();
 }
