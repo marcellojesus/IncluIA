@@ -70,6 +70,7 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 - **Escopo do contexto:** a IA recebe apenas dados da escola ou rede autorizada (RN-PAE-03, RN-SAB-01).
 - **Sem IA disponível:** os registros já confirmados permanecem e o usuário segue sem a sugestão (requisito transversal do PRD).
 - **Risco residual aceito:** nenhum filtro detecta 100% dos casos. O risco é reduzido pelas três camadas, pelo aviso e pela revisão humana do texto antes do envio, e deve ser reavaliado se o produto sair do piloto.
+- **Implementação (2026-10-23):** `backend/app/shared/guardiao_lgpd/`. Camada 2 com spaCy `pt_core_news_sm` (cerca de 80 MB a mais de memória), lista local de prenomes e sobrenomes frequentes e exceções para nomes públicos (municípios do artefato do Censo, escolas, leis). Revisado duas vezes pelo AgLGPD; os casos da revisão estão em `backend/tests/test_guardiao_lgpd_regressao.py`, que é o conjunto de regressão da taxa de detecção. Riscos residuais conhecidos: endereço só é mascarado em frase com "mora", "reside", "endereço" ou "CEP"; nome com maiúscula no início da frase que também é palavra comum depende do modelo. Integração com a chamada aos provedores pendente.
 
 ### AD-06 — Hospedagem gratuita com mitigação de inatividade
 
@@ -142,3 +143,4 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 8. Lista inicial do corpus de políticas públicas, com fonte oficial e vigência de cada documento (AD-08).
 9. Ampliar o mapeamento eixo → base legal para barreira → dispositivos, com validação jurídica (AD-08).
 10. Conjunto de perguntas de avaliação e meta mínima de acerto antes do piloto (AD-08).
+11. Vulnerabilidade social de um estudante identificável ("o pai está preso", "vive em abrigo", "sofre bullying"): bloquear como situação sensível ou só mascarar. Hoje passa sem tratamento, exceto Conselho Tutelar, medida protetiva e acolhimento institucional, que bloqueiam (AD-05).
