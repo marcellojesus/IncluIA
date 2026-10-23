@@ -24,6 +24,13 @@ BLOQUEIA = [
     "O aluno sofreu abuso sexual em casa.",
     "A aluna está grávida.",
     "Acionamos o Conselho Tutelar para a menina.",
+    # vulnerabilidade social (decisão de 2026-10-23: bloqueia)
+    "O menino é filho de pais presos.",
+    "A aluna é autista e o pai está preso.",
+    "O aluno vive em abrigo e é surdo.",
+    "A aluna é cega, filha de mãe solteira, sofre bullying.",
+    "O aluno está em situação de rua.",
+    "A menina apanha em casa.",
     # CAPS (segunda revisão)
     "O aluno faz acompanhamento no CAPSi.",
     "O aluno faz acompanhamento no CAPS infantil.",
@@ -99,6 +106,8 @@ PASSA = [
     "O aluno precisa de acompanhamento e a escola não tem psicólogo.",
     "A escola não tem fonoaudióloga para atender o aluno surdo.",
     "Faltam psicólogos e fonoaudiólogos para atender os alunos.",
+    "O aluno cadeirante ficou preso no banheiro sem barra de apoio.",
+    "A escola tem casos de bullying e precisa de formação.",
 ]
 
 # Nomes públicos (municípios, escolas, leis, autores) e palavras comuns não viram [NOME].

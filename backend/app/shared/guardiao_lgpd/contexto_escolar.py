@@ -66,7 +66,14 @@ _AUSENCIA = re.compile(
 _SENSIVEL = re.compile(
     r"\b(?:abus\w*|violencia sexual|violentad[oa]|estupr\w*|assedi\w*|gravid\w*|gestante|"
     r"medida protetiva|conselho tutelar|maus[- ]tratos|negligenciad[oa]|acolhimento institucional|"
-    r"abrigad[oa]|ato infracional|liberdade assistida|socioeducativ\w*)"
+    r"abrigad[oa]|ato infracional|liberdade assistida|socioeducativ\w*|"
+    # Vulnerabilidade social (decisão de 2026-10-23: bloqueia, o diretor reescreve). "Preso" só com
+    # familiar, para não pegar "ficou preso no banheiro" (obstáculo de acessibilidade).
+    r"(?:pai|mae|pais|irmao|irma|responsavel|familia|padrasto|madrasta|tio|tia|avo)\s+(?:[a-z]+\s+){0,2}"
+    r"(?:pres[oa]s?|detid[oa]s?|reclus[oa]s?)\b|presidiari\w*|sistema prisional|cumpr\w* pena|"
+    r"(?:vive|mora|esta|morando|vivendo)\s+(?:em|num|no|na)\s+(?:um\s+)?abrigo|situacao de rua|"
+    r"bullying|trabalho infantil|passa fome|violencia domestica|agredid[oa]|apanha\w*|"
+    r"dependente quimic\w*|dependencia quimica|usuari[oa] de drogas|alcoolismo|alcoolatra)"
 )
 _CID = re.compile(r"\bcid\s*-?\s*(?:10|11)?\s*:?\s*[a-z]\d{2}\.?\d?\b|\b[fgq]\d{2}(?:\.\d)?\b")
 

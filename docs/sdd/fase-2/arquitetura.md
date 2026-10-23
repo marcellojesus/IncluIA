@@ -143,4 +143,4 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 8. Lista inicial do corpus de políticas públicas, com fonte oficial e vigência de cada documento (AD-08).
 9. Ampliar o mapeamento eixo → base legal para barreira → dispositivos, com validação jurídica (AD-08).
 10. Conjunto de perguntas de avaliação e meta mínima de acerto antes do piloto (AD-08).
-11. Vulnerabilidade social de um estudante identificável ("o pai está preso", "vive em abrigo", "sofre bullying"): bloquear como situação sensível ou só mascarar. Hoje passa sem tratamento, exceto Conselho Tutelar, medida protetiva e acolhimento institucional, que bloqueiam (AD-05).
+11. **Resolvida em 2026-10-23:** vulnerabilidade social de um estudante identificável ("o pai está preso", "vive em abrigo", "sofre bullying") **bloqueia** o envio, como situação sensível; o diretor reescreve o trecho (AD-05).
