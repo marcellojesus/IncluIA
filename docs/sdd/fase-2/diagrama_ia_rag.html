@@ -1,0 +1,347 @@
+<title>IA da Gestão Ativa</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: documento técnico de coluna única; figuras largas com rolagem própria; exemplo em tabela de passos */
+:root {
+  --bg: #f4f6f7;
+  --surface: #ffffff;
+  --fg: #16212b;
+  --muted: #586773;
+  --line: #c6d0d7;
+  --tint: #e9eef1;
+  --guard: #1d7350;
+  --guard-tint: #e2f1ea;
+  --cross: #a8530c;
+  --cross-tint: #faeee2;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f161c; --surface: #17212a; --fg: #e2e8ed; --muted: #95a3ae; --line: #34434f; --tint: #1c2832;
+    --guard: #5cc597; --guard-tint: #15302a; --cross: #f0a25a; --cross-tint: #33251a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f161c; --surface: #17212a; --fg: #e2e8ed; --muted: #95a3ae; --line: #34434f; --tint: #1c2832;
+  --guard: #5cc597; --guard-tint: #15302a; --cross: #f0a25a; --cross-tint: #33251a; color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 64px;
+}
+main { max-width: 1140px; margin: 0 auto; display: grid; gap: 48px; }
+header { display: grid; gap: 10px; max-width: 72ch; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.15; margin: 0; font-weight: 700; text-wrap: balance; }
+h2 { font-size: 22px; margin: 0; font-weight: 600; text-wrap: balance; }
+p { margin: 0; }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 16px; }
+section > p, section > ul, section > ol { max-width: 72ch; }
+code, .mono { font-family: var(--mono); font-size: .9em; }
+
+figure { margin: 0; display: grid; gap: 12px; }
+.canvas { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
+.canvas svg { display: block; width: 100%; min-width: 920px; height: auto; color: var(--fg); font-family: var(--sans); }
+figcaption { font-size: 14px; color: var(--muted); max-width: 80ch; }
+
+/* elementos do SVG */
+.box { fill: var(--surface); stroke: var(--fg); stroke-width: 1.4; }
+.store { fill: var(--tint); stroke: var(--muted); stroke-width: 1.2; }
+.guardbox { fill: var(--guard-tint); stroke: var(--guard); stroke-width: 2; }
+.extbox { fill: var(--cross-tint); stroke: var(--cross); stroke-width: 1.4; }
+.zone { fill: none; stroke: var(--muted); stroke-width: 1.2; stroke-dasharray: 6 5; }
+.zone-ext { fill: none; stroke: var(--cross); stroke-width: 1.2; stroke-dasharray: 6 5; }
+.t { fill: var(--fg); font-size: 13px; font-weight: 600; }
+.s { fill: var(--muted); font-size: 11.5px; }
+.lbl { fill: var(--muted); font-size: 11px; }
+.zl { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; }
+.zl-ext { fill: var(--cross); font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; }
+.cross-lbl { fill: var(--cross); font-size: 11px; font-weight: 500; }
+.guard-t { fill: var(--guard); font-size: 13px; font-weight: 700; }
+.edge { fill: none; stroke: var(--fg); stroke-width: 1.4; }
+.edge-ext { fill: none; stroke: var(--cross); stroke-width: 1.8; }
+.edge-alt { fill: none; stroke: var(--muted); stroke-width: 1.3; stroke-dasharray: 5 4; }
+.head { fill: var(--fg); }
+.head-ext { fill: var(--cross); }
+.head-alt { fill: var(--muted); }
+
+.key { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: var(--muted); }
+.key span { display: inline-flex; align-items: center; gap: 8px; }
+.sw { width: 28px; height: 0; border-top: 2px solid var(--fg); }
+.sw.ext { border-top-color: var(--cross); }
+.sw.alt { border-top: 2px dashed var(--muted); }
+.sw.guard { height: 12px; border: 2px solid var(--guard); background: var(--guard-tint); width: 18px; border-radius: 2px; }
+
+ol.steps { margin: 0; padding-left: 1.4em; display: grid; gap: 10px; }
+ol.steps li::marker { font-family: var(--mono); color: var(--muted); }
+ol.steps b { font-weight: 600; }
+
+.walk { width: 100%; border-collapse: collapse; font-size: 15px; }
+.walk-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.walk th, .walk td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.walk tr:last-child td { border-bottom: 0; }
+.walk th { font-size: 12px; font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--tint); }
+.walk td:first-child { white-space: nowrap; font-weight: 600; }
+.walk .q { font-family: var(--mono); font-size: 13.5px; background: var(--tint); padding: 2px 6px; border-radius: 4px; }
+.walk .mask { color: var(--guard); font-weight: 600; }
+
+.pending { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+
+<main>
+  <header>
+    <span class="eyebrow">Escola Sem Barreiras · Fase 2 · AD-08 · proposta de 2026-10-23</span>
+    <h1>Como a IA da Gestão Ativa responde</h1>
+    <p class="lead">Com IA em plano gratuito não há treinamento. A precisão vem do contexto montado a cada chamada: fatos exatos por SQL, metodologia por chave, normas por busca híbrida, e uma validação que recusa citações inventadas.</p>
+  </header>
+
+  <section aria-labelledby="h-runtime">
+    <h2 id="h-runtime">Uma pergunta, do chat à resposta</h2>
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 1120 530" role="img" aria-label="Fluxo em tempo de execução: o texto do usuário passa pelo Guardião LGPD, o montador junta quatro camadas de contexto vindas de SQLite, arquivos de metodologia, base normativa e PostgreSQL, o prompt cortado pelo orçamento de tokens vai à cadeia de provedores gratuitos, e o validador só devolve respostas cujas citações estavam no contexto.">
+          <defs>
+            <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="ax" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-ext" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-alt" d="M0,0 L10,5 L0,10 z"/></marker>
+          </defs>
+
+          <!-- zonas -->
+          <rect class="zone" x="185" y="14" width="675" height="510" rx="10"/>
+          <text class="zl" x="199" y="34">BACKEND FASTAPI · RENDER GRATUITO</text>
+          <rect class="zone-ext" x="880" y="14" width="232" height="510" rx="10"/>
+          <text class="zl-ext" x="894" y="34">PROVEDORES GRATUITOS</text>
+
+          <!-- linha 1 -->
+          <rect class="box" x="10" y="70" width="150" height="64" rx="6"/>
+          <text class="t" x="85" y="98" text-anchor="middle">Diretor ou secretário</text>
+          <text class="s" x="85" y="117" text-anchor="middle">escreve no chat</text>
+
+          <rect class="guardbox" x="205" y="70" width="150" height="64" rx="6"/>
+          <text class="guard-t" x="280" y="98" text-anchor="middle">Guardião LGPD</text>
+          <text class="s" x="280" y="117" text-anchor="middle">mascara · bloqueia</text>
+
+          <rect class="box" x="400" y="70" width="190" height="64" rx="6"/>
+          <text class="t" x="495" y="98" text-anchor="middle">Montador de contexto</text>
+          <text class="s" x="495" y="117" text-anchor="middle">junta C1 + C2 + C3 + C4</text>
+
+          <rect class="box" x="635" y="70" width="200" height="64" rx="6"/>
+          <text class="t" x="735" y="98" text-anchor="middle">Corte por orçamento</text>
+          <text class="s" x="735" y="117" text-anchor="middle">cabe no provedor mais restrito</text>
+
+          <path class="edge" d="M160,102 H203" marker-end="url(#a)"/>
+          <text class="lbl" x="182" y="94" text-anchor="middle">texto</text>
+          <path class="edge" d="M355,102 H398" marker-end="url(#a)"/>
+          <text class="lbl" x="377" y="94" text-anchor="middle">limpo</text>
+          <path class="edge" d="M590,102 H633" marker-end="url(#a)"/>
+
+          <!-- bloqueio -->
+          <path class="edge-alt" d="M230,134 V158 H110 V136" marker-end="url(#aa)"/>
+          <text class="lbl" x="170" y="174" text-anchor="middle">risco alto: reescrever</text>
+
+          <!-- cadeia de provedores -->
+          <rect class="extbox" x="905" y="50" width="180" height="176" rx="8"/>
+          <text class="t" x="995" y="72" text-anchor="middle">Cadeia de LLMs</text>
+          <rect class="box" x="925" y="84" width="140" height="32" rx="5"/>
+          <text class="t" x="995" y="105" text-anchor="middle">Gemini</text>
+          <rect class="box" x="925" y="134" width="140" height="32" rx="5"/>
+          <text class="t" x="995" y="155" text-anchor="middle">Groq</text>
+          <rect class="box" x="925" y="184" width="140" height="32" rx="5"/>
+          <text class="t" x="995" y="205" text-anchor="middle">Mistral</text>
+          <path class="edge-alt" d="M995,116 V132" marker-end="url(#aa)"/>
+          <path class="edge-alt" d="M995,166 V182" marker-end="url(#aa)"/>
+          <text class="lbl" x="1003" y="128">falhou</text>
+          <text class="lbl" x="1003" y="178">falhou</text>
+          <text class="lbl" x="995" y="242" text-anchor="middle">todos falham → segue sem IA</text>
+
+          <path class="edge-ext" d="M835,100 H923" marker-end="url(#ax)"/>
+          <text class="cross-lbl" x="880" y="92" text-anchor="middle">prompt</text>
+
+          <!-- barramento das camadas -->
+          <path class="edge" d="M280,248 V215 H760 V248"/>
+          <path class="edge" d="M440,248 V215"/>
+          <path class="edge" d="M600,248 V215"/>
+          <path class="edge" d="M495,215 V136" marker-end="url(#a)"/>
+
+          <!-- camadas -->
+          <rect class="box" x="205" y="248" width="150" height="60" rx="6"/>
+          <text class="t" x="280" y="273" text-anchor="middle">C1 · Fatos da escola</text>
+          <text class="s" x="280" y="292" text-anchor="middle">SQL pelo código INEP</text>
+
+          <rect class="box" x="365" y="248" width="150" height="60" rx="6"/>
+          <text class="t" x="440" y="273" text-anchor="middle">C2 · Metodologia</text>
+          <text class="s" x="440" y="292" text-anchor="middle">seção pela barreira</text>
+
+          <rect class="box" x="525" y="248" width="150" height="60" rx="6"/>
+          <text class="t" x="600" y="273" text-anchor="middle">C4 · Contexto privado</text>
+          <text class="s" x="600" y="292" text-anchor="middle">filtro pelo vínculo</text>
+
+          <rect class="box" x="685" y="248" width="150" height="60" rx="6"/>
+          <text class="t" x="760" y="273" text-anchor="middle">C3 · Base normativa</text>
+          <text class="s" x="760" y="292" text-anchor="middle">mapa + busca híbrida</text>
+
+          <!-- embeddings -->
+          <rect class="extbox" x="925" y="250" width="140" height="56" rx="6"/>
+          <text class="t" x="995" y="274" text-anchor="middle">API de embeddings</text>
+          <text class="s" x="995" y="292" text-anchor="middle">só a pergunta limpa</text>
+          <path class="edge-ext" d="M835,270 H923" marker-end="url(#ax)"/>
+          <text class="cross-lbl" x="880" y="263" text-anchor="middle">pergunta</text>
+          <path class="edge-ext" d="M925,290 H837" marker-end="url(#ax)"/>
+          <text class="cross-lbl" x="880" y="304" text-anchor="middle">vetor</text>
+          <text class="lbl" x="995" y="324" text-anchor="middle">falhou → só FTS5</text>
+
+          <!-- armazenamentos -->
+          <rect class="store" x="205" y="350" width="150" height="56" rx="6"/>
+          <text class="t" x="280" y="374" text-anchor="middle">incluia.db</text>
+          <text class="s" x="280" y="393" text-anchor="middle">Censo · só leitura</text>
+
+          <rect class="store" x="365" y="350" width="150" height="56" rx="6"/>
+          <text class="t" x="440" y="374" text-anchor="middle">metodologia_*.md</text>
+          <text class="s" x="440" y="393" text-anchor="middle">versão usada no ETL</text>
+
+          <rect class="store" x="525" y="350" width="150" height="56" rx="6"/>
+          <text class="t" x="600" y="374" text-anchor="middle">PostgreSQL</text>
+          <text class="s" x="600" y="393" text-anchor="middle">Gestão Ativa</text>
+
+          <rect class="store" x="685" y="350" width="150" height="56" rx="6"/>
+          <text class="t" x="760" y="374" text-anchor="middle">base_normativa.db</text>
+          <text class="s" x="760" y="393" text-anchor="middle">FTS5 + vetores</text>
+
+          <path class="edge" d="M280,350 V310" marker-end="url(#a)"/>
+          <path class="edge" d="M440,350 V310" marker-end="url(#a)"/>
+          <path class="edge" d="M600,350 V310" marker-end="url(#a)"/>
+          <path class="edge" d="M760,350 V310" marker-end="url(#a)"/>
+
+          <!-- volta: resposta, validação, nova tentativa -->
+          <path class="edge-ext" d="M1085,150 H1100 V496 H837" marker-end="url(#ax)"/>
+          <text class="cross-lbl" x="1000" y="489" text-anchor="middle">resposta JSON</text>
+          <path class="edge-alt" d="M835,466 H1075 V228" marker-end="url(#aa)"/>
+          <text class="lbl" x="955" y="459" text-anchor="middle">citação inválida → próximo</text>
+
+          <rect class="box" x="635" y="450" width="200" height="64" rx="6"/>
+          <text class="t" x="735" y="476" text-anchor="middle">Validador</text>
+          <text class="s" x="735" y="495" text-anchor="middle">Pydantic + IDs citados no contexto</text>
+
+          <rect class="box" x="400" y="450" width="190" height="64" rx="6"/>
+          <text class="t" x="495" y="476" text-anchor="middle">Resposta com fontes</text>
+          <text class="s" x="495" y="495" text-anchor="middle">ou lacuna declarada</text>
+
+          <path class="edge" d="M635,482 H592" marker-end="url(#a)"/>
+          <text class="lbl" x="613" y="474" text-anchor="middle">válida</text>
+          <path class="edge" d="M400,482 H60 V136" marker-end="url(#a)"/>
+          <text class="lbl" x="230" y="474" text-anchor="middle">o usuário revisa e decide</text>
+        </svg>
+      </div>
+      <figcaption>Tudo que cruza a linha laranja sai do servidor. Por isso só cruza depois do Guardião: o prompt para a cadeia de LLMs e a pergunta para a API de embeddings. Fatos da escola e conteúdo privado nunca passam por busca vetorial.</figcaption>
+      <div class="key" aria-hidden="true">
+        <span><i class="sw"></i>fluxo interno</span>
+        <span><i class="sw ext"></i>sai para provedor externo</span>
+        <span><i class="sw alt"></i>caminho de exceção</span>
+        <span><i class="sw guard"></i>ponto de controle LGPD</span>
+      </div>
+    </figure>
+
+    <ol class="steps">
+      <li><b>Guardião LGPD.</b> Regras determinísticas, reconhecimento local de nomes e regras do contexto escolar mascaram o texto. Laudo ou documento de identificação bloqueiam o envio até o usuário reescrever.</li>
+      <li><b>Montador de contexto.</b> Busca cada camada pelo método mais exato. <b>C1</b> é consulta SQL: o score e as barreiras da escola vêm do Censo, nunca de uma busca aproximada. <b>C2</b> traz a seção da metodologia correspondente ao código da barreira. <b>C4</b> traz a Declaração emitida e o plano, só se o vínculo estiver aprovado. <b>C3</b> une o mapa curado barreira → dispositivos e, para perguntas livres, a busca por palavra-chave (FTS5) combinada com a vetorial.</li>
+      <li><b>Corte por orçamento.</b> O contexto é limitado ao que cabe no provedor mais restrito da cadeia, para o fallback não falhar por tamanho. Referência inicial: 4 a 6 trechos normativos.</li>
+      <li><b>Cadeia de LLMs.</b> Mesma ordem de fallback da Fase 1. Se todos falharem, o que já foi registrado permanece e o usuário continua sem sugestão.</li>
+      <li><b>Validador.</b> Além do formato, confere se cada identificador citado estava no contexto entregue. Citação fora do contexto é descartada e a chamada vai ao próximo provedor. Sem trecho de suporte, a resposta declara a lacuna.</li>
+      <li><b>Revisão humana.</b> A IA sugere; o diretor ou o secretário decide o que entra no plano.</li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="h-build">
+    <h2 id="h-build">Como a base normativa é construída</h2>
+    <figure>
+      <div class="canvas">
+        <svg viewBox="0 0 1120 230" role="img" aria-label="Construção offline da base normativa: fontes validadas são divididas por artigo, recebem embeddings, passam por um conjunto de perguntas de avaliação e só então viram uma versão da base lida pelo backend; o mapa curado barreira para dispositivos entra na mesma base.">
+          <defs>
+            <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="bx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-ext" d="M0,0 L10,5 L0,10 z"/></marker>
+            <marker id="ba" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-alt" d="M0,0 L10,5 L0,10 z"/></marker>
+          </defs>
+
+          <path class="edge-alt" d="M790,60 V30 H330 V58" marker-end="url(#ba)"/>
+          <text class="lbl" x="560" y="24" text-anchor="middle">reprovado: ajustar divisão ou corpus</text>
+
+          <rect class="store" x="10" y="60" width="180" height="64" rx="6"/>
+          <text class="t" x="100" y="86" text-anchor="middle">Fontes validadas</text>
+          <text class="s" x="100" y="105" text-anchor="middle">legislacao.md · base/legislacao/</text>
+
+          <rect class="box" x="240" y="60" width="180" height="64" rx="6"/>
+          <text class="t" x="330" y="86" text-anchor="middle">Divisão por dispositivo</text>
+          <text class="s" x="330" y="105" text-anchor="middle">artigo · § · inciso + vigência</text>
+
+          <rect class="extbox" x="470" y="60" width="180" height="64" rx="6"/>
+          <text class="t" x="560" y="86" text-anchor="middle">Embeddings</text>
+          <text class="s" x="560" y="105" text-anchor="middle">API · só corpus público</text>
+
+          <rect class="box" x="700" y="60" width="180" height="64" rx="6"/>
+          <text class="t" x="790" y="86" text-anchor="middle">Avaliação</text>
+          <text class="s" x="790" y="105" text-anchor="middle">30 a 50 perguntas reais</text>
+
+          <rect class="store" x="930" y="60" width="180" height="64" rx="6"/>
+          <text class="t" x="1020" y="86" text-anchor="middle">base_normativa.db</text>
+          <text class="s" x="1020" y="105" text-anchor="middle">versão N · só leitura</text>
+
+          <path class="edge" d="M190,92 H238" marker-end="url(#b)"/>
+          <path class="edge" d="M420,92 H468" marker-end="url(#b)"/>
+          <text class="lbl" x="444" y="84" text-anchor="middle">trechos</text>
+          <path class="edge-ext" d="M650,92 H698" marker-end="url(#bx)"/>
+          <text class="cross-lbl" x="674" y="84" text-anchor="middle">vetores</text>
+          <path class="edge" d="M880,92 H928" marker-end="url(#b)"/>
+          <text class="lbl" x="904" y="84" text-anchor="middle">aprovada</text>
+
+          <rect class="box" x="240" y="160" width="180" height="56" rx="6"/>
+          <text class="t" x="330" y="184" text-anchor="middle">Mapa barreira → norma</text>
+          <text class="s" x="330" y="202" text-anchor="middle">curado e validado</text>
+          <path class="edge" d="M420,188 H1020 V126" marker-end="url(#b)"/>
+          <text class="lbl" x="720" y="180" text-anchor="middle">entra na mesma versão da base</text>
+        </svg>
+      </div>
+      <figcaption>A base é um artefato do ETL, como o <code>incluia.db</code>: gerada fora do servidor, versionada e só lida em execução. Uma versão nova só vai para produção se passar no conjunto de avaliação.</figcaption>
+    </figure>
+  </section>
+
+  <section aria-labelledby="h-example">
+    <h2 id="h-example">Exemplo: uma pergunta sobre Braille</h2>
+    <p>Escola com a barreira <span class="mono">B-III-02</span> (sem revisor de texto em Braille) e a Declaração já emitida. O diretor está montando o Plano de Ação.</p>
+    <div class="walk-wrap">
+      <table class="walk">
+        <thead><tr><th>Etapa</th><th>O que acontece</th></tr></thead>
+        <tbody>
+          <tr><td>Pergunta</td><td><span class="q">O Pedro, do 3º ano, é cego e não temos material em Braille. Que ação proponho?</span></td></tr>
+          <tr><td>Guardião</td><td><span class="q"><span class="mask">[ESTUDANTE]</span>, do <span class="mask">[TURMA]</span>, é cego e não temos material em Braille. Que ação proponho?</span><br>O nome é mascarado, e a combinação deficiência + turma também, porque identifica o estudante sem citar o nome. O diretor vê o que foi mascarado antes do envio.</td></tr>
+          <tr><td>C1 · SQL</td><td>Score, faixa e eixos da escola; barreira <span class="mono">B-III-02</span> ativa, com 1,0 ponto em jogo.</td></tr>
+          <tr><td>C2 · chave</td><td>Linha de <span class="mono">B-III-02</span> na metodologia de barreiras: regra <span class="mono">QT_PROF_REVISOR_BRAILLE = 0</span> e texto exibido.</td></tr>
+          <tr><td>C4 · vínculo</td><td>A posição que o diretor registrou para <span class="mono">B-III-02</span> na Declaração emitida.</td></tr>
+          <tr><td>C3 · normas</td><td>Pelo mapa do Eixo III: Lei 13.146/2015 (LBI), Art. 28, XI e XII. Pela busca: trechos de políticas públicas sobre material acessível, quando estiverem na base.</td></tr>
+          <tr><td>Validador</td><td>A resposta cita <span class="mono">LBI-art28-XII</span>, que estava no contexto: aceita. Se citasse um artigo que não foi entregue, seria descartada.</td></tr>
+          <tr><td>Resposta</td><td>Proposta de ação com a fonte de cada afirmação. O diretor ajusta e decide se entra no plano.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="h-pending">
+    <h2 id="h-pending">Decisões em aberto</h2>
+    <ul class="pending">
+      <li>Provedor e modelo de embeddings (multilíngue, com plano gratuito); avaliar se um modelo local cabe na memória do servidor junto com o Guardião.</li>
+      <li>Lista inicial do corpus de políticas públicas, com fonte oficial e vigência de cada documento.</li>
+      <li>Ampliar o mapeamento eixo → base legal para barreira → dispositivos, com validação jurídica.</li>
+      <li>Conjunto de perguntas de avaliação e meta mínima de acerto antes do piloto.</li>
+      <li>Conferir modelos e cotas atuais dos provedores; o código ainda fixa <span class="mono">gemini-2.0-flash</span>.</li>
+    </ul>
+  </section>
+
+  <footer>Registro: <span class="mono">docs/sdd/fase-2/arquitetura.md</span>, AD-08. Complementa AD-04 (artefatos do ETL) e AD-05 (Guardião LGPD).</footer>
+</main>

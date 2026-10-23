@@ -82,6 +82,41 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 - O autocadastro aberto e o chat público do Diagnóstico IA são encerrados.
 - Contas existentes: aviso aos usuários e exclusão ou anonimização após prazo definido; conversas armazenadas seguem a mesma regra. Observação: no ambiente atual de produção, o banco é recriado a cada deploy, o que limita o volume real de contas e conversas persistidas — confirmar antes de definir o procedimento.
 
+### AD-08 — Recuperação de contexto para a IA (RAG em camadas)
+
+**Proposta de 2026-10-23.** Com IA gratuita não há treinamento nem ajuste fino; a precisão vem do contexto entregue em cada chamada. Cada tipo de conhecimento é recuperado pela técnica que lhe dá mais exatidão — busca por similaridade só onde a pergunta é imprevisível. Diagrama: [diagrama_ia_rag.html](diagrama_ia_rag.html).
+
+**Camadas de contexto:**
+
+| Camada | Conteúdo | Recuperação |
+|---|---|---|
+| C1 — Fatos da escola | Score, faixa, indicadores e barreiras da escola ou rede autorizada | Consulta SQL ao artefato do Censo (`incluia.db`). Nunca por busca vetorial: o dado precisa ser exato e a IA não decide números. |
+| C2 — Metodologia | `metodologia_score.md` e `metodologia_barreiras.md`, na versão usada pelo ETL | Injeção por chave: cada barreira ou eixo traz a sua seção. |
+| C3 — Corpus normativo | Base legal validada (`base/legislacao/`, [legislacao.md](../../legislacao.md)) e, depois, documentos de políticas públicas de educação | (a) **Mapa curado** barreira/eixo → dispositivos, ampliando o mapeamento eixo → base legal já existente; (b) **busca híbrida** para perguntas livres. |
+| C4 — Contexto privado | Declaração emitida, posições, plano em edição, decisões | Injeção direta, filtrada pelo vínculo aprovado (AD-02, RN-PAE-03, RN-SAB-01). |
+
+**Base de conhecimento como artefato do ETL** (mesmo padrão do AD-04):
+
+- Um script offline lê o corpus, divide por **estrutura legal** (artigo, parágrafo, inciso; seção nos documentos não normativos), gera embeddings e grava tudo num arquivo somente leitura e versionado. O backend em execução só lê.
+- Metadados por trecho: documento, dispositivo, data, vigência (vigente, alterado, revogado), URL oficial, data de consulta e versão da base.
+- Busca por palavra-chave com SQLite FTS5 (embutido, sem custo de memória nem chamada externa); busca vetorial por força bruta em numpy, suficiente para alguns milhares de trechos; resultados combinados por classificação recíproca (RRF, do inglês Reciprocal Rank Fusion).
+- **Fallback:** sem a API de embeddings (falha ou cota), a busca segue só por palavra-chave.
+- Inclusão de documento no corpus exige registro em [legislacao.md](../../legislacao.md) ou em lista equivalente de fontes validadas — a regra "nunca citar o que não está validado" continua valendo.
+
+**Montagem e validação da chamada:**
+
+1. O texto do usuário passa pelo Guardião LGPD (AD-05) **antes** de qualquer chamada externa — inclusive a de embeddings, que também envia texto ao provedor.
+2. O montador de contexto junta C1, C2, C3 e C4 e corta pelo **orçamento de tokens do provedor mais restrito da cadeia**, para que o fallback não falhe por tamanho (referência inicial: 4 a 6 trechos normativos).
+3. A saída estruturada (Pydantic) exige, em cada afirmação normativa, os identificadores dos trechos usados. O backend **rejeita** citação de identificador que não foi entregue no contexto e aciona nova tentativa ou o próximo provedor.
+4. Sem trecho de suporte, a resposta deve declarar a lacuna ("não encontrei base normativa"), rotulada como tal (RN-SAB-03).
+5. Evitar técnicas que gastam chamadas extras (reescrita de pergunta, reordenação por LLM) enquanto a IA for gratuita.
+
+**Geração em lote:** textos que não dependem da conversa (explicação de cada barreira e sua base legal, narrativa municipal) são gerados uma vez por edição do Censo ou da base, revisados e gravados no artefato (AD-04). Chamadas ao vivo ficam para o chat do Plano de Ação e o Analítico.
+
+**Conteúdo privado não vai para embedding externo:** declarações e planos usados no Analítico do secretário são buscados apenas por FTS5 local; um modelo local de embeddings só será adotado se couber na memória do servidor junto com o modelo de nomes do Guardião.
+
+**Avaliação:** conjunto de 30 a 50 perguntas reais de diretores e secretários, cada uma com a fonte esperada, para medir se a busca traz o trecho certo (revocação nos primeiros resultados) e se as citações da resposta são válidas. Reexecutado a cada nova versão da base ou mudança de provedor.
+
 ## 4. Riscos do plano gratuito
 
 | Risco | Efeito | Mitigação |
@@ -91,6 +126,9 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 | Cota de e-mail | Códigos de acesso não enviados | Cota dimensionada ao número de diretores do piloto |
 | Backend que dorme | Primeira resposta lenta | AD-06 |
 | Limites mudam sem aviso | Quebra de funcionamento | Revisar limites a cada etapa; documentar provedores e cotas em `docs/deploy.md` |
+| Cota ou indisponibilidade da API de embeddings | Busca normativa menos precisa | Fallback para FTS5 (AD-08) |
+| Contexto maior que o limite de um provedor gratuito | Fallback falha por tamanho | Orçamento de tokens pelo provedor mais restrito (AD-08) |
+| Modelo descontinuado no plano gratuito | Cadeia de IA quebra | Conferir modelos e cotas na escolha; hoje o código fixa `gemini-2.0-flash` |
 
 ## 5. Decisões pendentes
 
@@ -100,3 +138,7 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 4. Prazo de retenção de conversas com IA e de rascunhos (AD-03).
 5. Procedimento para contas e conversas da Fase 1 (AD-07).
 6. Escala do piloto (quantas escolas e redes), que define se as cotas gratuitas bastam.
+7. Provedor e modelo de embeddings (multilíngue, com plano gratuito), e se haverá modelo local (AD-08).
+8. Lista inicial do corpus de políticas públicas, com fonte oficial e vigência de cada documento (AD-08).
+9. Ampliar o mapeamento eixo → base legal para barreira → dispositivos, com validação jurídica (AD-08).
+10. Conjunto de perguntas de avaliação e meta mínima de acerto antes do piloto (AD-08).
