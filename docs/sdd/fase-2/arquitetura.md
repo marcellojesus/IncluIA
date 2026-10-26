@@ -28,6 +28,7 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 - **Alternativas consideradas:** (a) SQLite com disco persistente — exige plano pago no Render; (b) SQLite remoto (libSQL/Turso) — mantém o dialeto atual, mas é menos comum para dados transacionais com auditoria; (c) tudo em PostgreSQL — possível no futuro, mas obriga a mudar o ETL e o deploy da Fase 1 agora sem necessidade.
 - **A verificar antes de escolher o provedor** (Neon, Supabase, Render Postgres ou outro): limite de armazenamento, política de pausa por inatividade, expiração do banco gratuito e disponibilidade de backup. Esses limites mudam com frequência e devem ser conferidos na data da escolha.
 - **Backup:** como planos gratuitos costumam ter backup limitado, prever exportação periódica (por exemplo, `pg_dump` agendado) para armazenamento privado.
+- **Decisão de 2026-10-23 (desenvolvimento local):** o código usa SQLAlchemy 2 com migrações Alembic, portável entre SQLite e PostgreSQL. Localmente o banco é `data/gestao_ativa.db`, fora do Git; no deploy basta apontar `DATABASE_URL` para o PostgreSQL. As tabelas novas de contas, vínculos e auditoria nascem nesse banco, e não no `incluia.db` versionado (encaminha a pendência 12).
 
 ### AD-02 — Autenticação e autorização próprias no backend
 
@@ -37,6 +38,18 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 - **Tela de administração mínima:** aprovar, rejeitar e revogar vínculos, com registro de quem aprovou, quando e como (RF-06).
 - **Alternativa considerada:** usar o serviço de autenticação do provedor de banco (por exemplo, Supabase Auth). Reduz trabalho com código e e-mail, mas a regra de vínculo continua sendo própria e o produto fica mais acoplado ao provedor. Pode ser reavaliado se AD-01 escolher esse provedor.
 - **Autocadastro aberto da Fase 1:** desativado (ver AD-07).
+- **Decisões de 2026-10-23:**
+  - Piloto só com escolas da **rede municipal**. O administrador do produto provisiona o secretário municipal, e o secretário aprova os diretores das escolas da própria rede (autoridade competente, RN-04 e RN-14 do acesso).
+  - Entrada **sem senha**: a cada acesso, um código de uso único é enviado ao e-mail. O mesmo código confirma o canal no cadastro (RF-04). Não há senha para guardar nem recuperar.
+  - O token de sessão da Gestão Ativa é separado do da Fase 1 (RF-12) e, a cada requisição, o servidor confere no banco o estado da conta e do vínculo, de modo que suspensão e revogação valem na hora (RN-12).
+  - Em desenvolvimento, o código aparece no console do backend; o provedor de e-mail entra no deploy sem mudar o fluxo.
+- **Implementação (2026-10-23):** `backend/app/features/acesso/` e `backend/app/features/diretor/`; telas em `frontend/src/features/gestao-ativa/`. Revisão do AgLGPD aplicada:
+  - **Falha fechado por ambiente:** só `AMBIENTE=dev` (no `.env` local) libera o código no console e segredos de desenvolvimento. Fora disso, sem `GESTAO_SEGREDO_TOKEN` e `GESTAO_SEGREDO_CODIGO` (32 bytes ou mais, chaves separadas) ou sem provedor de e-mail, as rotas da Gestão Ativa respondem 503 e o site público segue no ar. O `render.yaml` gera os dois segredos.
+  - **Força bruta do código:** 5 tentativas por código, novo código a cada 60 s, até 5 por hora e 10 por dia, até 20 erros por dia por e-mail, 30 requisições a cada 10 minutos por IP nas rotas anônimas; uso e erro gravados por atualização condicional (atômica).
+  - **Pedido de terceiros:** o pedido só aparece ao secretário depois que o dono do e-mail usa o código enviado para aquele pedido (a confirmação antiga da conta não vale); pedidos não confirmados são apagados em 72 h.
+  - **Auditoria e textos livres:** a auditoria guarda só categoria fechada; o texto do secretário e do administrador é mascarado pelo Guardião, e saúde ou situação sensível bloqueiam.
+  - **Navegador:** só o token, na aba (`sessionStorage`); nome e e-mail vêm do servidor a cada abertura.
+  - **Retenção mínima:** `python -m app.features.acesso.cli limpar` (também na subida) apaga códigos com mais de 24 h, pedidos nunca confirmados com mais de 72 h e as contas deles.
 
 ### AD-03 — Versões imutáveis e trilha de auditoria
 
@@ -119,6 +132,34 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 
 **Avaliação:** conjunto de 30 a 50 perguntas reais de diretores e secretários, cada uma com a fonte esperada, para medir se a busca traz o trecho certo (revocação nos primeiros resultados) e se as citações da resposta são válidas. Reexecutado a cada nova versão da base ou mudança de provedor.
 
+**Implementação da base (2026-10-23):** `backend/etl/base_normativa/` gera `data/base_normativa.db` com `python -m etl.base_normativa.construir`.
+- Corpus em `corpus.json`: Decreto 12.686/2025 consolidado (101 trechos) e LBI, Art. 27 a 30 (31 trechos). O Decreto 12.773/2025 ficou de fora porque o arquivo local resume as alterações em vez de reproduzir o texto, e o 12.686 consolidado já as incorpora.
+- Identificador por dispositivo (`LBI-art28-XII`, `D12686-art11-p1-IV`); notas editoriais vão para metadados (`alterado_por`); artigo vetado não entra.
+- Embeddings `gemini-embedding-001`, 768 dimensões, gerados offline pelo ETL — que só lê o corpus público e por isso chama o provedor direto; a consulta em tempo de execução passará pelo `ai_client.py`. Sem a API, a base sai só com FTS5 e o motivo fica na tabela `meta`.
+- Mapa barreira → dispositivos (`mapa_barreira_norma.json`, v0.1) herdado do mapeamento por eixo de `docs/legislacao.md`; refinamento por barreira pendente de validação jurídica.
+- Metodologia de barreiras (camada C2) gravada na mesma base, a partir das tabelas da §3 de `metodologia_barreiras.md`, com a versão da metodologia em `meta`.
+- Semente da avaliação em `avaliacao.json`: com busca híbrida (RRF), 8 de 8 perguntas com o trecho esperado entre os 3 primeiros e 6 de 8 em 1º lugar; só palavra-chave, 7 de 8 entre os 5 primeiros; só vetor, 8 de 8.
+
+**Implementação do montador (2026-10-23):** `backend/app/shared/contexto_ia/`, função `montar_contexto(co_entidade, pergunta=…, barreiras_foco=…, contexto_privado=…)`.
+- C1: escola e score do `incluia.db`; barreiras identificadas na hora por `barreiras.identificar`, a mesma regra que o ETL deve gravar quando a tabela de barreiras do AD-04 existir.
+- C2: regra de cada barreira em foco. C3: mapa da barreira fundido (RRF) com a busca híbrida da pergunta; sem pergunta, só o mapa. C4: textos já protegidos, entregues por quem checou o vínculo.
+- Devolve `TextoProtegido`, a lista fechada `ids_citaveis` (base do validador de citações), as lacunas (busca só por palavra-chave, sem trecho de suporte) e a estimativa de tokens. Orçamento inicial de 2.500 tokens e até 6 trechos; o corte tira trechos normativos, nunca fatos ou registros da escola.
+- `ai_client.py` mudou para `app/shared/` (serve todas as features) e ganhou `gerar_embedding_consulta`, só com `TextoProtegido`.
+- Revisão do AgLGPD aplicada: registros privados entram como `RegistroDaEscola` (texto protegido + escola de origem) e registro de outra escola é recusado; nome e código INEP da escola não vão à IA (minimização); contagens de matrícula da educação especial abaixo de 5 são omitidas do texto da IA, porque somadas a um relato apontam uma criança; `juntar_protegidos` revisa o texto juntado (dado partido entre partes); o app não pode importar módulo do ETL que acesse a rede. Quando a autorização por vínculo existir (AD-02), `RegistroDaEscola` deve ser criado só pela camada que checou o vínculo.
+
+**Implementação do validador de citações (2026-10-23):** `backend/app/shared/contexto_ia/citacoes.py`.
+- `validar_citacoes(resposta, contexto)` reprova: identificador fora de `ids_citaveis` (em `fontes` ou entre colchetes no texto); menção livre a lei, decreto, portaria, resolução ou artigo que não esteja nos trechos entregues (pega "Art. 59 da LDB" escrito de memória); resposta com campo `lacunas` sem nenhuma fonte e sem lacuna declarada.
+- `gerar_resposta_fundamentada` passa o validador ao `ai_client.gerar_resposta`: resposta reprovada vale como falha do provedor e a cadeia segue para o próximo.
+- `Fundamento` (afirmação + ao menos uma fonte) e `INSTRUCOES_CITACAO` são as peças comuns para os schemas e prompts das features.
+- Teste com provedores reais: numa pergunta sobre material em Braille, Gemini e Groq fundamentaram só em trechos entregues; numa pergunta fora do corpus (número máximo de alunos por turma), os dois declararam a lacuna em vez de inventar.
+- O log da reprovação leva só a contagem por tipo de problema (`CitacaoInvalida: artigo_fora=1, trecho_fora=1`), nunca o texto da IA; `fontes` só aceita identificador no formato fechado (revisão do AgLGPD).
+
+**Implementação da avaliação (2026-10-23):** `python -m etl.base_normativa.avaliar [--com-ia] [--meta 0.9] [--saida relatorio.json]`.
+- Mede a posição do trecho esperado na busca por palavra-chave, vetorial e híbrida (acerto no 1º, entre os 3 e os 5 primeiros, MRR) e, com `--com-ia`, se o trecho chegou ao contexto, se a resposta passou no validador e se o citou. As perguntas passam pelo Guardião como em produção.
+- Resultado com as 8 perguntas da semente: palavra-chave 75% entre os 3 primeiros; vetor e híbrida 100% (88% em 1º lugar); respostas da IA 100% válidas e 100% citando o trecho esperado.
+- A primeira rodada mostrou que, com pesos iguais na fusão, um trecho mediano nas duas listas passava à frente do 1º lugar do vetor (híbrida 88% contra 100% do vetor). O peso da palavra-chave passou a 0,5 (`PESO_PALAVRA_CHAVE`), provisório até o conjunto ampliado.
+- Rodar a cada mudança de corpus, de modelo de embedding ou de provedor; com `--meta`, o comando falha abaixo do acerto mínimo.
+
 ## 4. Riscos do plano gratuito
 
 | Risco | Efeito | Mitigação |
@@ -129,8 +170,9 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 | Backend que dorme | Primeira resposta lenta | AD-06 |
 | Limites mudam sem aviso | Quebra de funcionamento | Revisar limites a cada etapa; documentar provedores e cotas em `docs/deploy.md` |
 | Cota ou indisponibilidade da API de embeddings | Busca normativa menos precisa | Fallback para FTS5 (AD-08) |
+| Cota gratuita pequena por provedor | Cadeia roda com menos provedores | Em 2026-10-23, após algumas dezenas de chamadas de teste, o Gemini 3.5 devolveu 429 na maioria e o Mistral em todas; só o Groq respondeu. Medir as cotas reais antes do piloto (decisão pendente 6) |
 | Contexto maior que o limite de um provedor gratuito | Fallback falha por tamanho | Orçamento de tokens pelo provedor mais restrito (AD-08) |
-| Modelo descontinuado no plano gratuito | Cadeia de IA quebra | Conferir modelos e cotas na escolha; hoje o código fixa `gemini-2.0-flash` |
+| Modelo descontinuado no plano gratuito | Cadeia de IA quebra | Aconteceu: em 2026-10-23 `gemini-2.0-flash` e `llama-3.3-70b-versatile` já não existiam e a cadeia rodava só no Mistral. Trocados por `gemini-3.5-flash` e `openai/gpt-oss-120b`; conferir modelos e cotas a cada etapa |
 
 ## 5. Decisões pendentes
 
@@ -140,9 +182,15 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 4. Prazo de retenção de conversas com IA e de rascunhos (AD-03).
 5. Procedimento para contas e conversas da Fase 1 (AD-07).
 6. Escala do piloto (quantas escolas e redes), que define se as cotas gratuitas bastam.
-7. Provedor e modelo de embeddings (multilíngue, com plano gratuito), e se haverá modelo local (AD-08).
+7. Provedor e modelo de embeddings (multilíngue, com plano gratuito), e se haverá modelo local (AD-08). **Escolha inicial em 2026-10-23:** `gemini-embedding-001` (768 dimensões); confirmar com o conjunto de avaliação ampliado.
 8. Lista inicial do corpus de políticas públicas, com fonte oficial e vigência de cada documento (AD-08).
 9. Ampliar o mapeamento eixo → base legal para barreira → dispositivos, com validação jurídica (AD-08).
-10. Conjunto de perguntas de avaliação e meta mínima de acerto antes do piloto (AD-08).
+10. Conjunto de perguntas de avaliação e meta mínima de acerto antes do piloto (AD-08). **Parcialmente resolvida em 2026-10-23:** o comando de avaliação existe e a semente tem 8 perguntas escritas pela equipe; faltam as 30 a 50 perguntas reais de diretores e secretários e a meta (sugestão: 90% entre os 3 primeiros e 100% de respostas válidas).
 11. **Resolvida em 2026-10-23:** vulnerabilidade social de um estudante identificável ("o pai está preso", "vive em abrigo", "sofre bullying") **bloqueia** o envio, como situação sensível; o diretor reescreve o trecho (AD-05).
 12. Tirar as tabelas de escrita (`usuarios`, `chat_*`, `cache_diagnosticos`) do `data/incluia.db` versionado — hoje toda conversa local fica a um `git add` de ir para o repositório — e exigir vínculo no histórico do chat (o GET devolve a conversa a qualquer usuário autenticado). Resolver junto com AD-01, AD-02 e AD-07.
+13. Limiar de supressão de célula pequena (menos de 5 matrículas da educação especial). **Parcialmente resolvida em 2026-10-25:** a regra vale para o texto enviado à IA, para a Declaração emitida e publicada e para a tela pública de escolas da Fase 1 ("menos de 5"). Continua pendente validar o limiar; a API e os dados abertos seguem com o número do Censo, que é público no INEP.
+14. Antes do deploy da Gestão Ativa (AD-02, revisão do AgLGPD):
+    - provedor de e-mail com envio em segundo plano, para que a resposta tenha o mesmo tempo com ou sem conta (enumeração por tempo);
+    - revogação de sessão no servidor (versão da sessão na conta, incrementada ao sair), contra token roubado de conta ativa;
+    - limite por IP em armazenamento compartilhado se houver mais de uma instância;
+    - prazos de retenção de contas rejeitadas ou revogadas, textos de decisão e auditoria, e garantia de que a auditoria não é alterada nem apagada (complementa a pendência 4).

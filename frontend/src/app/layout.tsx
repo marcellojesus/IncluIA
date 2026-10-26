@@ -26,7 +26,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`h-full ${bricolage.variable} ${nunito.variable}`}>
+    // suppressHydrationWarning: extensões do navegador (ex.: assinador BRy) acrescentam atributos ao <html>
+    // antes de o React hidratar. Vale só para os atributos deste elemento, não para os filhos.
+    <html lang="pt-BR" className={`h-full ${bricolage.variable} ${nunito.variable}`} suppressHydrationWarning>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

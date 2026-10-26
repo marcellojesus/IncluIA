@@ -1,5 +1,7 @@
 // Ver interface.md §6 "Tabela de escolas" — lista em cartões (substituiu a tabela original),
 // com um badge de texto + ponto colorido por eixo, no estilo do protótipo de referência.
+import { formatarMatriculasEsp } from "@/shared/lib/formatters";
+import type { PublicacaoGestao } from "../api";
 import type { Escola, StatusEixo } from "../types";
 
 const ESTILO_POR_STATUS: Record<StatusEixo, { texto: string; chip: string; dot: string; label: string }> = {
@@ -30,12 +32,31 @@ function ColunaEixo({ label, status }: { label: string; status: StatusEixo }) {
   );
 }
 
+// Selos da Gestão Ativa: o que a gestão da escola publicou (Declaração de Obstáculos e Plano de Ação).
+function SelosPublicacao({ publicacao }: { publicacao?: PublicacaoGestao }) {
+  if (!publicacao) return null;
+  return (
+    <div className="mt-1.5 flex flex-wrap gap-1.5">
+      {publicacao.planoVersao && (
+        <span className="inline-flex items-center gap-1 rounded-full bg-[#e7f3ec] px-2.5 py-0.5 text-[11px] font-bold text-[#2f7a55]">
+          <span aria-hidden>✓</span> Plano de Ação publicado · v{publicacao.planoVersao}
+        </span>
+      )}
+      <span className="inline-flex items-center rounded-full bg-gov-blue-lt px-2.5 py-0.5 text-[11px] font-bold text-gov-blue">
+        Declaração de Obstáculos publicada
+      </span>
+    </div>
+  );
+}
+
 export function ListaEscolas({
   escolas,
   onSelecionar,
+  publicacoes = {},
 }: {
   escolas: Escola[];
   onSelecionar: (escola: Escola) => void;
+  publicacoes?: Record<number, PublicacaoGestao>;
 }) {
   if (escolas.length === 0) {
     return (
@@ -52,13 +73,14 @@ export function ListaEscolas({
           key={escola.coEntidade}
           type="button"
           onClick={() => onSelecionar(escola)}
-          className="flex w-full items-center gap-4 rounded-2xl bg-paper px-5 py-4 text-left shadow-sm transition-shadow hover:shadow"
+          className={`flex w-full items-center gap-4 rounded-2xl bg-paper px-5 py-4 text-left shadow-sm transition-shadow hover:shadow ${publicacoes[escola.coEntidade]?.planoVersao ? "ring-2 ring-[#2f9e6b]/40" : ""}`}
         >
           <div className="min-w-0 flex-1">
             <div className="truncate font-bold text-gov-blue-dark">{escola.nome}</div>
             <div className="truncate text-xs text-gray-400">
-              {escola.bairro} · {escola.rede} · {escola.alunosEsp} estudantes ESP
+              {escola.bairro} · {escola.rede} · {formatarMatriculasEsp(escola.alunosEsp)} estudantes ESP
             </div>
+            <SelosPublicacao publicacao={publicacoes[escola.coEntidade]} />
           </div>
 
           <ColunaEixo label="AEE" status={escola.statusEixoI} />

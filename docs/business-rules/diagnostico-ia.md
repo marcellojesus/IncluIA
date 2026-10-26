@@ -4,7 +4,9 @@
 
 ## RN-01 — Ordem de fallback entre modelos é fixa e hierárquica
 
-1º Gemini 2.0 Flash → 2º Groq LLaMA 3.3 70B → 3º Mistral Small → 4º dados brutos sem narrativa (sem IA).
+1º Gemini 3.5 Flash → 2º Groq GPT-OSS 120B → 3º Mistral Small → 4º dados brutos sem narrativa (sem IA).
+
+*Atualizado em 2026-10-23:* Gemini 2.0 Flash e Groq LLaMA 3.3 70B foram descontinuados pelos provedores; a ordem e os papéis continuam os mesmos.
 
 **Por quê**: `IncluIA_IA_Estrategia_v1` define essa ordem com base em free tier disponível (Gemini: 1.500 req/dia, 1M tokens contexto) e velocidade. Não pular etapas (ex.: ir direto de Gemini para dados brutos sem tentar Groq/Mistral) — cada etapa reduz o custo antes de desistir da narrativa gerada por IA.
 

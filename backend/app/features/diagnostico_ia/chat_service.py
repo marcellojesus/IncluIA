@@ -1,6 +1,6 @@
 """Spec: docs/business-rules/diagnostico-ia.md RN-09 — chat de ajuste de recomendações por eixo.
 
-Reaproveita a mesma cadeia de fallback de IA (ai_client.py::gerar_resposta) e o mesmo diagnóstico
+Reaproveita a mesma cadeia de fallback de IA (app/shared/ai_client.py::gerar_resposta) e o mesmo diagnóstico
 já calculado/cacheado (service.py::_obter_diagnostico_eixo) — o chat nunca gera um diagnóstico
 paralelo, só conversa em cima do que já existe.
 """
@@ -10,7 +10,7 @@ import logging
 from datetime import datetime, timezone
 
 from app.database import get_connection
-from app.features.diagnostico_ia.ai_client import gerar_resposta
+from app.shared.ai_client import gerar_resposta
 from app.features.diagnostico_ia.cache import calcular_chave, salvar_no_cache
 from app.features.diagnostico_ia.prompts import SYSTEM_PROMPT, montar_prompt_usuario
 from app.features.diagnostico_ia.prompts_chat import (

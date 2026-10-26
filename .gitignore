@@ -29,3 +29,7 @@ Thumbs.db
 
 # Logs de execução local do dev server (podem conter segredos e mensagens de erro de provedores)
 *.log
+
+# Banco da Gestão Ativa em desenvolvimento local (contas, vínculos, auditoria) — nunca versionar
+data/gestao_ativa.db
+data/gestao_ativa.db-*

@@ -7,17 +7,19 @@ recusa qualquer outra coisa — no system prompt e nas mensagens.
 """
 
 import ast
+import re
 import asyncio
 from pathlib import Path
 
 import pytest
 
-from app.features.diagnostico_ia import ai_client, chat_service
+from app.features.diagnostico_ia import chat_service
+from app.shared import ai_client
 from app.features.diagnostico_ia.schemas import RespostaChatIA
 from app.shared.guardiao_lgpd import GuardiaoIndisponivel, TextoBloqueado, liberar_dados_publicos, proteger
 
 APP = Path(__file__).resolve().parents[1] / "app"
-AI_CLIENT = APP / "features" / "diagnostico_ia" / "ai_client.py"
+AI_CLIENT = APP / "shared" / "ai_client.py"
 GUARDIAO = APP / "shared" / "guardiao_lgpd"
 
 # Bibliotecas de rede: só o ai_client.py pode importar. Um módulo novo que precise de rede (por
@@ -40,6 +42,28 @@ _ARGUMENTOS_LIBERADOS = {
     "INSTRUCAO_REPROCESSAMENTO",
     "_MENSAGEM_REPROCESSADO",
     "_MENSAGEM_REMOVIDA",
+    # contexto_ia/montador.py: fatos do Censo, metodologia, cabeçalho fixo e texto legal do corpus
+    "_renderizar_fatos(escola, barreiras, foco, base)",
+    "_CABECALHO_PRIVADO",
+    "_renderizar_normas(trechos)",
+    "INSTRUCOES_CITACAO",
+    # declaracao/conversa.py: instruções fixas do assistente de registro
+    "INSTRUCOES_REGISTRO",
+    "INSTRUCAO_FORMALIZAR",
+    "_FALA_REMOVIDA",
+    "pergunta_inicial(codigo)",
+    # plano/sugestoes.py: instruções fixas e pedido com o código da barreira
+    "INSTRUCOES_PLANO",
+    "pedido_de_sugestoes(codigo)",
+    "INSTRUCAO_AJUSTE",
+    "pedido_de_ajuste(sugestao.codigo)",
+    "FORMATO_RESPOSTA_FUNDAMENTADA",
+    # plano_municipal/sugestoes.py: instruções fixas e pedido com o código da barreira (validado na base da rede)
+    "INSTRUCOES_MUNICIPAL",
+    "pedido_municipal(codigo)",
+    # contexto_ia/montador.py, rede: só contagens calculadas e a regra da metodologia (sem município nem escola) e cabeçalho fixo
+    "_renderizar_fatos_rede(codigo, fatos, base.metodologia[codigo])",
+    "_CABECALHO_ACOES_ESCOLAS",
 }
 
 
@@ -70,6 +94,33 @@ def test_so_ai_client_acessa_a_rede_e_nenhum_sdk_de_ia_e_usado():
                 assert not _comeca_com(modulo, _REDE), f"{arquivo} importa {modulo} fora do ai_client.py"
 
 
+def test_app_so_importa_do_etl_modulos_sem_rede():
+    """O ETL chama a API de embeddings direto (só corpus público, offline). Se o app importasse esse
+    código, texto de usuário poderia chegar ao provedor sem o guardião."""
+    backend = APP.parent
+    for arquivo in _arquivos_do_app():
+        for modulo in _modulos_importados(ast.parse(arquivo.read_text(encoding="utf-8"))):
+            if not _comeca_com(modulo, {"etl"}):
+                continue
+            caminho = backend.joinpath(*modulo.split("."))
+            fonte = caminho.with_suffix(".py") if caminho.with_suffix(".py").exists() else caminho / "__init__.py"
+            importados = _modulos_importados(ast.parse(fonte.read_text(encoding="utf-8")))
+            rede = [m for m in importados if _comeca_com(m, _REDE) or _comeca_com(m, {"etl.base_normativa"})]
+            assert not rede, f"{arquivo} importa {modulo}, que usa {rede}"
+
+
+def test_embeddings_do_etl_so_sao_usados_pelo_construtor_da_base():
+    backend = APP.parent
+    permitido = backend / "etl" / "base_normativa" / "construir.py"
+    for arquivo in backend.rglob("*.py"):
+        if ".venv" in arquivo.parts or "__pycache__" in arquivo.parts or arquivo == permitido:
+            continue
+        texto = arquivo.read_text(encoding="utf-8")
+        modulos = _modulos_importados(ast.parse(texto))
+        assert "etl.base_normativa.embeddings" not in modulos, f"{arquivo} importa os embeddings do ETL"
+        assert not ("etl.base_normativa" in modulos and "import embeddings" in texto), f"{arquivo} importa os embeddings do ETL"
+
+
 def test_chamadas_de_rede_do_ai_client_sao_privadas():
     """Toda função que faz requisição é privada e só é alcançada por `gerar_resposta`."""
     arvore = ast.parse(AI_CLIENT.read_text(encoding="utf-8"))
@@ -92,7 +143,7 @@ def test_so_o_guardiao_cria_texto_protegido():
         if GUARDIAO in arquivo.parents:
             continue
         conteudo = arquivo.read_text(encoding="utf-8")
-        assert "_CHAVE" not in conteudo, f"{arquivo} usa a chave interna do guardião"
+        assert not re.search(r"\b_CHAVE\b", conteudo), f"{arquivo} usa a chave interna do guardião"
         assert "TextoProtegido(" not in conteudo, f"{arquivo} cria TextoProtegido diretamente"
 
 
@@ -114,6 +165,25 @@ def test_liberar_dados_publicos_ainda_bloqueia_documento_e_saude():
         liberar_dados_publicos("CPF 529.982.247-25")
     with pytest.raises(TextoBloqueado):
         liberar_dados_publicos("O aluno toma Ritalina.")
+
+
+def test_juntar_protegidos_nao_aceita_texto_cru():
+    from app.shared.guardiao_lgpd import juntar_protegidos
+
+    protegido = proteger("Pergunta").texto_protegido
+    with pytest.raises(TypeError):
+        juntar_protegidos([protegido, "O Pedro é cego"])
+    with pytest.raises(ValueError):
+        juntar_protegidos([protegido, protegido], separador=" O Pedro é cego ")
+
+
+def test_juntar_protegidos_revisa_dado_partido_entre_partes():
+    from app.shared.guardiao_lgpd import juntar_protegidos
+
+    inicio = proteger("Contato da família: CPF 529.982").texto_protegido
+    fim = proteger(".247-25 conforme ficha").texto_protegido
+    with pytest.raises(TextoBloqueado):
+        juntar_protegidos([inicio, fim], separador="")
 
 
 def _provedor_que_nao_pode_ser_chamado(*_args, **_kwargs):

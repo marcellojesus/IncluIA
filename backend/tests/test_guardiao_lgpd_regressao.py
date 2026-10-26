@@ -83,6 +83,12 @@ MASCARA = [
     ("mat. 556677", ["556677"]),
     # CPF com dígito verificador errado e sem rótulo
     ("o número 12345678901 foi informado", ["12345678901"]),
+    # prenomes terminados em -ir/-ar no início da frase continuam pessoa (lista de verbos é fechada)
+    ("Valdir faltou ontem.", ["Valdir"]),
+    ("Altair relatou o caso.", ["Altair"]),
+    # palavra institucional no trecho não salva o prenome
+    ("João do Centro faltou ontem.", ["João"]),
+    ("A coordenadora Maria Secretaria pediu.", ["Maria"]),
 ]
 
 
@@ -131,6 +137,14 @@ INTACTO = [
     "As escolas não oferecem Atendimento Educacional Especializado.",
     "O Decreto destaca a sala de recursos.",
     "Recalcule o custo, pois não temos verba.",
+    # conversa da Declaração (teste com IA real, 2026-10-23)
+    "Sim, mandamos o ofício e reforçamos por e-mail em agosto.",
+    "Não, a secretaria não respondeu.",
+    # ações do Plano no infinitivo (2026-10-25)
+    "Reunir a equipe pedagógica para planejar o AEE.",
+    "Elaborar plano de captação. Promover formação continuada.",
+    # instituição tomada por pessoa pelo modelo (resposta real da IA, 2026-10-25)
+    "Existência de Centro de Atendimento Educacional Especializado público ou conveniado no município.",
 ]
 
 

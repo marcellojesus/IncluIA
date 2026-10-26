@@ -74,3 +74,23 @@ html.alto-contraste video,
 html.alto-contraste iframe {
   filter: invert(1) hue-rotate(180deg);
 }
+
+/* Chamada de atenção para pendência do usuário (ex.: ajustes pedidos no Plano de Ação).
+   Pulsa 3 vezes (~4,5 s) e para: a WCAG 2.2.2 pede que movimento automático pare em até 5 s.
+   Quem pediu ao sistema menos movimento não vê a animação. */
+@keyframes chamar-atencao {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(229 83 60 / 0.55);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgb(229 83 60 / 0);
+    transform: scale(1.04);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .chamar-atencao {
+    animation: chamar-atencao 1.5s ease-in-out 3;
+  }
+}

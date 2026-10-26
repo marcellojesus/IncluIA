@@ -31,8 +31,17 @@ _TERMOS_DO_DOMINIO = {
     "sei", "inss", "atendimento educacional especializado", "decreto", "lei", "diagnostico", "eixo",
     "score", "valor", "taxa", "piso", "elevador", "rampa",
     # Verbos no imperativo que o modelo confunde com nome no início da frase do chat.
+    # Respostas curtas de conversa que o modelo confunde com nome no início da frase.
+    "sim", "nao", "ok", "certo", "claro", "contato", "obrigado", "obrigada", "ola", "bom dia", "boa tarde", "boa noite",
     "recalcule", "considere", "inclua", "reduza", "aumente", "explique", "detalhe", "priorize", "ajuste",
     "sugira", "refaca", "compare", "resuma", "liste", "mostre", "revise", "simplifique",
+    # Verbos no infinitivo que abrem as ações do Plano de Ação ("Reunir a equipe..."). Lista fechada,
+    # e não regra por terminação, para não deixar passar prenomes como Valdir ou Altair.
+    "reunir", "solicitar", "elaborar", "promover", "formalizar", "garantir", "adquirir", "contratar", "realizar",
+    "organizar", "articular", "adaptar", "implantar", "implementar", "instalar", "oferecer", "ofertar", "ampliar",
+    "capacitar", "formar", "mapear", "acompanhar", "monitorar", "registrar", "requerer", "pedir", "buscar",
+    "definir", "criar", "estruturar", "planejar", "reformar", "construir", "atualizar", "divulgar", "sensibilizar",
+    "estabelecer", "firmar", "providenciar", "viabilizar", "assegurar", "apoiar", "integrar", "manter", "revisar",
 }
 
 # Nomes de pessoas que são nomes de leis, escolas ou autores, não de quem está no relato.
@@ -85,6 +94,20 @@ def _eh_termo_do_dominio(trecho: str) -> bool:
     return normalizar(trecho).strip() in _TERMOS_DO_DOMINIO
 
 
+# Palavras de órgão ou serviço. Uma entidade do modelo que contém uma delas é instituição, não pessoa
+# ("Existência de Centro de Atendimento"). Só vale para o modelo: um prenome no trecho continua
+# pego pela lista de frequentes ("João do Centro" → [NOME] do Centro).
+_PALAVRAS_INSTITUCIONAIS = {
+    "centro", "atendimento", "secretaria", "conselho", "nucleo", "instituto", "departamento", "coordenadoria",
+    "diretoria", "ministerio", "prefeitura", "fundacao", "associacao", "universidade", "faculdade", "servico",
+    "unidade", "programa", "educacional", "especializado", "municipal", "estadual", "federal", "escolar",
+}
+
+
+def _eh_instituicao(trecho: str) -> bool:
+    return any(p in _PALAVRAS_INSTITUCIONAIS for p in re.findall(r"[a-z]+", normalizar(trecho)))
+
+
 @lru_cache(maxsize=1)
 def _municipios_compostos() -> tuple[str, ...]:
     """Municípios de duas ou mais palavras ("Lucas do Rio Verde", "Pedro Leopoldo"), do artefato do
@@ -134,7 +157,7 @@ def _pelo_modelo(texto: str) -> list[Trecho]:
     trechos = []
     for ent in _modelo()(_sem_caixa_alta(texto)).ents:
         trecho = texto[ent.start_char : ent.end_char]
-        if ent.label_ != "PER" or any(c.isdigit() for c in trecho) or _eh_termo_do_dominio(trecho):
+        if ent.label_ != "PER" or any(c.isdigit() for c in trecho) or _eh_termo_do_dominio(trecho) or _eh_instituicao(trecho):
             continue
         trechos.append(Trecho(ent.start_char, ent.end_char, "NOME", "[NOME]"))
     return trechos

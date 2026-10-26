@@ -1,0 +1,24 @@
+{
+  "_descricao": "Mapa curado barreira → dispositivos (AD-08, camada C3). Versão inicial derivada do mapeamento eixo → base legal de docs/legislacao.md: toda barreira de um eixo herda os dispositivos do eixo. O refinamento por barreira depende de validação jurídica (decisão pendente 9 da arquitetura). Cada dispositivo é um prefixo de identificador de trecho: 'LBI-art28-p2' inclui os incisos do § 2º.",
+  "versao": "0.1",
+  "origem": "docs/legislacao.md — mapeamento oficial eixo → base legal",
+  "validacao_juridica": "pendente",
+  "eixos": {
+    "I": {
+      "barreiras": ["B-I-01"],
+      "dispositivos": ["D12686-art5", "D12686-art6", "D12686-art7", "D12686-art8", "D12686-art9", "D12686-art10"]
+    },
+    "II": {
+      "barreiras": ["B-II-01", "B-II-02", "B-II-03", "B-II-04", "B-II-05", "B-II-06", "B-II-07"],
+      "dispositivos": ["LBI-art28-II", "LBI-art28-XVI"]
+    },
+    "III": {
+      "barreiras": ["B-III-01", "B-III-02"],
+      "dispositivos": ["LBI-art28-XI", "LBI-art28-XII", "LBI-art28-p2"]
+    },
+    "IV": {
+      "barreiras": ["B-IV-01"],
+      "dispositivos": ["D12686-art1-p3", "D12686-art8"]
+    }
+  }
+}

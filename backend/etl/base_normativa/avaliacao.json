@@ -1,0 +1,14 @@
+{
+  "_descricao": "Conjunto de avaliação da busca normativa (AD-08). Cada pergunta tem o trecho que deve aparecer entre os primeiros resultados. Semente de 2026-10-23, com perguntas escritas pela equipe; deve crescer para 30 a 50 perguntas reais de diretores e secretários, inclusive sobre os documentos de políticas públicas que entrarem no corpus.",
+  "resultado_semente": "busca híbrida (FTS5 + gemini-embedding-001, RRF k=60): 8 de 8 entre os 3 primeiros; 6 de 8 em 1º lugar",
+  "perguntas": [
+    {"pergunta": "Não temos material em Braille para o aluno cego", "esperado": "LBI-art28-XII"},
+    {"pergunta": "A rede exige laudo para liberar profissional de apoio, pode?", "esperado": "D12686-art14-p2"},
+    {"pergunta": "A escola não tem rampa nem banheiro acessível", "esperado": "LBI-art28-XVI"},
+    {"pergunta": "Qual a formação mínima do professor do AEE?", "esperado": "D12686-art13-II"},
+    {"pergunta": "Podemos colocar o aluno só na sala de recursos, sem classe comum?", "esperado": "D12686-art8"},
+    {"pergunta": "Precisamos de intérprete de Libras, qual a qualificação exigida?", "esperado": "LBI-art28-p2-I"},
+    {"pergunta": "Quem paga? Tem recurso do Fundeb para educação especial?", "esperado": "D12686-art19A"},
+    {"pergunta": "Como fazer o estudo de caso do estudante?", "esperado": "D12686-art11"}
+  ]
+}

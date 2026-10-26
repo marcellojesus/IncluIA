@@ -80,8 +80,8 @@ Não armazenar código INEP como prova de identidade, senha em texto puro, códi
 
 ## Decisões pendentes
 
-1. Confirmar se diretores de escolas estaduais, federais e privadas entram no MVP ou se o primeiro piloto fica restrito a uma dependência administrativa.
-2. Definir quais cargos podem aprovar diretores em cada rede e como serão delegadas/substituídas essas autoridades.
+1. **Resolvida em 2026-10-23:** o piloto fica restrito às escolas da rede municipal.
+2. **Resolvida em 2026-10-23 para o piloto:** o secretário municipal aprova os diretores das escolas da própria rede. Continua pendente como delegar ou substituir essa autoridade.
 3. Definir fonte institucional mínima aceita para confirmar o vínculo, especialmente quando não houver diretório público ou ato de designação facilmente consultável.
 4. Definir se o secretário pode convidar diretamente diretores ou apenas revisar solicitações encaminhadas.
 5. Definir prazos de expiração das solicitações, códigos, revisão periódica e contestação.

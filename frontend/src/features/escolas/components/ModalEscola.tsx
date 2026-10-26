@@ -1,8 +1,10 @@
 // Ver interface.md §6.1 "Modal de Detalhamento da Escola" e docs/requirements/escolas.md RF-04.
+import { formatarMatriculasEsp } from "@/shared/lib/formatters";
 import { Badge } from "@/shared/components/Badge";
 import { Modal } from "@/shared/components/Modal";
 import { formatarScore } from "@/shared/lib/score";
 import type { Escola, StatusEixo } from "../types";
+import { DeclaracaoPublicaEscola } from "./DeclaracaoPublicaEscola";
 
 const CARDS_EIXO: Array<{ campo: keyof Escola; label: string }> = [
   { campo: "statusEixoI", label: "Eixo I — AEE" },
@@ -47,7 +49,7 @@ export function ModalEscola({ escola, onFechar }: { escola: Escola; onFechar: ()
         <tbody>
           <tr className="border-b border-gray-100">
             <td className="py-1.5 text-gray-500">Alunos com deficiência (ESP)</td>
-            <td className="py-1.5 text-right font-bold text-gray-700">{escola.alunosEsp}</td>
+            <td className="py-1.5 text-right font-bold text-gray-700">{formatarMatriculasEsp(escola.alunosEsp)}</td>
           </tr>
           <tr className="border-b border-gray-100">
             <td className="py-1.5 text-gray-500">Bairro</td>
@@ -71,6 +73,8 @@ export function ModalEscola({ escola, onFechar }: { escola: Escola; onFechar: ()
           </tr>
         </tbody>
       </table>
+
+      <DeclaracaoPublicaEscola coEntidade={escola.coEntidade} />
     </Modal>
   );
 }

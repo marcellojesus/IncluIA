@@ -1,0 +1,42 @@
+{
+  "_descricao": "Fontes validadas da base normativa (AD-08). Um documento só entra aqui depois de registrado em docs/legislacao.md ou em lista equivalente de fontes validadas, com fonte oficial e data de consulta. Os textos ficam em base/legislacao/.",
+  "documentos": [
+    {
+      "id": "D12686",
+      "arquivo": "decreto_12686_2025_pneei.md",
+      "titulo": "Decreto nº 12.686, de 20 de outubro de 2025 — institui a Política Nacional de Educação Especial Inclusiva (PNEEI)",
+      "citacao": "Decreto 12.686/2025 (PNEEI)",
+      "tipo": "decreto",
+      "fonte_url": "https://www.planalto.gov.br/ccivil_03/_ato2023-2026/2025/decreto/d12686.htm",
+      "consultado_em": "2026-07",
+      "situacao": "vigente",
+      "escopo": "texto consolidado, com as alterações do Decreto 12.773/2025",
+      "incluir": true
+    },
+    {
+      "id": "LBI",
+      "arquivo": "lei_13146_2015_lbi_art27_a_30.md",
+      "titulo": "Lei nº 13.146, de 6 de julho de 2015 — Lei Brasileira de Inclusão da Pessoa com Deficiência (LBI)",
+      "citacao": "Lei 13.146/2015 (LBI)",
+      "tipo": "lei",
+      "fonte_url": "https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2015/lei/l13146.htm",
+      "consultado_em": "2026-07",
+      "situacao": "vigente",
+      "escopo": "Capítulo IV — Do Direito à Educação (Art. 27 a 30)",
+      "incluir": true
+    },
+    {
+      "id": "D12773",
+      "arquivo": "decreto_12773_2025_alteracoes.md",
+      "titulo": "Decreto nº 12.773, de 8 de dezembro de 2025 — altera o Decreto 12.686/2025",
+      "citacao": "Decreto 12.773/2025",
+      "tipo": "decreto",
+      "fonte_url": "https://www2.camara.leg.br/legin/fed/decret/2025/decreto-12773-8-dezembro-2025-798454-publicacaooriginal-177304-pe.html",
+      "consultado_em": "2026-07",
+      "situacao": "vigente",
+      "escopo": "decreto alterador",
+      "incluir": false,
+      "motivo_exclusao": "O arquivo local resume as alterações em vez de reproduzir o texto literal, e o texto consolidado do Decreto 12.686/2025 já incorpora todas elas. Incluir faria a IA citar paráfrase como texto legal."
+    }
+  ]
+}

@@ -72,13 +72,15 @@ _ROTULOS_BLOQUEIO = {
 class TextoBloqueado(Exception):
     """O texto tem dado de risco alto e não pode ir à IA; o usuário precisa reescrevê-lo."""
 
-    def __init__(self, motivos: list[str]):
+    def __init__(
+        self,
+        motivos: list[str],
+        inicio: str = "A mensagem não foi enviada à IA",
+        orientacao: str = "Reescreva sem esse dado: descreva a necessidade da escola, sem identificar o estudante.",
+    ):
         self.motivos = motivos
         rotulos = ", ".join(_ROTULOS_BLOQUEIO.get(m, m) for m in motivos)
-        super().__init__(
-            f"A mensagem não foi enviada à IA porque contém {rotulos}. "
-            "Reescreva sem esse dado: descreva a necessidade da escola, sem identificar o estudante."
-        )
+        super().__init__(f"{inicio} porque contém {rotulos}. {orientacao}")
 
 
 def _selecionar(trechos: list[Trecho]) -> list[Trecho]:
@@ -130,6 +132,28 @@ def liberar_dados_publicos(texto: str) -> TextoProtegido:
     aparecer, é sinal de que texto de usuário entrou por engano, e levanta `TextoBloqueado`.
     O uso é restrito por chamada: `tests/test_arquitetura_ia.py` só aceita os argumentos listados
     lá; acrescentar um exige revisão do AgLGPD."""
+    resultado = _aplicar(texto, documentos.encontrar(texto) + contexto_escolar.encontrar(texto, []))
+    if resultado.texto_protegido is None:
+        raise TextoBloqueado(resultado.motivos_bloqueio)
+    return resultado.texto_protegido
+
+
+def verificar_regras(texto: str) -> ResultadoGuardiao:
+    """Só as camadas determinísticas (documentos, contatos e contexto escolar), sem reconhecimento de
+    nomes: para conferir de novo um texto já mascarado sem os falsos positivos do modelo."""
+    return _aplicar(texto, documentos.encontrar(texto) + contexto_escolar.encontrar(texto, []))
+
+
+def juntar_protegidos(partes: list[TextoProtegido], separador: str = "\n\n") -> TextoProtegido:
+    """Concatena textos já protegidos (por exemplo, o contexto da IA montado por camadas). O
+    separador é texto fixo do código; qualquer parte crua levanta TypeError."""
+    if not all(isinstance(p, TextoProtegido) for p in partes):
+        raise TypeError("Só textos protegidos podem ser juntados (AD-05)")
+    if separador.strip():
+        raise ValueError("O separador deve ser só espaço em branco")
+    # Revisão das camadas 1 e 3 sobre o resultado: um dado partido entre duas partes (telefone,
+    # CPF) só se forma na junção.
+    texto = separador.join(str(p) for p in partes)
     resultado = _aplicar(texto, documentos.encontrar(texto) + contexto_escolar.encontrar(texto, []))
     if resultado.texto_protegido is None:
         raise TextoBloqueado(resultado.motivos_bloqueio)

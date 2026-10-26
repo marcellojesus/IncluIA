@@ -85,6 +85,21 @@ _ENDERECO = re.compile(
 _CEP = re.compile(r"(?<!\d)\d{5}-?\d{3}(?!\d)")
 
 
+def menciona_estudante_individual(texto: str) -> bool:
+    """Fala de UM estudante ("o estudante", "a única aluna", "1 aluno")? Em escola com poucas
+    matrículas da educação especial, isso basta para a comunidade saber quem é."""
+    norm = normalizar(texto)
+    return bool(_INDIVIDUO.search(norm) or _UNICO.search(norm) or _UNICO_SEM_SUBSTANTIVO.search(norm))
+
+
+def tem_dado_sensivel(texto: str) -> bool:
+    """Saúde, CID ou situação sensível em qualquer frase, sem exigir que fale de um estudante.
+    Para textos que por natureza tratam de uma pessoa identificada — a justificativa de uma decisão
+    sobre o vínculo de um diretor, por exemplo (revisão do AgLGPD de 2026-10-23)."""
+    norm = normalizar(texto)
+    return any(padrao.search(norm) for padrao in (_SAUDE, _ATENDIMENTO_SAUDE, _SENSIVEL, _CID))
+
+
 def _sobrepoe(inicio: int, fim: int, trechos: list[Trecho]) -> bool:
     return any(t.inicio < fim and inicio < t.fim for t in trechos)
 

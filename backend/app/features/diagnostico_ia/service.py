@@ -12,7 +12,8 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from app.database import get_connection
-from app.features.diagnostico_ia.ai_client import descrever_falha, gerar_narrativa
+from app.features.diagnostico_ia.narrativa import gerar_narrativa
+from app.shared.ai_client import descrever_falha
 from app.features.diagnostico_ia.cache import calcular_chave, obter_do_cache, salvar_no_cache
 from app.features.diagnostico_ia.schemas import DiagnosticoEixo, RecomendacaoIA
 from app.features.indicadores_municipio.schemas import EixoIndicador

@@ -15,6 +15,9 @@ CENSO_VERSAO = "2025"
 
 SQLITE_PATH = BASE_DIR / "data" / "incluia.db"
 
+# Base normativa da IA (AD-08), gerada por etl/base_normativa/construir.py.
+BASE_NORMATIVA_PATH = BASE_DIR / "data" / "base_normativa.db"
+
 # TP_SITUACAO_FUNCIONAMENTO — ver docs/business-rules/score-incluia.md e o plano do ETL:
 # só escolas "Em Atividade" entram no cálculo do score.
 SITUACAO_EM_ATIVIDADE = 1

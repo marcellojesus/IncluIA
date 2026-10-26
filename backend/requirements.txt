@@ -8,3 +8,6 @@ python-dotenv>=1.0
 # Guardião LGPD (AD-05): reconhecimento local de nomes; o modelo é baixado do repositório oficial do spaCy
 spacy>=3.8,<3.9
 pt_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/pt_core_news_sm-3.8.0/pt_core_news_sm-3.8.0-py3-none-any.whl
+# Banco da Gestão Ativa (AD-01): SQLite local, PostgreSQL no deploy (driver psycopg entra com o provedor)
+sqlalchemy>=2.0,<2.1
+alembic>=1.13

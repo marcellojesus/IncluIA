@@ -19,6 +19,17 @@ services:
         sync: false
       - key: MISTRAL_API_KEY
         sync: false
+      # Gestão Ativa (AD-02): segredos próprios, separados para o token e para os códigos de acesso.
+      # Sem eles, ou sem provedor de e-mail (EMAIL_MODO), a Gestão Ativa responde 503 e o site
+      # público segue no ar. Nunca definir AMBIENTE=dev aqui.
+      - key: GESTAO_SEGREDO_TOKEN
+        generateValue: true
+      - key: GESTAO_SEGREDO_CODIGO
+        generateValue: true
+      - key: EMAIL_MODO
+        sync: false
+      - key: GESTAO_DATABASE_URL
+        sync: false
       - key: INCLUIA_JWT_SECRET
         generateValue: true
       - key: INCLUIA_CORS_ORIGINS
