@@ -16,6 +16,9 @@ export function formatarCompacto(valor: number): string {
 // de backend/app/shared/contexto_ia/barreiras.py (LIMIAR_CELULA_PEQUENA).
 export const LIMIAR_CELULA_PEQUENA = 5;
 
-export function formatarMatriculasEsp(quantidade: number): string {
+// Desde 2026-10-27 a API pública já devolve null nesses casos (RN-06 de escolas); o número vindo de
+// outras fontes continua passando pela mesma regra.
+export function formatarMatriculasEsp(quantidade: number | null): string {
+  if (quantidade === null) return `menos de ${LIMIAR_CELULA_PEQUENA}`;
   return quantidade > 0 && quantidade < LIMIAR_CELULA_PEQUENA ? `menos de ${LIMIAR_CELULA_PEQUENA}` : String(quantidade);
 }

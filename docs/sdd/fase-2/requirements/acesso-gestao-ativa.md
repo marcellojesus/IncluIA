@@ -1,6 +1,6 @@
 # Requisitos — Cadastro, validação de vínculo e acesso à Gestão Ativa
 
-**Status:** Proposta para validação; não aprovada para implementação  
+**Status:** Implementado no piloto (rede municipal) · notas de implementação atualizadas em 2026-10-26  
 **Rastreabilidade:** Documento de Requisitos do Produto (PRD) geral B2-13; PRD da Fase 2 RF-01 e RF-03 a RF-06  
 **Data:** 2026-10-11
 
@@ -90,3 +90,41 @@ Não armazenar código INEP como prova de identidade, senha em texto puro, códi
 ## Limite conhecido da fonte Censo
 
 A `Tabela_Gestor_Escolar_2025.csv` local contém o código da escola e campos agregados, incluindo a quantidade de gestores que declararam a função de diretor (`QT_GEST_BAS_DIRETOR`). Ela não contém nome nem contato individual e não permite identificar automaticamente o candidato. Ver [microdados oficiais do Censo Escolar no INEP](https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/censo-escolar).
+
+## Notas de implementação (2026-10-23, revisadas em 2026-10-26)
+
+- **Código:**
+  - backend em `backend/app/features/acesso/` (constantes em `seguranca.py`), banco próprio da Gestão Ativa via SQLAlchemy/Alembic;
+  - telas `/participar`, `/gestao/entrar`, `/gestao/secretario` (aba "Vínculos de diretores") e `/gestao/admin`;
+  - testes em `backend/tests/test_acesso_gestao.py`.
+- **Entrada sem senha:** e-mail → código de 6 dígitos → sessão. Não há senha nem telefone; o canal confirmado é só o e-mail (RF-02, RF-04).
+- **Código de uso único:**
+  - válido por 10 minutos, com no máximo 5 tentativas; um código novo invalida os anteriores;
+  - reenvio a cada 60 s, no máximo 5 códigos por hora e 10 por dia por e-mail; 20 erros por dia bloqueiam o e-mail;
+  - guardado como HMAC; o consumo é atômico;
+  - ao atingir um limite, a resposta é a mesma de um envio normal, e e-mail desconhecido também recebe a mesma resposta.
+- **Limite por IP:** 30 requisições a cada 10 minutos nas rotas anônimas (em memória, por processo); acima disso, 429.
+- **Sessão:** token JWT de 8 horas, com audiência e segredo próprios da Gestão Ativa, guardado só na aba do navegador. O estado da conta e do vínculo é relido a cada requisição, e o token da Fase 1 é recusado (RF-12).
+- **Segredos:** `GESTAO_SEGREDO_TOKEN` e `GESTAO_SEGREDO_CODIGO`, com no mínimo 32 bytes fora do ambiente de desenvolvimento. Sem eles, ou sem provedor de e-mail, só a Gestão Ativa responde 503 e o site público continua no ar.
+- **Perfis:** além de diretor e secretário (RF-01), existe o perfil **administrador**, criado só pela linha de comando (`python -m app.features.acesso.cli criar-admin`), que provisiona secretários e pode retirar publicações.
+- **Aprovação do diretor (RF-05; decisões de 2026-10-23):**
+  - só escolas da rede municipal são aceitas;
+  - quem aprova é o secretário do município da escola;
+  - o pedido só aparece ao secretário depois que o candidato confirma o código daquele pedido;
+  - quem decide não pode decidir o próprio vínculo;
+  - a fonte institucional é declarada pelo secretário numa lista fechada (ofício, sistema da rede, telefone institucional, presencial, outro) com texto descritivo; o sistema registra, mas não verifica a fonte.
+- **Estados do vínculo:** pendente, aprovado, rejeitado, suspenso e revogado. Suspenso pode ser **reativado**; revogado é final, e voltar exige pedido novo. Cada decisão usa motivos em lista fechada e texto de 5 a 1000 caracteres, que passa pelo Guardião LGPD (dado sensível é recusado).
+- **Secretário (RF-06):** provisionado pelo administrador, com município validado no Censo e método (ofício, telefone institucional, Diário Oficial, outro). O "aceite do convite" é a primeira entrada com código.
+- **Retenção:** pedidos nunca confirmados são apagados em 72 horas e registros de código em 24 horas. A limpeza roda na subida do servidor e pela linha de comando (`limpar`).
+- **Auditoria (RF-08):** só inserção, sem código nem token; o evento guarda a categoria do motivo, e o texto livre fica no vínculo.
+- **Ambiente de desenvolvimento:**
+  - `EMAIL_MODO=console` só vale com `AMBIENTE=dev`;
+  - a caixa de e-mails de teste fica em `/gestao/dev/emails`, só em dev e só pela própria máquina, com até 30 mensagens em memória;
+  - `python -m app.features.acesso.cli demo` cria administrador, secretária de Niterói e um pedido de diretora (e-mails `@demo.local`).
+- **Ainda não implementado:**
+  - telefone como canal;
+  - suspensão e revogação de secretário (RF-09, RN-06 e RN-12 valem hoje só para o diretor);
+  - evento próprio de "troca de vínculo" (hoje é revogação mais novo pedido);
+  - tela de consulta da auditoria e prazo de retenção da auditoria;
+  - convite de diretor pelo secretário (o secretário só revisa pedidos);
+  - provedor de e-mail real para produção (pendência 3 da AD-02).

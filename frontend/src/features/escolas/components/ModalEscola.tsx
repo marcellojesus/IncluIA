@@ -4,6 +4,7 @@ import { Badge } from "@/shared/components/Badge";
 import { Modal } from "@/shared/components/Modal";
 import { formatarScore } from "@/shared/lib/score";
 import type { Escola, StatusEixo } from "../types";
+import { BarreirasEscola } from "./BarreirasEscola";
 import { DeclaracaoPublicaEscola } from "./DeclaracaoPublicaEscola";
 
 const CARDS_EIXO: Array<{ campo: keyof Escola; label: string }> = [
@@ -18,6 +19,7 @@ const ICONE_POR_STATUS: Record<StatusEixo, string> = {
   warn: "⚠️",
   nok: "❌",
   na: "—",
+  omitido: "—",
 };
 
 export function ModalEscola({ escola, onFechar }: { escola: Escola; onFechar: () => void }) {
@@ -38,6 +40,13 @@ export function ModalEscola({ escola, onFechar }: { escola: Escola; onFechar: ()
           );
         })}
       </div>
+
+      {escola.dadosProtegidos && (
+        <p className="mb-4 rounded bg-gov-blue-lt px-3 py-2 text-xs text-gov-blue-dark">
+          Esta escola tem menos de 5 matrículas da educação especial. Para não identificar estudantes, o Eixo IV fica omitido e o
+          índice público usa a taxa de inclusão em classe comum média das escolas do município.
+        </p>
+      )}
 
       {escola.especialExclusiva && (
         <p className="mb-4 rounded bg-gov-blue-lt px-3 py-2 text-xs text-gov-blue-dark">
@@ -74,6 +83,7 @@ export function ModalEscola({ escola, onFechar }: { escola: Escola; onFechar: ()
         </tbody>
       </table>
 
+      <BarreirasEscola coEntidade={escola.coEntidade} />
       <DeclaracaoPublicaEscola coEntidade={escola.coEntidade} />
     </Modal>
   );

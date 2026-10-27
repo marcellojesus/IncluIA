@@ -1,5 +1,14 @@
 # Requisitos — Diagnóstico de IA por Eixo (Módulo 6)
 
+> **Mudança de 2026-10-27** ([impacto da Fase 2](../sdd/fase-2/impacto-fase-1.md), opção 2). O Diagnóstico IA passou a ser uma **leitura pública do município, só leitura, sem login e sem chat**:
+> - rota `GET /municipios/{codigo}/narrativa`; a narrativa é escrita uma vez por município e edição do Censo e fica guardada (não expira em 24 h); quando a IA falha, o texto de reserva com o dado calculado não é guardado, e o município espera 10 minutos antes de nova tentativa;
+> - quem dispara uma geração passa por limite por IP (10 a cada 10 minutos), e só um pedido por município chega à IA de cada vez; `python -m app.features.diagnostico_ia.cli gerar <UF>` gera de antemão;
+> - a tela rotula o texto como gerado por IA, com a edição do Censo e a data (PUB-05);
+> - **saíram**: recomendações com custo, prazo e alunos impactados (números inventados pela IA, contra a regra de que a IA não define números), o chat por eixo (RN-09), o reprocessamento (RN-10), o botão "Regenerar" e a exigência de login (RN-06 de `login.md`). RN-05 (cache de 24 h) e RN-07 (recomendação com custo) deixam de valer;
+> - continuam: RN-01 a RN-04, RN-06 (artigo só quando validado) e RN-08 (eixos em paralelo).
+>
+> O reaproveitamento da IA no Analítico de Barreiras do secretário (opção 3) fica para a entrega do Analítico. Pendente: o destino do histórico do chat já gravado em `data/incluia.db`.
+
 Fonte de interface: `interface.md` §7. Fonte de contexto: `context.md` (Módulo 6, IA_Estrategia).
 
 ## Objetivo

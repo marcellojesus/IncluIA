@@ -1,8 +1,8 @@
 # Documento de Requisitos do Produto (PRD) — Escola Sem Barreiras | Fase 2: Gestão Ativa
 
-**Status:** Rascunho para validação; ainda não aprovado para implementação  
-**Versão:** 0.2  
-**Data:** 2026-10-18 (versão 0.1 de 2026-10-11)  
+**Status:** Em implementação — piloto com a rede municipal; protótipo v2 aprovado em 2026-10-23  
+**Versão:** 0.3  
+**Data:** 2026-10-27 (versão 0.2 de 2026-10-18; 0.1 de 2026-10-11)  
 **Fontes primárias:** `../../../FASE2/EscolaSemBarreiras_Fase2_NarrativaV6_revisão_cassiano.pdf` e `../../../FASE2/GestaoAtiva_Perfis_Diretor_Secretario.pdf`
 
 ## Resumo
@@ -11,7 +11,25 @@ A Fase 2 propõe transformar indicadores da Fase 1, organizados pelos eixos da P
 
 Este PRD preserva a proposta das fontes, mas registra como pendentes as decisões de produto, segurança, privacidade, regras legais e cálculo.
 
-**Decisões de produto de 2026-10-18 (validação do protótipo):** a Declaração de Obstáculos é **emitida** antes do Plano de Ação e serve de base de contexto para a IA do plano; **emitir** e **publicar** são etapas separadas; toda barreira precisa de uma **posição** antes da emissão; e passa a existir a posição **divergência com o dado do Censo**. Essas decisões estão detalhadas nas seções 1B, 2 e "Publicação da Declaração de Obstáculos". O próximo artefato de validação será um protótipo em Linguagem de Marcação de Hipertexto (HTML, do inglês HyperText Markup Language); a implementação do software só começa após aprovação explícita.
+**Decisões de produto de 2026-10-18 (validação do protótipo):** a Declaração de Obstáculos é **emitida** antes do Plano de Ação e serve de base de contexto para a IA do plano; **emitir** e **publicar** são etapas separadas; toda barreira precisa de uma **posição** antes da emissão; e passa a existir a posição **divergência com o dado do Censo**. Essas decisões estão detalhadas nas seções 1B, 2 e "Publicação da Declaração de Obstáculos". O protótipo em Linguagem de Marcação de Hipertexto (HTML, do inglês HyperText Markup Language) v2 (`FASE2/prototipo_gestao_ativa_v2.html`) foi aprovado em 2026-10-23, e a implementação começou em seguida.
+
+**Decisões de 2026-10-23 a 2026-10-27 (implementação):** o piloto atende só escolas da **rede municipal**, e o secretário do município aprova os diretores; a entrada é **sem senha**, por código enviado ao e-mail; o rascunho da Declaração é salvo e retomado; o Plano de Ação aceito pode ser **publicado** pelo diretor, só junto com a Declaração publicada; o Plano Estratégico Municipal parte **só dos planos aceitos**; o Dashboard Municipal ordena as escolas pelo **peso no score da rede**; e a Fase 1 foi integrada (seção "Integração com a Fase 1"). Os detalhes ficam nas notas de implementação de cada requisito.
+
+## Estado da implementação (2026-10-27)
+
+| Feature | Situação | Requisitos atendidos | Especificação |
+|---|---|---|---|
+| Acesso à Gestão Ativa | Implementado no piloto | RF-01 a RF-06, RF-12 (só e-mail; sem suspensão de secretário) | [acesso](requirements/acesso-gestao-ativa.md) |
+| Dashboard da Escola | Implementado | RF-33, RF-35, RF-38 | [dashboard da escola](requirements/diretor/dashboard-situacao-escola.md) |
+| Declaração de Obstáculos | Implementada, com publicação e retirada | RF-07 a RF-11, RF-32, RF-39 a RF-42 | [declaração](requirements/diretor/declaracao-obstaculos.md) |
+| Plano de Ação Escolar | Implementado, com publicação do plano aceito | RF-12 a RF-17 (contexto da IA só com a base normativa e a Declaração; sem orçamento e histórico da escola) | [plano escolar](requirements/diretor/plano-acao-escolar.md) |
+| Dashboard Municipal | Implementado | RF-18, RF-34, RF-36 a RF-38 | [dashboard municipal](requirements/secretario/dashboard-municipal.md) |
+| Fila e Revisão | Implementada, com apontamentos por barreira e ação | RF-19 a RF-22 | [fila](requirements/secretario/fila-revisao-planos.md) |
+| Plano Estratégico Municipal | Implementado sem narrativa executiva | RF-26 a RF-29 (RF-30 pendente) | [plano municipal](requirements/secretario/plano-estrategico-municipal.md) |
+| Analítico de Barreiras | Não iniciado | RF-23 a RF-25 | [analítico](requirements/secretario/analitico-barreiras.md) |
+| Documentos em PDF | Não iniciado | RF-31 | — |
+
+A arquitetura (banco próprio, Guardião LGPD, IA em camadas e validação de citações) está em [arquitetura.md](arquitetura.md).
 
 ## Problema e objetivos
 
@@ -27,7 +45,8 @@ Os indicadores tornam lacunas visíveis, mas não oferecem aos diretores um flux
 
 - **Diretor de escola:** após validação institucional, acessa e gerencia exclusivamente a escola vinculada ao seu perfil.
 - **Secretário municipal de educação:** após provisionamento e validação institucional, consulta exclusivamente a rede municipal autorizada, analisa necessidades e gerencia o plano estratégico municipal.
-- **Público:** consulta a versão publicada da Declaração de Obstáculos de cada escola, depois da checagem de dados pessoais e da aprovação do diretor. Não acessa a Gestão Ativa.
+- **Público:** consulta a versão publicada da Declaração de Obstáculos de cada escola, depois da checagem de dados pessoais e da aprovação do diretor, e o Plano de Ação aceito que o diretor publicar. Não acessa a Gestão Ativa.
+- **Administrador do produto** (acrescentado na implementação): provisiona secretários e pode retirar publicações a pedido de titular. É criado só pela linha de comando do servidor.
 
 O módulo Gestão Ativa será restrito a diretores e secretários aprovados. As páginas públicas da Fase 1 permanecem públicas. Não haverá integração com gov.br no MVP. O fluxo deve verificar separadamente a identidade/canal da pessoa e sua autorização para exercer o papel na escola ou rede.
 
@@ -75,6 +94,15 @@ Com base na análise e nas propostas escolares, o secretário pode selecionar a�
 
 Publicar é uma etapa separada de emitir. A partir de uma versão emitida, o sistema gera uma versão pública em linguagem acessível. Antes de publicar, uma checagem assistida por IA aponta possíveis dados pessoais e riscos de identificação indireta de estudantes ou profissionais (por exemplo, "o único estudante surdo do 5º ano"), e o diretor revisa e aprova explicitamente. A versão publicada aparece na página pública da escola com data e número de versão, sem alterar o score nem os dados do Censo. Retirada da publicação, moderação e eventual resposta da secretaria permanecem como decisões pendentes.
 
+### Integração com a Fase 1
+
+A área pública da Fase 1 continua aberta, sem login. A integração, decidida rota por rota em [impacto-fase-1.md](impacto-fase-1.md) e concluída em 2026-10-27, fez o seguinte:
+- **login da Fase 1:** saiu do ar, com o autocadastro; o único login do produto é o da Gestão Ativa;
+- **entrada da Gestão Ativa:** o cabeçalho, a Início, o rodapé e a página Sobre levam a `/participar`;
+- **fichas das escolas:** mostram as barreiras do Censo e o que a escola publicou;
+- **Início do município:** conta as publicações das escolas;
+- **Diagnóstico IA:** virou uma leitura pública do município, sem chat e sem recomendações.
+
 ## Não objetivos
 
 - Enviar ou alterar respostas dentro do Educacenso; a fonte informa não haver interface de programação de aplicações (API) pública para integração.
@@ -90,7 +118,7 @@ Publicar é uma etapa separada de emitir. A partir de uma versão emitida, o sis
 - **RF-02:** apresentar experiências de entrada e navegação distintas para diretor e secretário.
 - **RF-03:** permitir que o diretor solicite acesso associando-se a uma escola identificada pelo código INEP; manter a solicitação pendente até aprovação institucional.
 - **RF-04:** habilitar secretários municipais por provisionamento aprovado por administrador autorizado, associado a um município.
-- **RF-05:** confirmar controle do e-mail ou telefone por código de uso único, sem tratar isso como prova suficiente de cargo/vínculo.
+- **RF-05:** confirmar controle do e-mail ou telefone por código de uso único, sem tratar isso como prova suficiente de cargo/vínculo. *(Implementado só por e-mail.)*
 - **RF-06:** registrar aprovador, data, método e resultado da verificação, alterações e revogações, minimizando dados pessoais.
 - **RF-33:** após autenticação, abrir o diretor no Dashboard da Situação Atual da Escola vinculada.
 - **RF-34:** após autenticação, abrir o secretário no Dashboard Municipal da rede autorizada.
@@ -147,7 +175,7 @@ Publicar é uma etapa separada de emitir. A partir de uma versão emitida, o sis
 - **RF-31:** gerar documentos em Formato de Documento Portátil (PDF) com versão, data, conteúdo confirmado e ressalvas, sujeito a validação jurídica.
 - **RF-32:** exibir na página pública da escola a versão publicada da Declaração de Obstáculos, com data e versão, conforme RF-42.
 
-Cada requisito funcional (RF) terá critérios de aceite detalhados, derivados após a validação do fluxo no protótipo. Os requisitos deste rascunho não são autorização para implementação.
+Os critérios de aceite detalhados e as notas de implementação de cada requisito estão nos documentos de requisitos por feature (ver "Estado da implementação").
 
 ## Requisitos transversais
 
@@ -162,15 +190,15 @@ Cada requisito funcional (RF) terá critérios de aceite detalhados, derivados a
 
 ## Decisões pendentes
 
-1. Definir a autoridade que valida vínculo e substitutos autorizados para cada dependência administrativa; o fluxo proposto é convite/provisionamento institucional sem gov.br no MVP.
+1. **Parcialmente resolvida em 2026-10-23:** no piloto, o secretário do município aprova os diretores da rede municipal, e o administrador do produto provisiona o secretário. Continuam pendentes os substitutos autorizados e a autoridade para outras redes.
 2. **Resolvida em 2026-10-18:** a Declaração é fechada na **emissão**, que exige posição para todas as barreiras; retificação gera nova versão, e o plano baseado em versão anterior é sinalizado. Continua pendente se a retificação deve ser bloqueada enquanto um plano está em análise.
-3. Salvar parcialmente, pausar e retomar o fluxo conversacional do diretor; a fonte original descreve um loop que não pode ser interrompido.
+3. **Resolvida em 2026-10-23:** o rascunho da Declaração (posições e conversa em andamento) fica salvo e é retomado de onde parou; conversas paradas há mais de 30 dias são apagadas.
 4. Definir os critérios pelos quais o diretor marca uma ação sugerida pela IA como pertinente, ajustável ou não pertinente, e como tratar ações não pertinentes.
 5. Definir quais normas, documentos institucionais, orçamento e histórico estarão disponíveis para contexto da IA, quem os fornece, níveis de acesso, atualização e retenção.
-6. Definir prazo de análise da secretaria, responsáveis substitutos, se aceitação pode incluir recomendação opcional e se reprovação permite nova submissão ou exige novo plano.
-7. Definir se a secretaria pode aceitar apenas ações selecionadas ou parcialmente um plano escolar e como comunicar essa decisão sem alterar o restante do plano.
-8. Definir como ações municipais serão vinculadas a ações escolares, como registrar cobertura parcial/múltiplas escolas e quem manterá o andamento; ainda não considerar execução como automática.
-9. **Parcialmente resolvida em 2026-10-18:** a Declaração é publicada em etapa separada da emissão, após checagem assistida de dados pessoais e aprovação do diretor. Continuam pendentes: retirada da publicação, moderação, prazo de exibição de versões antigas e se a publicação pode ser obrigatória.
+6. Definir prazo de análise da secretaria, responsáveis substitutos e se aceitação pode incluir recomendação opcional. Hoje a escola pode enviar nova versão depois de qualquer decisão, inclusive reprovação; a política definitiva segue pendente.
+7. **Parcialmente resolvida em 2026-10-26:** a decisão vale para a versão inteira; ao pedir ajustes ou reprovar, a secretaria pode apontar barreiras e ações específicas, com nota. Aceite parcial de um plano não existe.
+8. **Parcialmente resolvida em 2026-10-26:** cada ação municipal aponta as escolas e os itens dos planos aceitos que atende, com cobertura total ou parcial. Continua pendente quem mantém o andamento (execução).
+9. **Parcialmente resolvida em 2026-10-18 e 2026-10-24:** a Declaração é publicada em etapa separada da emissão, após checagem de dados pessoais e aprovação do diretor; a retirada existe (pelo diretor e pela administração, com motivo e auditoria). Continuam pendentes: moderação, canal público para pedir revisão, prazo de exibição de versões antigas e se a publicação pode ser obrigatória.
 10. Dados permitidos nos prompts, provedores de IA, retenção e prevenção de dados pessoais. **Parcialmente resolvida em 2026-10-18:** provedores em plano gratuito, com Guardião LGPD local que mascara ou bloqueia dados pessoais antes de qualquer envio à IA (ver `arquitetura.md`, AD-05). Continuam pendentes a retenção e a validação da taxa de detecção.
 11. Validação por especialista do mapeamento legal e dos artigos citados nos documentos.
 12. Método determinístico para estimar impacto no score; a fonte atribui o cálculo ao modelo de linguagem de grande escala (LLM, do inglês Large Language Model), enquanto a arquitetura atual proíbe IA de decidir números/status.
@@ -180,7 +208,7 @@ Cada requisito funcional (RF) terá critérios de aceite detalhados, derivados a
 16. Campos, assinatura, identidade visual e valor formal dos PDFs.
 17. Vocabulário e relação entre “barreira” identificada nos dados e “obstáculo” relatado pelo diretor. Em 2026-10-18 foi adotado “posição” como termo para o que o diretor registra sobre cada barreira (obstáculo relatado, divergência com o dado do Censo ou sem relato nesta versão).
 18. Cronograma de dois meses indicado na Narrativa V6, escopo incluído e disponibilidade para validação.
-19. Confirmar se o MVP atenderá diretores de escolas municipais apenas ou também estaduais, federais e privadas, pois a autoridade competente para aprovar o vínculo depende da dependência/mantenedora.
+19. **Resolvida em 2026-10-23:** o piloto atende só escolas da rede municipal.
 20. Definir se o secretário pode registrar resposta ou manifestação, pública ou privada, a uma Declaração que atribua obstáculos à rede.
 21. Definir o encaminhamento das divergências com o dado do Censo: se geram orientação para correção no próximo Educacenso (ligada à futura extensão Assistente de Preenchimento) e se aparecem para o secretário como indicador próprio.
 22. Definir se "sem relato nesta versão" exige justificativa curta e se aparece na versão publicada.
@@ -191,4 +219,4 @@ A Narrativa V6 lista como extensões: Assistente de Preenchimento do Censo (sem 
 
 ## Etapas seguintes
 
-Requisitos de acesso: [Acesso à Gestão Ativa](requirements/acesso-gestao-ativa.md). O [índice das features de requisitos](requirements/planos-de-acao.md) aponta para Declaração de Obstáculos, Plano de Ação Escolar, Fila e Revisão do Secretário, Analítico de Barreiras e Plano Estratégico Municipal. As regras seguem a mesma separação no [índice de regras de negócio](business-rules/planos-de-acao.md). Validar este PRD e as decisões pendentes; produzir o protótipo HTML; avaliar e aprovar a experiência; só depois criar especificações e tarefas de implementação.
+Requisitos de acesso: [Acesso à Gestão Ativa](requirements/acesso-gestao-ativa.md). O [índice das features de requisitos](requirements/planos-de-acao.md) aponta para Declaração de Obstáculos, Plano de Ação Escolar, Fila e Revisão do Secretário, Analítico de Barreiras e Plano Estratégico Municipal. As regras seguem a mesma separação no [índice de regras de negócio](business-rules/planos-de-acao.md). Próximas entregas: Analítico de Barreiras (RF-23 a RF-25), narrativa executiva do Plano Estratégico Municipal (RF-30) e documentos em PDF (RF-31). Antes de produção: provedor de e-mail real, retenção e auditoria pendentes (AD-03 e AD-07 em [arquitetura.md](arquitetura.md)) e o destino das contas da Fase 1 ([impacto-fase-1.md](impacto-fase-1.md)).

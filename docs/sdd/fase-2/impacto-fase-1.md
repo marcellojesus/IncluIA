@@ -1,6 +1,6 @@
 # Impacto da Fase 2 sobre a Fase 1
 
-**Status:** Proposta para validação · 2026-10-18  
+**Status:** Implementado em 2026-10-27, salvo os itens marcados como pendentes abaixo · proposta de 2026-10-18  
 **Base:** [PRD da Fase 1](../fase-1/prd.md) (rotas observadas no código local) e [PRD da Fase 2](prd.md)
 
 ## Objetivo
@@ -40,3 +40,27 @@ Registrar, rota por rota, o que acontece com o produto em produção (Fase 1) qu
 - Destino das contas e do histórico de chat da Fase 1.
 - Se a narrativa municipal pública substitui o atual conteúdo da aba Diagnóstico na mesma rota ou ganha rota nova.
 - Arquitetura da Fase 2 (persistência, autenticação, IA e hospedagem): ver discussão de arquitetura.
+
+## Situação em 2026-10-27
+
+Decisões do responsável em 2026-10-27: os botões "Registrar barreira" viram entrada da Gestão Ativa; o login da Fase 1 sai do ar já; o Diagnóstico IA vira narrativa pública sem login; PUB-01, PUB-03, PUB-04 e os textos institucionais entram nesta revisão.
+
+| Rota ou elemento | Situação | Onde |
+|---|---|---|
+| Cabeçalho | "Registrar barreira" e "Entrar/Sair" do login antigo deram lugar a um único botão **Gestão Ativa** (leva a `/participar`). | `shared/components/AppHeader.tsx` |
+| `/municipio/{codigoIbge}` (Início) | Bloco "O que as escolas publicaram" com as contagens de Declarações e Planos publicados (PUB-04) e cartão de entrada da Gestão Ativa. No topo, "Sou gestor: Gestão Ativa"; o card "Registrar uma barreira" virou "Entender os números" (leitura com IA). | `indicadores-municipio/components/GestaoAtivaMunicipio.tsx`, `InicioMunicipio.tsx` |
+| `/municipio/{codigoIbge}/escolas` | Ficha: barreiras do Censo (PUB-01, rota `GET /escolas/{co}/barreiras`), Declaração e Plano publicados (PUB-02, desde 2026-10-24, exibidos na própria ficha em vez de botão). Lista: selos e filtros por Declaração e por Plano publicados (PUB-03). | `escolas/components/BarreirasEscola.tsx`, `DeclaracaoPublicaEscola.tsx`, `AbaEscolas.tsx` |
+| `/participar` | Porta da Gestão Ativa (desde 2026-10-23), com um aviso para quem não é gestor voltar à área pública. | `gestao-ativa/components/ParticiparGestao.tsx` |
+| `/login` | Desativado: redireciona para `/gestao/entrar`. Backend `/auth/*`, autocadastro e `INCLUIA_JWT_SECRET` removidos. | `app/login/page.tsx` |
+| `/municipio/{codigoIbge}/diagnostico` | Narrativa pública só leitura, sem login e sem chat, guardada por edição do Censo e rotulada como texto de IA (opção 2, PUB-05). Recomendações com custo, chat e "Regenerar" saíram. | `diagnostico_ia/` (backend e frontend), `docs/requirements/diagnostico-ia.md` |
+| `/sobre`, `/dados-abertos`, rodapé | Citam a Gestão Ativa e o que dela é público. | `app/(app)/sobre`, `app/(app)/dados-abertos`, `shared/components/Footer.tsx` |
+| `/metodologia` | Já exibia a metodologia de barreiras (`/metodologia/barreiras`). | — |
+
+### Pendências que continuam
+
+- **Contas e histórico de chat da Fase 1:** em 2026-10-27 as tabelas `usuarios` e de chat foram apagadas de `data/incluia.db`, e o cache de narrativas foi esvaziado (o arquivo versionado volta a ter só o resultado do ETL). Continuam nos commits antigos publicados no GitHub; apagar de lá exige reescrever o histórico e forçar o envio, junto com a limpeza da chave do Gemini.
+- **Analítico do secretário (opção 3):** reaproveitar a IA da narrativa no Analítico de Barreiras, na entrega do Analítico.
+- **Exportações** ("Exportar (em breve)" na aba Escolas): continuam fora do escopo.
+- **Contagem de alunos na área pública:** corrigida em 2026-10-27 (RN-06 de `docs/business-rules/escolas.md`). Fica o risco residual de recalcular o score real de uma escola pequena a partir do score do município, descrito na RN-06.
+- **Limites em memória:** o limite por IP vê o IP do proxy do Render (vale para o site inteiro) e, como o teto diário de 200 gerações da narrativa, é por processo. Pré-gerar as narrativas com `python -m app.features.diagnostico_ia.cli gerar <UF>` a cada edição do Censo.
+- **Sessão no cabeçalho:** o botão "Gestão Ativa" leva sempre a `/participar`, mesmo para quem já entrou; a sessão da Gestão Ativa fica só na aba do navegador.

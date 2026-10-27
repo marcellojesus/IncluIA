@@ -25,7 +25,7 @@ Este repositório já tem um `render.yaml` na raiz — o Render lê esse arquivo
 
 Segredos que o Render vai pedir na hora de aplicar o Blueprint (não ficam no `render.yaml`, são inseridos só no dashboard):
 - `GEMINI_API_KEY`, `GROQ_API_KEY`, `MISTRAL_API_KEY` — chaves de IA já usadas em dev.
-- `INCLUIA_JWT_SECRET` — gerado automaticamente pelo Render (`generateValue: true`), não precisa informar.
+- `GESTAO_SEGREDO_TOKEN` e `GESTAO_SEGREDO_CODIGO` — gerados automaticamente pelo Render (`generateValue: true`). O `INCLUIA_JWT_SECRET` do login da Fase 1 deixou de existir em 2026-10-27; se ainda estiver no painel do Render, pode ser apagado.
 
 Depois do primeiro deploy, anotar a URL pública do serviço (algo como `https://incluia-api.onrender.com`) — é o que o frontend vai chamar.
 
@@ -41,12 +41,12 @@ Ao importar o repositório na Vercel (cada projeto Vercel é um import independe
 
 ## 4. Fechar o CORS com a(s) URL(s) real(is) do frontend
 
-`INCLUIA_CORS_ORIGINS` no `render.yaml` **não** está marcada como `sync: false` — o valor vem do próprio arquivo, e o Render resincroniza a cada push. Por isso, para liberar a URL real do frontend, o jeito certo é editar o `value` desse campo no `render.yaml` (lista separada por vírgula — pode ter mais de um domínio, um por frontend) e comitar/dar push — nunca editar só pelo painel do Render (um push futuro reverteria o valor). Sem essa origem liberada, o navegador bloqueia por CORS toda chamada feita direto do cliente (ex.: aba Escolas, chat do Diagnóstico IA) — só as chamadas feitas no servidor (SSR) continuam funcionando, o que confunde o diagnóstico do problema.
+`INCLUIA_CORS_ORIGINS` no `render.yaml` **não** está marcada como `sync: false` — o valor vem do próprio arquivo, e o Render resincroniza a cada push. Por isso, para liberar a URL real do frontend, o jeito certo é editar o `value` desse campo no `render.yaml` (lista separada por vírgula — pode ter mais de um domínio, um por frontend) e comitar/dar push — nunca editar só pelo painel do Render (um push futuro reverteria o valor). Sem essa origem liberada, o navegador bloqueia por CORS toda chamada feita direto do cliente (ex.: aba Escolas, Diagnóstico IA, Gestão Ativa) — só as chamadas feitas no servidor (SSR) continuam funcionando, o que confunde o diagnóstico do problema.
 
 **Depois de criar um novo frontend na Vercel**: confirmar a URL exata gerada (pode diferir do nome do projeto se o slug já estiver em uso) e atualizar `INCLUIA_CORS_ORIGINS` no `render.yaml` com essa URL antes de considerar o deploy concluído — sem isso, o novo frontend carrega mas nenhuma chamada de API feita pelo navegador funciona.
 
 ## 5. Limitações do MVP a ter em mente em produção
 
 - **SQLite em disco efêmero do Render (plano free)**: o `data/incluia.db` versionado no Git sempre volta certinho a cada deploy, mas qualquer escrita em runtime (cache de diagnóstico de IA, histórico de chat, ajustes via chat) é perdida quando o serviço reinicia/reimplanta. Aceitável para o MVP — não é perda de dados do Censo, só de cache/conversas.
-- **`INCLUIA_JWT_SECRET` gerado pelo Render permanece igual entre deploys** (não muda a cada redeploy) — sessões continuam válidas normalmente.
+- **Os segredos gerados pelo Render (`GESTAO_SEGREDO_*`) permanecem iguais entre deploys** (não mudam a cada redeploy) — sessões da Gestão Ativa continuam válidas normalmente.
 - Sem domínio próprio configurado neste guia — Render e Vercel já dão HTTPS nos subdomínios padrão (`.onrender.com` / `.vercel.app`), suficiente para a v1.0.

@@ -60,6 +60,8 @@ O ETL é reexecutado manualmente (`python run_etl.py` dentro de `backend/`) semp
 
 ### Onde o projeto usa IA (e onde não usa)
 
+> **Atualização de 2026-10-27:** na área pública, a IA só escreve a leitura pública de cada município (`GET /municipios/{codigo}/narrativa`), guardada por edição do Censo, sem login, chat nem recomendações; o login da Fase 1 saiu do ar. Na Gestão Ativa, a IA apoia a Declaração de Obstáculos, o Plano de Ação e o Plano Estratégico Municipal — ver `docs/sdd/fase-2/arquitetura.md` (AD-05 e AD-08). O texto abaixo descreve a versão anterior.
+
 A IA generativa é usada em **um único lugar do produto**: a feature `diagnostico-ia` (aba "🤖 Diagnóstico IA" da tela de município). Ela transforma os indicadores já calculados de cada eixo da PNEEI (Decreto 12.686/2025) em texto explicativo, alertas legais e recomendações com custo/prazo, em linguagem natural — e, a partir desta versão, também conversa com o gestor sobre esse diagnóstico via um chat por eixo (ver "Chat de ajuste de recomendações" abaixo).
 
 **A IA nunca decide números ou status** — isso é uma regra de negócio explícita (RN-03 de `docs/business-rules/diagnostico-ia.md`): o Score Escola Sem Barreiras, as faixas de classificação (Crítico/Insuficiente/Em desenvolvimento/Adequado/Referência) e os semáforos ✅/⚠️/❌ de cada eixo são 100% calculados deterministicamente pelo ETL (`backend/etl/score.py`), a partir da metodologia em `metodologia_score.md`. A IA só recebe esse resultado já pronto como contexto e o explica — nunca o contrário. Isso evita que uma alucinação de modelo altere o "resultado oficial" de conformidade exibido ao gestor.

@@ -1,13 +1,14 @@
 // Tela "Início" — dashboard público do município: hero + índice geral + 4 compromissos da lei
 // + score por eixo + números da rede + atalhos + ranking na UF. Substitui a antiga aba
 // "Indicadores" (era uma aba dentro da tela de município; agora é a home do sistema).
+// A Gestão Ativa entra por GestaoAtivaMunicipio (contagem pública e porta para gestores).
 import Link from "next/link";
 
 import { Badge } from "@/shared/components/Badge";
-import { BotaoRegistrarBarreira } from "@/shared/components/BotaoRegistrarBarreira";
 import { formatarScore } from "@/shared/lib/score";
 import type { MunicipioDetalhe } from "../types";
 import { DadosGeraisPanel } from "./DadosGeraisPanel";
+import { GestaoAtivaMunicipio } from "./GestaoAtivaMunicipio";
 import { RankingEstados } from "./RankingEstados";
 import { ScoreEixoPanel } from "./ScoreEixoPanel";
 import { SemaforoGrid } from "./SemaforoGrid";
@@ -36,9 +37,12 @@ export function InicioMunicipio({ municipio }: { municipio: MunicipioDetalhe }) 
             >
               Ver escolas da rede
             </Link>
-            <BotaoRegistrarBarreira className="rounded-xl border-2 border-accent px-4 py-2.5 text-sm font-extrabold text-accent-dark hover:bg-white">
-              Registrar uma barreira
-            </BotaoRegistrarBarreira>
+            <Link
+              href="/participar"
+              className="rounded-xl border-2 border-accent px-4 py-2.5 text-sm font-extrabold text-accent-dark hover:bg-white"
+            >
+              Sou gestor: Gestão Ativa
+            </Link>
           </div>
         </div>
 
@@ -77,6 +81,8 @@ export function InicioMunicipio({ municipio }: { municipio: MunicipioDetalhe }) 
         <DadosGeraisPanel dadosGerais={municipio.dadosGerais} />
       </section>
 
+      <GestaoAtivaMunicipio codigoIbge={municipio.codigoIbge} nome={municipio.nome} />
+
       {/* O que você pode fazer */}
       <section>
         <h2 className="mb-4 text-xl font-extrabold text-gov-blue-dark">O que você pode fazer</h2>
@@ -98,13 +104,16 @@ export function InicioMunicipio({ municipio }: { municipio: MunicipioDetalhe }) 
               Compare municípios de uma região ou estado e cobre sua gestão com evidências.
             </div>
           </Link>
-          <BotaoRegistrarBarreira className="rounded-2xl border border-orange-200 bg-orange-50/60 p-5 text-left shadow-sm hover:shadow">
-            <div className="mb-2 text-2xl">📣</div>
-            <div className="mb-1 font-bold text-accent-dark">Registrar uma barreira</div>
-            <div className="text-[13px] leading-relaxed text-orange-900/70">
-              Faltou intérprete, rampa ou vaga? Registre — vira dado público e alerta aos órgãos.
+          <Link
+            href={`/municipio/${municipio.codigoIbge}/diagnostico`}
+            className="rounded-2xl bg-paper p-5 shadow-sm hover:shadow"
+          >
+            <div className="mb-2 text-2xl">🧭</div>
+            <div className="mb-1 font-bold text-gov-blue-dark">Entender os números</div>
+            <div className="text-[13px] leading-relaxed text-gray-500">
+              Leia uma explicação de cada eixo em linguagem simples, escrita com apoio de IA a partir dos dados do Censo.
             </div>
-          </BotaoRegistrarBarreira>
+          </Link>
         </div>
       </section>
 

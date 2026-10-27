@@ -346,3 +346,40 @@ export type AcoesMunicipaisDaEscola = {
     escolasAtendidas: number;
   }[];
 };
+
+// Dashboard municipal do secretário (requirements/secretario/dashboard-municipal.md).
+export type EscolaPrioritaria = {
+  coEntidade: number;
+  escola: string;
+  score: number;
+  faixa: string;
+  alunosEsp: number | null;
+  peso: number;
+  eixosCriticos: string[];
+  declaracao: boolean;
+  plano: EstadoVersaoPlano | null;
+};
+
+export type DashboardMunicipal = {
+  municipio: string;
+  uf: string;
+  censoVersao: string | null;
+  score: number | null;
+  faixa: string | null;
+  ponderacao: "alunos_esp" | "media_simples";
+  alunosEsp: number;
+  scoreMunicipio: number | null;
+  escolasMunicipio: number;
+  eixos: { eixo: string; nome: string; peso: number; score: number; faixa: string }[];
+  cobertura: {
+    escolasMunicipais: number;
+    escolasComBarreiras: number;
+    comDeclaracao: number;
+    comPlanoEnviado: number;
+    aguardandoAnalise: number;
+    planoMaisAntigo: string | null;
+  };
+  prioridades: EscolaPrioritaria[];
+  escolasNoRanking: number;
+  escolasSemAlunosEsp: number;
+};

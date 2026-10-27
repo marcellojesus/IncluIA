@@ -9,6 +9,7 @@ const ESTILO_POR_STATUS: Record<StatusEixo, { texto: string; chip: string; dot: 
   warn: { texto: "text-gov-orange", chip: "bg-orange-50", dot: "bg-gov-orange", label: "Parcial" },
   nok: { texto: "text-gov-red", chip: "bg-red-50", dot: "bg-gov-red", label: "Não conf." },
   na: { texto: "text-gray-400", chip: "bg-gray-50", dot: "bg-gray-300", label: "Não se aplica" },
+  omitido: { texto: "text-gray-400", chip: "bg-gray-50", dot: "bg-gray-300", label: "Dado omitido" },
 };
 
 function BadgeStatusEixo({ status }: { status: StatusEixo }) {

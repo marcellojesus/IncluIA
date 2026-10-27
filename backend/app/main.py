@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 
-# Precisa rodar antes de importar qualquer módulo de feature — login/security.py e
+# Precisa rodar antes de importar qualquer módulo de feature — acesso/seguranca.py e
 # shared/ai_client.py leem variáveis de ambiente (chaves/segredos) na importação.
 load_dotenv()
 
@@ -17,8 +17,6 @@ from app.features.diagnostico_ia.db import ensure_schema as ensure_schema_diagno
 from app.features.diagnostico_ia.router import router as diagnostico_ia_router  # noqa: E402
 from app.features.escolas.router import router as escolas_router  # noqa: E402
 from app.features.indicadores_municipio.router import router as indicadores_municipio_router  # noqa: E402
-from app.features.login.db import ensure_schema_and_seed  # noqa: E402
-from app.features.login.router import router as login_router  # noqa: E402
 from app.features.mapa.router import router as mapa_router  # noqa: E402
 from app.features.acesso.router import router as acesso_router  # noqa: E402
 from app.features.acesso.router_dev import router as acesso_dev_router  # noqa: E402
@@ -32,6 +30,7 @@ from app.features.plano.router import router_admin as plano_admin_router  # noqa
 from app.features.plano_municipal.router import router as plano_municipal_router  # noqa: E402
 from app.features.plano_municipal.router import router_diretor as acoes_municipais_router  # noqa: E402
 from app.features.plano.router_secretario import router as plano_secretario_router  # noqa: E402
+from app.features.dashboard_municipal.router import router as dashboard_municipal_router  # noqa: E402
 from app.features.acesso import servico as acesso_servico  # noqa: E402
 from app.features.declaracao.conversa import limpar_conversas_paradas  # noqa: E402
 from app.shared import banco_gestao  # noqa: E402
@@ -42,7 +41,6 @@ from app.shared.guardiao_lgpd import carregar as carregar_guardiao_lgpd  # noqa:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    ensure_schema_and_seed()
     ensure_schema_diagnostico_ia()
     # Banco da Gestão Ativa (AD-01): aplica as migrações pendentes antes de aceitar requisições.
     banco_gestao.migrar()
@@ -84,7 +82,6 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-app.include_router(login_router)
 app.include_router(mapa_router)
 app.include_router(indicadores_municipio_router)
 app.include_router(escolas_router)
@@ -101,3 +98,4 @@ app.include_router(plano_admin_router)
 app.include_router(plano_municipal_router)
 app.include_router(acoes_municipais_router)
 app.include_router(plano_secretario_router)
+app.include_router(dashboard_municipal_router)

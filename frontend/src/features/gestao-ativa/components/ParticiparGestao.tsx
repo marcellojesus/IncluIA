@@ -62,7 +62,14 @@ export function ParticiparGestao() {
         </Cartao>
       </div>
 
-      <div className="mt-6">
+      <div className="mt-6 space-y-3">
+        <Aviso>
+          <strong>Não é diretor nem da secretaria?</strong> A área pública não precisa de cadastro: veja o índice do seu município e, na aba
+          Escolas, as barreiras de cada escola e o que ela publicou na Gestão Ativa.{" "}
+          <Link href="/" className="font-bold text-gov-blue underline underline-offset-2">
+            Ir para a área pública
+          </Link>
+        </Aviso>
         <Aviso>
           <strong>Sem gov.br nesta versão.</strong> A confirmação de e-mail prova o controle do canal; o vínculo com a escola ou a
           rede é validado à parte.

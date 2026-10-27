@@ -1,6 +1,6 @@
 # Requisitos — Diretor | Plano de Ação Escolar
 
-**Status:** Proposta para validação · atualizada em 2026-10-18  
+**Status:** Implementado · notas de implementação até 2026-10-26  
 **PRD:** RF-12 a RF-17 e RF-41  
 **Dependência:** Declaração de Obstáculos **emitida** (ver `declaracao-obstaculos.md`)
 

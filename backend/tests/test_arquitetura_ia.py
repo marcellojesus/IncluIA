@@ -13,9 +13,8 @@ from pathlib import Path
 
 import pytest
 
-from app.features.diagnostico_ia import chat_service
 from app.shared import ai_client
-from app.features.diagnostico_ia.schemas import RespostaChatIA
+from app.features.diagnostico_ia.schemas import RespostaIA
 from app.shared.guardiao_lgpd import GuardiaoIndisponivel, TextoBloqueado, liberar_dados_publicos, proteger
 
 APP = Path(__file__).resolve().parents[1] / "app"
@@ -38,10 +37,6 @@ _SDKS_DE_IA = {
 _ARGUMENTOS_LIBERADOS = {
     "montar_prompt_usuario(contexto)",
     "SYSTEM_PROMPT",
-    "montar_system_prompt_chat(eixo, contexto_diagnostico)",
-    "INSTRUCAO_REPROCESSAMENTO",
-    "_MENSAGEM_REPROCESSADO",
-    "_MENSAGEM_REMOVIDA",
     # contexto_ia/montador.py: fatos do Censo, metodologia, cabeçalho fixo e texto legal do corpus
     "_renderizar_fatos(escola, barreiras, foco, base)",
     "_CABECALHO_PRIVADO",
@@ -198,7 +193,7 @@ def test_gerar_resposta_recusa_texto_cru_nas_mensagens(monkeypatch):
     monkeypatch.setattr(ai_client, "_PROVEDORES", [("teste", _provedor_que_nao_pode_ser_chamado)])
     with pytest.raises(TypeError):
         asyncio.run(
-            ai_client.gerar_resposta(_sistema(), [{"role": "user", "content": "O Pedro é cego"}], RespostaChatIA)
+            ai_client.gerar_resposta(_sistema(), [{"role": "user", "content": "O Pedro é cego"}], RespostaIA)
         )
 
 
@@ -207,7 +202,7 @@ def test_gerar_resposta_recusa_system_prompt_cru(monkeypatch):
     mensagem = proteger("Pergunta").texto_protegido
     with pytest.raises(TypeError):
         asyncio.run(
-            ai_client.gerar_resposta("O Pedro é cego", [{"role": "user", "content": mensagem}], RespostaChatIA)
+            ai_client.gerar_resposta("O Pedro é cego", [{"role": "user", "content": mensagem}], RespostaIA)
         )
 
 
@@ -216,42 +211,15 @@ def test_gerar_resposta_envia_so_o_texto_mascarado(monkeypatch):
 
     async def provedor(system_prompt, mensagens):
         recebido["mensagens"] = mensagens
-        return {"resposta": "ok", "recomendacoesAtualizadas": None}
+        return {"situacao": "ok", "analise": "ok"}
 
     monkeypatch.setattr(ai_client, "_PROVEDORES", [("teste", provedor)])
     protegido = proteger("O Pedro, do 3º ano, é cego.").texto_protegido
-    asyncio.run(ai_client.gerar_resposta(_sistema(), [{"role": "user", "content": protegido}], RespostaChatIA))
+    asyncio.run(ai_client.gerar_resposta(_sistema(), [{"role": "user", "content": protegido}], RespostaIA))
 
     enviado = recebido["mensagens"][0]["content"]
     assert isinstance(enviado, str)
     assert "Pedro" not in enviado and "3º ano" not in enviado
-
-
-def _chat_isolado(monkeypatch):
-    gravadas = []
-    monkeypatch.setattr(chat_service, "obter_municipio_detalhe", lambda _codigo: object())
-    monkeypatch.setattr(chat_service, "_persistir_mensagem", lambda *args: gravadas.append(args))
-    monkeypatch.setattr(ai_client, "_PROVEDORES", [("teste", _provedor_que_nao_pode_ser_chamado)])
-    return gravadas
-
-
-def test_chat_bloqueado_nao_grava_nem_chama_a_ia(monkeypatch):
-    gravadas = _chat_isolado(monkeypatch)
-    with pytest.raises(TextoBloqueado):
-        asyncio.run(chat_service.enviar_mensagem(5300108, "I", "O aluno toma Ritalina e tem laudo."))
-    assert gravadas == []
-
-
-def test_chat_com_guardiao_indisponivel_nao_grava_nem_chama_a_ia(monkeypatch):
-    gravadas = _chat_isolado(monkeypatch)
-
-    def indisponivel(_texto):
-        raise GuardiaoIndisponivel("modelo fora")
-
-    monkeypatch.setattr(chat_service, "proteger_ou_falhar", indisponivel)
-    with pytest.raises(GuardiaoIndisponivel):
-        asyncio.run(chat_service.enviar_mensagem(5300108, "I", "Qual a prioridade do eixo?"))
-    assert gravadas == []
 
 
 def test_log_de_falha_nao_carrega_url_nem_resposta():

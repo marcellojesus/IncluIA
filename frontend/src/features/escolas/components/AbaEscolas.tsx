@@ -9,12 +9,13 @@ import type { Escola } from "../types";
 import { ListaEscolas } from "./ListaEscolas";
 import { ModalEscola } from "./ModalEscola";
 
-type Filtro = "" | "critica" | "sem-aee" | "com-plano";
+type Filtro = "" | "critica" | "sem-aee" | "com-declaracao" | "com-plano";
 
 // RN-03 de docs/business-rules/escolas.md: filtros mutuamente exclusivos, sem combinação.
 function aplicarFiltro(escolas: Escola[], filtro: Filtro, publicacoes: Record<number, PublicacaoGestao>): Escola[] {
   if (filtro === "critica") return escolas.filter((e) => e.score < 3);
   if (filtro === "sem-aee") return escolas.filter((e) => e.statusEixoI === "nok");
+  if (filtro === "com-declaracao") return escolas.filter((e) => publicacoes[e.coEntidade]);
   if (filtro === "com-plano") return escolas.filter((e) => publicacoes[e.coEntidade]?.planoVersao);
   return escolas;
 }
@@ -73,11 +74,18 @@ export function AbaEscolas({ codigoIbge }: { codigoIbge: number }) {
             publicação não é escola sem dificuldade: a gestão ainda não publicou seus registros.
           </p>
         </div>
-        {totalComPlano > 0 && filtro !== "com-plano" && (
-          <button onClick={() => setFiltro("com-plano")} className="shrink-0 rounded-lg border-2 border-[#2f9e6b] px-3 py-1.5 text-xs font-bold text-[#2f7a55] hover:bg-[#e7f3ec]">
-            Ver só as com plano
-          </button>
-        )}
+        <div className="flex shrink-0 flex-col gap-1.5">
+          {totalComPlano > 0 && filtro !== "com-plano" && (
+            <button onClick={() => setFiltro("com-plano")} className="rounded-lg border-2 border-[#2f9e6b] px-3 py-1.5 text-xs font-bold text-[#2f7a55] hover:bg-[#e7f3ec]">
+              Ver só as com plano
+            </button>
+          )}
+          {totalComDeclaracao > 0 && filtro !== "com-declaracao" && (
+            <button onClick={() => setFiltro("com-declaracao")} className="rounded-lg border border-gov-blue px-3 py-1.5 text-xs font-bold text-gov-blue hover:bg-gov-blue-lt">
+              Ver só as com Declaração
+            </button>
+          )}
+        </div>
       </section>
 
       <div className="flex items-center justify-end gap-2">
@@ -87,6 +95,7 @@ export function AbaEscolas({ codigoIbge }: { codigoIbge: number }) {
           className="rounded-lg border border-gray-300 bg-paper px-2.5 py-1.5 text-xs font-semibold text-gov-blue-dark"
         >
           <option value="">Todas as escolas</option>
+          <option value="com-declaracao">Com Declaração de Obstáculos publicada</option>
           <option value="com-plano">Com Plano de Ação publicado</option>
           <option value="critica">Situação crítica</option>
           <option value="sem-aee">Sem AEE</option>

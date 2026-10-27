@@ -30,7 +30,5 @@ services:
         sync: false
       - key: GESTAO_DATABASE_URL
         sync: false
-      - key: INCLUIA_JWT_SECRET
-        generateValue: true
       - key: INCLUIA_CORS_ORIGINS
         value: https://inclu-ia.vercel.app,https://escola-sem-barreiras.vercel.app,http://localhost:3000

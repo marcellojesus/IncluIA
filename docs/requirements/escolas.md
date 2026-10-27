@@ -1,5 +1,7 @@
 # Requisitos — Lista de Escolas do Município (Módulo 5)
 
+> **Integração com a Gestão Ativa (2026-10-24 a 2026-10-27).** A ficha da escola mostra as **barreiras identificadas no Censo** (`GET /escolas/{co_entidade}/barreiras`, metodologia de barreiras; contagem abaixo de 5 alunos omitida — PUB-01) e a **Declaração de Obstáculos** e o **Plano de Ação** publicados, com versão e data (PUB-02). A lista mostra selos de publicação e filtra por "Com Declaração de Obstáculos publicada" e "Com Plano de Ação publicado" (PUB-03). Escola sem publicação é apresentada como tal, nunca como escola sem dificuldade.
+
 Fonte de interface: `interface.md` §6. Fonte de contexto: `context.md` (Módulo 5).
 
 ## Objetivo

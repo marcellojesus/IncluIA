@@ -1,5 +1,7 @@
 # Requisitos — Indicadores do Município (Módulo 2)
 
+> **Integração com a Gestão Ativa (2026-10-27).** A Início ganhou o bloco "O que as escolas publicaram" (quantas escolas do município publicaram Declaração de Obstáculos e Plano de Ação, buscado no navegador por causa do limite por IP da rota pública — PUB-04) e a porta de entrada da Gestão Ativa para diretores e secretarias. Os botões "Registrar uma barreira", que só abriam um aviso de função futura, foram substituídos: no topo, "Sou gestor: Gestão Ativa" (leva a `/participar`); no card "O que você pode fazer", "Entender os números" (leva à leitura pública com IA). Ver [impacto da Fase 2](../sdd/fase-2/impacto-fase-1.md).
+
 Fonte de interface: `interface.md` §4 e §5. Fonte de contexto: `context.md` (Módulo 2).
 
 > **Status atual (rastreabilidade)**: esta tela é hoje a "Início" pública de um município (`/municipio/[codigoIbge]`), sem exigir login — ver RN-00/RN-06/RN-07 de `docs/business-rules/indicadores-municipio.md`. RF-01 e RF-05 abaixo descrevem a especificação original (barra de 3 abas + tabela de detalhamento) e ficam mantidos por histórico; RF-13 e RF-14 documentam o que substituiu cada um na tela atual.

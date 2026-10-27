@@ -1,6 +1,6 @@
 # Requisitos — Secretário | Fila e Revisão de Planos Escolares
 
-**Status:** Proposta para validação  
+**Status:** Implementado · notas de implementação até 2026-10-26  
 **PRD:** RF-02 e RF-18 a RF-22
 
 ## Objetivo

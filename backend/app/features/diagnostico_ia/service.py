@@ -1,13 +1,15 @@
 """Spec: docs/requirements/diagnostico-ia.md, docs/business-rules/diagnostico-ia.md
 
-RF-06/RN-08: os 4 eixos são gerados em paralelo, cache independente por eixo. RF-07/RN-04:
+Narrativa pública do município, só leitura e sem login (impacto-fase-1.md, opção 2): gerada uma vez
+por edição do Censo e guardada. RF-06/RN-08: os 4 eixos são gerados em paralelo, guardados por eixo. RF-07/RN-04:
 o contexto enviado à IA é só o que já está pronto em indicadores_municipio (agregados públicos,
 nenhum dado pessoal). RN-02: se todos os provedores falharem, cai para dados brutos sem narrativa.
 """
 
 import asyncio
-import json
 import logging
+import time
+from collections import defaultdict
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -15,13 +17,19 @@ from app.database import get_connection
 from app.features.diagnostico_ia.narrativa import gerar_narrativa
 from app.shared.ai_client import descrever_falha
 from app.features.diagnostico_ia.cache import calcular_chave, obter_do_cache, salvar_no_cache
-from app.features.diagnostico_ia.schemas import DiagnosticoEixo, RecomendacaoIA
+from app.features.diagnostico_ia.schemas import NarrativaEixo, NarrativaMunicipio
 from app.features.indicadores_municipio.schemas import EixoIndicador
 from app.features.indicadores_municipio.service import obter_municipio_detalhe
+from etl.config import CENSO_VERSAO
 
 logger = logging.getLogger("diagnostico_ia")
 
 EIXOS_ROMANOS = ["I", "II", "III", "IV"]
+ESPERA_APOS_FALHA = 600.0
+"""Segundos sem nova chamada à IA para um município depois que todos os provedores falharam."""
+
+_travas: defaultdict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
+_falhou_em: dict[int, float] = {}
 
 _COLUNA_SCORE_EIXO = {
     "I": "score_eixo_i",
@@ -50,19 +58,18 @@ _ARTIGO_VALIDADO_POR_EIXO = {
 _STATUS_TEXTO = {"ok": "adequada", "warn": "em desenvolvimento", "nok": "crítica"}
 
 
-def _fallback_dados_brutos(eixo_romano: str, eixo_indicador: EixoIndicador) -> DiagnosticoEixo:
+def _fallback_dados_brutos(eixo_romano: str, eixo_indicador: EixoIndicador) -> NarrativaEixo:
     situacao_texto = _STATUS_TEXTO[eixo_indicador.status]
     analise = (
         f"{eixo_indicador.label} está com situação {situacao_texto}: {eixo_indicador.valor} "
         f"({eixo_indicador.subtexto}). Diagnóstico narrativo por IA indisponível no momento — "
         "exibindo apenas os dados já calculados do Censo Escolar."
     )
-    return DiagnosticoEixo(
+    return NarrativaEixo(
         eixo=eixo_romano,
         situacao=f"Situação {situacao_texto}",
         analise=analise,
         alerta_legal=None,
-        recomendacoes=[],
         referencia_municipio=None,
         modelo_usado="dados_brutos",
         gerado_em=datetime.now(timezone.utc).isoformat(),
@@ -84,32 +91,8 @@ def _obter_benchmarking(codigo_ibge: int, uf: str, eixo_romano: str, score_atual
         conn.close()
 
 
-def _aplicar_ajuste(codigo_ibge: int, eixo_romano: str, diagnostico: DiagnosticoEixo) -> DiagnosticoEixo:
-    """RN-09: se o chat já ajustou a recomendação deste eixo, ela substitui a gerada
-    automaticamente — mesmo após "Regenerar" o diagnóstico base (decisão deliberada)."""
-    conn = get_connection()
-    try:
-        linha = conn.execute(
-            "SELECT recomendacoes_json, ajustado_em FROM chat_diagnostico_recomendacoes_ajustadas "
-            "WHERE codigo_ibge = ? AND eixo = ?",
-            (codigo_ibge, eixo_romano),
-        ).fetchone()
-    finally:
-        conn.close()
-
-    if linha is None:
-        return diagnostico
-
-    recomendacoes = [RecomendacaoIA.model_validate(r) for r in json.loads(linha["recomendacoes_json"])]
-    return diagnostico.model_copy(
-        update={"recomendacoes": recomendacoes, "recomendacao_ajustada_em": linha["ajustado_em"]}
-    )
-
-
 def _montar_contexto_diagnostico(codigo_ibge: int, indice: int, eixo_romano: str, municipio) -> dict:
-    """Contexto enviado à IA para gerar (ou reprocessar, ver chat_service.py) o diagnóstico de um
-    eixo — extraído para ser reaproveitado tanto na geração automática quanto no reprocessamento
-    via chat (RN-10 de docs/business-rules/diagnostico-ia.md)."""
+    """Contexto enviado à IA para escrever a narrativa de um eixo: só agregados públicos (RN-04)."""
     eixo_indicador = municipio.eixos[indice]
     score_eixo_info = municipio.score_eixos[indice]
     score_eixo = score_eixo_info.percentual / 10
@@ -139,47 +122,55 @@ def _montar_contexto_diagnostico(codigo_ibge: int, indice: int, eixo_romano: str
     }
 
 
-async def _obter_diagnostico_eixo(
-    codigo_ibge: int, indice: int, eixo_romano: str, municipio, forcar: bool
-) -> DiagnosticoEixo:
+async def _gerar_eixo(codigo_ibge: int, indice: int, eixo_romano: str, municipio) -> NarrativaEixo:
     chave = calcular_chave(codigo_ibge, eixo_romano)
-    if not forcar:
-        cacheado = obter_do_cache(chave)
-        if cacheado is not None:
-            return _aplicar_ajuste(codigo_ibge, eixo_romano, cacheado)
-
-    eixo_indicador = municipio.eixos[indice]
-    contexto = _montar_contexto_diagnostico(codigo_ibge, indice, eixo_romano, municipio)
+    guardada = obter_do_cache(chave)
+    if guardada is not None:
+        return guardada
 
     try:
-        resposta_ia, modelo = await gerar_narrativa(contexto)
-        diagnostico = DiagnosticoEixo(
-            eixo=eixo_romano,
-            situacao=resposta_ia.situacao,
-            analise=resposta_ia.analise,
-            alerta_legal=resposta_ia.alerta_legal,
-            recomendacoes=resposta_ia.recomendacoes,
-            referencia_municipio=resposta_ia.referencia_municipio,
-            modelo_usado=modelo,
-            gerado_em=datetime.now(timezone.utc).isoformat(),
-        )
-    except Exception as exc:  # noqa: BLE001 — qualquer falha aqui vira o fallback de dados brutos
-        logger.warning(
-            "IA indisponível para município %s eixo %s: %s", codigo_ibge, eixo_romano, descrever_falha(exc)
-        )
-        diagnostico = _fallback_dados_brutos(eixo_romano, eixo_indicador)
+        resposta_ia, modelo = await gerar_narrativa(_montar_contexto_diagnostico(codigo_ibge, indice, eixo_romano, municipio))
+    except Exception as exc:  # noqa: BLE001 — qualquer falha aqui vira o texto de reserva com dados brutos
+        logger.warning("IA indisponível para município %s eixo %s: %s", codigo_ibge, eixo_romano, descrever_falha(exc))
+        _falhou_em[codigo_ibge] = time.monotonic()
+        return _fallback_dados_brutos(eixo_romano, municipio.eixos[indice])
 
-    salvar_no_cache(chave, codigo_ibge, eixo_romano, diagnostico)
-    return _aplicar_ajuste(codigo_ibge, eixo_romano, diagnostico)
+    narrativa = NarrativaEixo(
+        eixo=eixo_romano, situacao=resposta_ia.situacao, analise=resposta_ia.analise, alerta_legal=resposta_ia.alerta_legal,
+        referencia_municipio=resposta_ia.referencia_municipio, modelo_usado=modelo, gerado_em=datetime.now(timezone.utc).isoformat(),
+    )
+    salvar_no_cache(chave, codigo_ibge, narrativa)
+    return narrativa
 
 
-async def obter_diagnostico_municipio(codigo_ibge: int, forcar: bool) -> Optional[list[DiagnosticoEixo]]:
+def guardada(codigo_ibge: int) -> Optional[NarrativaMunicipio]:
+    """A narrativa completa já guardada para a edição atual, sem chamar a IA."""
+    eixos = [obter_do_cache(calcular_chave(codigo_ibge, eixo)) for eixo in EIXOS_ROMANOS]
+    if any(e is None for e in eixos):
+        return None
+    return NarrativaMunicipio(codigo_ibge=codigo_ibge, censo_versao=CENSO_VERSAO, eixos=eixos)
+
+
+async def obter_narrativa_municipio(codigo_ibge: int) -> Optional[NarrativaMunicipio]:
+    """Narrativa guardada; se faltar algum eixo, gera só os que faltam, um pedido por município de cada vez.
+
+    Depois de uma falha da IA, por ESPERA_APOS_FALHA o município recebe o texto de reserva sem nova tentativa,
+    para visitantes não repetirem chamadas a um provedor fora do ar.
+    """
     municipio = obter_municipio_detalhe(codigo_ibge)
     if municipio is None:
         return None
-
-    tarefas = [
-        _obter_diagnostico_eixo(codigo_ibge, indice, eixo_romano, municipio, forcar)
-        for indice, eixo_romano in enumerate(EIXOS_ROMANOS)
-    ]
-    return list(await asyncio.gather(*tarefas))
+    async with _travas[codigo_ibge]:
+        pronta = guardada(codigo_ibge)
+        if pronta is not None:
+            return pronta
+        if time.monotonic() - _falhou_em.get(codigo_ibge, -ESPERA_APOS_FALHA) < ESPERA_APOS_FALHA:
+            eixos = [
+                obter_do_cache(calcular_chave(codigo_ibge, eixo)) or _fallback_dados_brutos(eixo, municipio.eixos[i])
+                for i, eixo in enumerate(EIXOS_ROMANOS)
+            ]
+        else:
+            eixos = list(await asyncio.gather(*(
+                _gerar_eixo(codigo_ibge, indice, eixo, municipio) for indice, eixo in enumerate(EIXOS_ROMANOS)
+            )))
+    return NarrativaMunicipio(codigo_ibge=codigo_ibge, censo_versao=CENSO_VERSAO, eixos=eixos)

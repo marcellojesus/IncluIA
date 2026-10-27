@@ -3,8 +3,8 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 import type { Eu } from "./types";
 
-// Sessão da Gestão Ativa, separada da sessão pública da Fase 1 (RF-12 do acesso): entrar ou sair
-// aqui não mexe no login do Diagnóstico IA, e vice-versa. O token só identifica a conta; o
+// Sessão da Gestão Ativa, a única do produto: a área pública não tem login desde 2026-10-27
+// (RF-12 do acesso). O token só identifica a conta; o
 // servidor confere conta e vínculo a cada requisição.
 //
 // Só o token é guardado, e só na aba (sessionStorage): computadores de escola são compartilhados,

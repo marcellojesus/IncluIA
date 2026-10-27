@@ -1,17 +1,18 @@
 "use client";
 
-// Painel do secretário municipal: fila de Planos de Ação, Plano Estratégico Municipal, Declarações e vínculos.
+// Painel do secretário municipal: dashboard da rede (tela inicial, DMS-RF-01), fila de Planos de Ação, Plano Estratégico Municipal, Declarações e vínculos.
 // O topo destaca o que depende do secretário (planos aguardando análise, pedidos de acesso a validar).
 import { useCallback, useEffect, useState } from "react";
 
 import { getFilaPlanos, listarVinculos } from "../api";
 import type { Eu } from "../types";
+import { DashboardMunicipal } from "./DashboardMunicipal";
 import { DeclaracoesRede } from "./DeclaracoesRede";
 import { FilaPlanos } from "./FilaPlanos";
 import { PlanoMunicipal } from "./PlanoMunicipal";
 import { VinculosSecretario } from "./VinculosSecretario";
 
-type Aba = "planos" | "municipal" | "declaracoes" | "vinculos";
+type Aba = "rede" | "planos" | "municipal" | "declaracoes" | "vinculos";
 
 type Pendencias = { planos: number; planoMaisAntigo: string | null; vinculos: number; vinculoMaisAntigo: string | null };
 
@@ -28,7 +29,7 @@ function maisAntigo(datas: string[]) {
 }
 
 export function PainelSecretario({ eu }: { eu: Eu }) {
-  const [aba, setAba] = useState<Aba>("planos");
+  const [aba, setAba] = useState<Aba>("rede");
   const [pendencias, setPendencias] = useState<Pendencias | null>(null);
 
   const atualizar = useCallback(async () => {
@@ -51,7 +52,7 @@ export function PainelSecretario({ eu }: { eu: Eu }) {
     atualizar();
   }, [atualizar]);
 
-  const contagem: Record<Aba, number> = { planos: pendencias?.planos ?? 0, municipal: 0, declaracoes: 0, vinculos: pendencias?.vinculos ?? 0 };
+  const contagem: Record<Aba, number> = { rede: 0, planos: pendencias?.planos ?? 0, municipal: 0, declaracoes: 0, vinculos: pendencias?.vinculos ?? 0 };
   const total = contagem.planos + contagem.vinculos;
 
   return (
@@ -97,6 +98,7 @@ export function PainelSecretario({ eu }: { eu: Eu }) {
         <div role="tablist" aria-label="Áreas da secretaria" className="mt-4 flex gap-1 border-b border-black/10">
           {(
             [
+              ["rede", "Visão da rede"],
               ["planos", "Planos das escolas"],
               ["municipal", "Plano municipal"],
               ["declaracoes", "Declarações das escolas"],
@@ -121,7 +123,9 @@ export function PainelSecretario({ eu }: { eu: Eu }) {
           ))}
         </div>
       </div>
-      {aba === "planos" ? (
+      {aba === "rede" ? (
+        <DashboardMunicipal onAbrir={setAba} />
+      ) : aba === "planos" ? (
         <div className="mx-auto max-w-6xl px-6 py-6">
           <h1 className="text-3xl font-extrabold text-gov-blue-dark">Planos de Ação das escolas</h1>
           <p className="mb-5 mt-2 max-w-3xl text-[15px] text-gray-600">

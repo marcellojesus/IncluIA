@@ -5,6 +5,8 @@
 **Data da observação:** 2026-10-11  
 **Escopo:** frontend Next.js e backend FastAPI presentes no workspace. Não implica certificação do deploy de produção.
 
+> **Atualização de 2026-10-27 (integração com a Fase 2):** o login e o autocadastro descritos aqui saíram do ar, e a área pública não pede conta. O Diagnóstico IA virou uma leitura pública do município, sem chat e sem recomendações. As fichas das escolas e a Início ganharam os dados públicos da Gestão Ativa. Detalhes em [impacto-fase-1.md](../fase-2/impacto-fase-1.md). O texto abaixo descreve a Fase 1 como observada em 2026-10-11.
+
 ## Resumo
 
 A Fase 1 apresenta publicamente indicadores agregados do Censo Escolar sobre educação especial inclusiva, com referência à Política Nacional de Educação Especial Inclusiva (PNEEI). Visitantes podem navegar entre municípios, consultar scores e indicadores por eixo, consultar escolas e comparar rankings. Usuários com conta podem acessar o Diagnóstico com inteligência artificial (IA), que explica os indicadores por eixo e oferece chat de acompanhamento.

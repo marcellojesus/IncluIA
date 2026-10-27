@@ -19,6 +19,7 @@ import type {
   DeclaracoesDaRede,
   PreviaPublica,
   DashboardEscola,
+  DashboardMunicipal,
   EstadoDeclaracao,
   Eu,
   MensagemConversa,
@@ -147,6 +148,8 @@ export const submeterPlano = () => chamar<VersaoPlano>(`${plano}/submeter`, post
 
 // --- Secretário: fila e revisão de planos (backend/app/features/plano/router_secretario.py) ------
 export const getFilaPlanos = () => chamar<FilaPlanos>("/secretario/planos", {}, true);
+
+export const getDashboardMunicipal = () => chamar<DashboardMunicipal>("/secretario/dashboard", {}, true);
 
 export const getRevisaoPlano = (coEntidade: number, numero: number) =>
   chamar<RevisaoPlano>(`/secretario/planos/${coEntidade}/versoes/${numero}`, {}, true);

@@ -4,6 +4,6 @@ Specs: `docs/sdd/fase-2/requirements/acesso-gestao-ativa.md` · `docs/sdd/fase-2
 
 Rotas: `/participar` (entrada pública), `/gestao/entrar` (código por e-mail), `/gestao/diretor`, `/gestao/secretario`, `/gestao/admin`.
 
-Sessão própria (`store.ts`), separada do login da Fase 1 (RF-12). A autorização de verdade é do backend: `AreaRestrita` só evita mostrar tela vazia e redireciona quem não tem acesso.
+Sessão própria (`store.ts`), a única do produto: o login da Fase 1 saiu do ar em 2026-10-27 e `/login` redireciona para `/gestao/entrar` (RF-12). A autorização de verdade é do backend: `AreaRestrita` só evita mostrar tela vazia e redireciona quem não tem acesso.
 
-Ambiente local: `python -m app.features.acesso.cli demo` (em `backend/`) cria administrador, secretária de Niterói/RJ e um pedido de diretora pendente; os códigos aparecem no console do backend.
+Ambiente local: `python -m app.features.acesso.cli demo` (em `backend/`) cria administrador, secretária de Niterói/RJ e um pedido de diretora pendente; os códigos aparecem no console do backend e na caixa de teste `/gestao/dev/emails` (só `AMBIENTE=dev`).

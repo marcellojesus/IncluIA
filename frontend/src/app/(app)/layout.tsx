@@ -5,8 +5,7 @@ import { GeoFiltroBar } from "@/shared/components/GeoFiltroBar";
 
 // Shell das telas públicas (Início, Escolas, Diagnóstico IA, Comparar, Dados abertos, Sobre,
 // Participar) — cabeçalho com navegação + filtro geográfico fixo (Região→UF→Município) + rodapé.
-// A tela de Login não usa este layout (fica fora do grupo de rotas (app)), mas replica a mesma
-// BarraAcessibilidade — ver features/login/components/LoginPage.tsx e app/metodologia/page.tsx.
+// A Gestão Ativa (/gestao/*) e a Metodologia ficam fora do grupo (app), com moldura própria.
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen flex-col overflow-hidden bg-cream">

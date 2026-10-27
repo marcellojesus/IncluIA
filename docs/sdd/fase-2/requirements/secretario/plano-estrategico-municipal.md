@@ -1,6 +1,6 @@
 # Requisitos — Secretário | Plano Estratégico Municipal
 
-**Status:** Proposta para validação  
+**Status:** Implementado · notas de implementação até 2026-10-26  
 **PRD:** RF-26 a RF-30
 
 ## Objetivo

@@ -4,11 +4,12 @@
 // Diferente do antigo ContextoMunicipioBar (abas dentro da tela de município), os itens
 // "Escolas" e "Diagnóstico IA" agora são rotas de nível superior, escopadas ao município
 // selecionado no filtro geográfico (GeoFiltroBar) — ver useAppStore.municipioSelecionado.
+// A área pública não tem login: a única porta de entrada é a Gestão Ativa (/participar), para
+// diretores e secretarias (login da Fase 1 desativado em 2026-10-27, impacto-fase-1.md).
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
-import { BotaoRegistrarBarreira } from "@/shared/components/BotaoRegistrarBarreira";
 import { Logo } from "@/shared/components/Logo";
 import { useAppStore } from "@/shared/store/useAppStore";
 
@@ -27,16 +28,8 @@ function itensNav(codigoIbge: number | undefined): ItemNav[] {
 }
 
 export function AppHeader() {
-  const router = useRouter();
   const pathname = usePathname();
-  const usuario = useAppStore((s) => s.usuario);
-  const logout = useAppStore((s) => s.logout);
   const municipioSelecionado = useAppStore((s) => s.municipioSelecionado);
-
-  function handleSair() {
-    logout();
-    router.push("/login");
-  }
 
   return (
     <header className="flex-shrink-0 border-b border-black/5 bg-paper">
@@ -77,23 +70,13 @@ export function AppHeader() {
         </nav>
 
         <div className="ml-auto flex items-center gap-4">
-          <BotaoRegistrarBarreira className="rounded-full bg-accent px-4 py-2 text-xs font-extrabold text-white hover:bg-accent-dark">
-            Registrar barreira
-          </BotaoRegistrarBarreira>
-          {usuario ? (
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              <span>
-                👤 <strong className="text-gov-blue-dark">{usuario.nome}</strong>
-              </span>
-              <button onClick={handleSair} className="underline underline-offset-2 hover:text-gov-blue-dark">
-                Sair
-              </button>
-            </div>
-          ) : (
-            <Link href="/login" className="text-xs font-semibold text-gray-500 underline underline-offset-2 hover:text-gov-blue-dark">
-              Entrar
-            </Link>
-          )}
+          <Link
+            href="/participar"
+            title="Para diretores de escola e secretarias municipais"
+            className="rounded-full bg-accent px-4 py-2 text-xs font-extrabold text-white hover:bg-accent-dark"
+          >
+            Gestão Ativa
+          </Link>
         </div>
       </div>
     </header>

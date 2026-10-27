@@ -1,5 +1,7 @@
 # Regras de Negócio — Sobre (Módulo novo)
 
+> **2026-10-27:** a página apresenta as duas partes do produto — a área pública e a Gestão Ativa (diretores e secretarias, com link para `/participar`). O rodapé de todas as telas públicas ganhou o link "Gestão Ativa (escolas e secretarias)".
+
 ## RN-01 — `/sobre` é uma página real, não um placeholder
 
 `/sobre` deixou de usar `PaginaEmConstrucao` — todo o conteúdo descrito neste documento está implementado (`frontend/src/app/(app)/sobre/page.tsx`), diferente de `/dados-abertos` (parcialmente real, ver [[dados-abertos]]) e `/participar` (ainda placeholder).

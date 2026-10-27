@@ -22,6 +22,10 @@ export default function DadosAbertosPage() {
           </a>
           .
         </p>
+        <p className="mt-3 text-[14px] leading-relaxed text-gray-600">
+          As Declarações de Obstáculos e os Planos de Ação que as escolas publicam na Gestão Ativa aparecem na ficha de cada escola, com
+          versão e data. Elas não são oferecidas para download em massa: são textos das escolas, que podem ser retirados de publicação.
+        </p>
       </section>
 
       <section className="flex items-center justify-between gap-4 rounded-2xl bg-gov-blue-dark p-6 text-white">

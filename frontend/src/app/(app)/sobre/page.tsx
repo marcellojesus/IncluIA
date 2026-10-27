@@ -26,6 +26,29 @@ export default function SobrePage() {
         </p>
       </section>
 
+      <section className="grid gap-4 md:grid-cols-2">
+        <div className="rounded-2xl bg-paper p-6 shadow-sm">
+          <Rotulo>Área pública</Rotulo>
+          <h2 className="mb-2 text-lg font-extrabold text-gov-blue-dark">Para famílias, imprensa e sociedade</h2>
+          <p className="text-sm leading-relaxed text-gray-600">
+            Índice de inclusão por município e escola, barreiras identificadas no Censo, comparação entre redes e uma leitura de cada eixo
+            escrita com apoio de IA. Também mostra o que as escolas publicaram na Gestão Ativa. Não precisa de cadastro.
+          </p>
+        </div>
+        <div className="rounded-2xl bg-paper p-6 shadow-sm">
+          <Rotulo>Gestão Ativa</Rotulo>
+          <h2 className="mb-2 text-lg font-extrabold text-gov-blue-dark">Para diretores de escola e secretarias</h2>
+          <p className="text-sm leading-relaxed text-gray-600">
+            A escola explica cada barreira numa Declaração de Obstáculos e propõe um Plano de Ação; a secretaria municipal analisa os planos
+            e monta o plano da rede. O acesso é validado pela secretaria. A escola decide o que publicar, sem alterar os dados do Censo nem o
+            índice.
+          </p>
+          <Link href="/participar" className="mt-3 inline-block text-sm font-bold text-gov-blue hover:underline">
+            Conhecer a Gestão Ativa →
+          </Link>
+        </div>
+      </section>
+
       <div className="rounded-2xl border border-orange-200 bg-orange-50 px-5 py-4 text-sm leading-relaxed text-orange-900">
         <strong>Protótipo acadêmico:</strong> número baseado no Censo Escolar — Microdados do
         Censo Escolar da Educação Básica 2025.{" "}

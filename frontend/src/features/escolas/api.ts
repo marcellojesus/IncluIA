@@ -56,3 +56,18 @@ export async function getPublicacoesGestao(codigoIbge: number): Promise<Publicac
   if (!res.ok) return [];
   return (await res.json()).escolas;
 }
+
+// Barreiras identificadas no Censo pela metodologia de barreiras (PUB-01), com ou sem Declaração publicada.
+// `pontos` vem null quando revelaria a contagem de uma turma com menos de 5 alunos.
+export type BarreirasDaEscola = {
+  coEntidade: number;
+  censoVersao: string;
+  metodologiaVersao: string;
+  barreiras: { codigo: string; eixo: string; nome: string; dadoCenso: string; pontos: number | null; nota: string | null }[];
+};
+
+export async function getBarreirasDaEscola(coEntidade: number): Promise<BarreirasDaEscola | null> {
+  const res = await fetch(`${API_BASE_URL}/escolas/${coEntidade}/barreiras`);
+  if (!res.ok) return null;
+  return res.json();
+}

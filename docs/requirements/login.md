@@ -1,5 +1,7 @@
 # Requisitos — Login / Autenticação
 
+> **Desativado em 2026-10-27** ([impacto da Fase 2](../sdd/fase-2/impacto-fase-1.md)). A área pública não tem login; o Diagnóstico IA virou uma leitura pública sem conta. O único login do produto é o da Gestão Ativa (código por e-mail, só para diretores e secretarias com vínculo validado — [requisitos de acesso](../sdd/fase-2/requirements/acesso-gestao-ativa.md)). `/login` redireciona para `/gestao/entrar`; as rotas `/auth/*` e o autocadastro saíram do ar. Este documento fica como histórico. Pendente: o destino das contas já gravadas na tabela `usuarios` de `data/incluia.db`.
+
 Fonte de interface: `interface.md` §2. Fonte de contexto: `context.md` (perfis de acesso), `arquitetura.md` (backend FastAPI).
 
 ## Objetivo

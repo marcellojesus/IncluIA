@@ -1,6 +1,6 @@
 # Requisitos — Diretor | Dashboard da Situação Atual da Escola
 
-**Status:** Proposta para validação  
+**Status:** Implementado · notas de implementação em 2026-10-26  
 **PRD:** RF-01, RF-02, RF-33, RF-35 e RF-38  
 **Dependência:** acesso aprovado e vínculo ativo com a escola
 
@@ -34,3 +34,18 @@ Ser a tela inicial do diretor na Gestão Ativa e oferecer uma visão ampliada e 
 ## Decisões pendentes
 
 Quais indicadores detalhados serão exibidos além dos quatro eixos; como mostrar data/edição dos dados; se score deve ser apresentado em destaque ou contextualizado; comportamento quando dados do Censo e relato do diretor divergem.
+
+## Notas de implementação (2026-10-23, revisadas em 2026-10-26)
+
+- **Código:** backend em `backend/app/features/diretor/` (`GET /gestao/diretor/escola`, escola vinda do vínculo); telas `DashboardDiretor.tsx` e `PainelTrabalhoDiretor.tsx`, rota `/gestao/diretor`.
+- **Decisões que o código fixou:**
+  - **indicadores:** score e faixa em destaque, com o aviso de que não é certificação legal; os quatro eixos; matrículas da educação especial e em classe comum; o dado do Censo de cada barreira;
+  - **edição dos dados:** um selo único "Censo {edição}" e a versão da metodologia de barreiras; não há fonte por métrica;
+  - **divergência entre Censo e relato:** vira a posição "divergência com o dado do Censo", que não altera o indicador.
+- **Painel de pendências:** lista o que depende do diretor, em ordem de prioridade: ajustar o plano após pedido de ajustes ou reprovação (urgente); registrar obstáculos ou emitir a Declaração; reemitir quando há alterações; fazer o plano; atualizar a base do plano; publicar a Declaração ou o plano aceito.
+- **Ações municipais:** o dashboard mostra as ações da última versão confirmada do Plano Estratégico Municipal que atendem a escola (ver `../secretario/plano-estrategico-municipal.md`).
+- **Diferenças em relação ao texto:**
+  - a versão emitida da Declaração aparece na tela como "Registrada";
+  - o atalho por eixo (`/gestao/diretor/declaracao?eixo=`) preserva o eixo, mas não a barreira (DSE-RF-05);
+  - matrícula ausente no Censo aparece como 0, não como "indisponível" (DSE-RF-02 e RN-DSE-05 pedem "indisponível").
+- Sem a metodologia de barreiras no servidor, a rota responde 503.

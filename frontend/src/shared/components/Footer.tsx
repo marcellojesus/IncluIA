@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-// Rodapé presente em todas as telas (login e pós-login).
+// Rodapé das telas públicas (grupo (app)).
 export function Footer() {
   return (
     <div className="flex flex-shrink-0 flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-gov-blue-dark px-4 py-3 text-center text-xs text-white/50">
@@ -14,6 +14,10 @@ export function Footer() {
       <span className="text-white/20">|</span>
       <Link href="/sobre" className="underline-offset-2 hover:text-white/80 hover:underline">
         Sobre o projeto
+      </Link>
+      <span className="text-white/20">|</span>
+      <Link href="/participar" className="underline-offset-2 hover:text-white/80 hover:underline">
+        Gestão Ativa (escolas e secretarias)
       </Link>
     </div>
   );

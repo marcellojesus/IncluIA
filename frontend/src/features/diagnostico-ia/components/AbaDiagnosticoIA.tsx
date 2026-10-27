@@ -1,139 +1,68 @@
 "use client";
 
-// Ver interface.md §7 — composição completa da aba Diagnóstico IA.
+// Ver interface.md §7. Narrativa pública do município (impacto-fase-1.md, opção 2): só leitura, sem
+// login e sem chat, escrita uma vez por edição do Censo. Rotulada como texto gerado por IA (PUB-05).
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Panel } from "@/shared/components/Panel";
-import { ErroAutenticacao, getDiagnostico } from "../api";
-import type { DiagnosticoEixo, RecomendacaoIA } from "../types";
+import { getNarrativa } from "../api";
+import type { NarrativaMunicipio } from "../types";
 import { DiagnosticoEixoCard } from "./DiagnosticoEixoCard";
 
-function tempoDecorrido(geradoEm: string): string {
-  const minutos = Math.max(0, Math.round((Date.now() - new Date(geradoEm).getTime()) / 60000));
-  if (minutos < 1) return "agora mesmo";
-  if (minutos < 60) return `há ${minutos} min`;
-  const horas = Math.round(minutos / 60);
-  return `há ${horas}h`;
-}
-
 export function AbaDiagnosticoIA({ codigoIbge }: { codigoIbge: number }) {
-  const [diagnosticos, setDiagnosticos] = useState<DiagnosticoEixo[] | null>(null);
+  const [narrativa, setNarrativa] = useState<NarrativaMunicipio | null>(null);
   const [erro, setErro] = useState<string | null>(null);
-  const [precisaLogin, setPrecisaLogin] = useState(false);
-  const [gerando, setGerando] = useState(false);
-
-  function carregar(forcar: boolean) {
-    setGerando(true);
-    setErro(null);
-    getDiagnostico(codigoIbge, forcar)
-      .then((d) => {
-        setDiagnosticos(d);
-        setGerando(false);
-      })
-      .catch((e) => {
-        if (e instanceof ErroAutenticacao) {
-          setPrecisaLogin(true);
-        } else {
-          setErro("Não foi possível gerar o diagnóstico agora. Tente novamente em instantes.");
-        }
-        setGerando(false);
-      });
-  }
 
   useEffect(() => {
-    carregar(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let ativo = true;
+    getNarrativa(codigoIbge)
+      .then((dados) => ativo && setNarrativa(dados))
+      .catch((falha) => ativo && setErro((falha as Error).message));
+    return () => {
+      ativo = false;
+    };
   }, [codigoIbge]);
 
-  if (precisaLogin) {
+  if (erro) return <p className="text-sm text-gov-red">{erro}</p>;
+
+  if (!narrativa) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-        <p className="text-sm text-gray-500">
-          Sua sessão expirou. Faça login novamente para acessar o Diagnóstico IA.
-        </p>
-        <Link
-          href={`/login?redirect=${encodeURIComponent(`/municipio/${codigoIbge}/diagnostico`)}`}
-          className="rounded-lg bg-gov-blue px-4 py-2 text-sm font-bold text-white"
-        >
-          Fazer login
-        </Link>
+      <div role="status" className="flex flex-col items-center justify-center gap-2 py-16 text-sm text-gray-400">
+        Carregando a leitura do município…
       </div>
     );
   }
 
-  if (erro) {
-    return <p className="text-sm text-gov-red">{erro}</p>;
-  }
-
-  if (!diagnosticos) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-2 py-16 text-sm text-gray-400">
-        <div>🤖 Gerando diagnóstico por IA — pode levar alguns segundos…</div>
-      </div>
-    );
-  }
-
-  const modelos = Array.from(new Set(diagnosticos.map((d) => d.modeloUsado)));
-  const geradoEm = diagnosticos[0]?.geradoEm;
-
-  function atualizarRecomendacoes(eixo: DiagnosticoEixo["eixo"], recomendacoes: RecomendacaoIA[]) {
-    setDiagnosticos((atual) =>
-      (atual ?? []).map((d) =>
-        d.eixo === eixo
-          ? { ...d, recomendacoes, recomendacaoAjustadaEm: new Date().toISOString() }
-          : d,
-      ),
-    );
-  }
-
-  function substituirDiagnostico(eixo: DiagnosticoEixo["eixo"], novoDiagnostico: DiagnosticoEixo) {
-    setDiagnosticos((atual) => (atual ?? []).map((d) => (d.eixo === eixo ? novoDiagnostico : d)));
-  }
+  const comIA = narrativa.eixos.filter((e) => e.modeloUsado !== "dados_brutos");
+  const modelos = Array.from(new Set(comIA.map((e) => e.modeloUsado)));
+  const geradoEm = comIA[0]?.geradoEm;
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-400">
-          Análise gerada por <strong>{modelos.join(", ")}</strong> com base nos dados do Censo
-          Escolar 2025 · Cache de 24h.
-        </p>
-        <div className="flex gap-2">
-          <button
-            onClick={() => carregar(true)}
-            disabled={gerando}
-            className="rounded bg-gov-blue px-3 py-1.5 text-xs font-bold text-white disabled:opacity-60"
-          >
-            {gerando ? "⏳ Gerando…" : "🔄 Regenerar"}
-          </button>
-          <button
-            disabled
-            title="Disponível em uma fase futura"
-            className="cursor-not-allowed rounded border border-gray-300 px-3 py-1.5 text-xs text-gray-400"
-          >
-            📄 Exportar PDF (em breve)
-          </button>
-        </div>
-      </div>
+      <p className="rounded-r border-l-4 border-gov-blue bg-gov-blue-lt px-4 py-3 text-[13px] leading-relaxed text-ink">
+        <strong>Texto gerado por inteligência artificial</strong>
+        {modelos.length > 0 && <> ({modelos.join(", ")})</>} a partir dos dados do Censo Escolar {narrativa.censoVersao}
+        {geradoEm && <>, em {new Date(geradoEm).toLocaleDateString("pt-BR")}</>}. A IA só explica os números: a situação de cada eixo vem do
+        cálculo do índice, não da IA. É uma leitura dos dados, não um parecer jurídico nem um plano de ação.
+        {comIA.length < narrativa.eixos.length && (
+          <> Alguns eixos mostram só o dado calculado, porque a IA não respondeu; a leitura completa será escrita depois.</>
+        )}
+      </p>
 
-      <Panel
-        titulo="Diagnóstico por Eixo da PNEEI"
-        acao={
-          geradoEm && (
-            <span className="text-[11px] text-gray-400">atualizado {tempoDecorrido(geradoEm)}</span>
-          )
-        }
-      >
-        {diagnosticos.map((d) => (
-          <DiagnosticoEixoCard
-            key={d.eixo}
-            diagnostico={d}
-            codigoIbge={codigoIbge}
-            onRecomendacoesAtualizadas={atualizarRecomendacoes}
-            onDiagnosticoReprocessado={substituirDiagnostico}
-          />
+      <Panel titulo="Leitura por eixo da PNEEI">
+        {narrativa.eixos.map((eixo) => (
+          <DiagnosticoEixoCard key={eixo.eixo} diagnostico={eixo} />
         ))}
       </Panel>
+
+      <p className="text-[12px] text-gray-500">
+        Quer saber o que cada escola fez diante das barreiras? Veja as Declarações de Obstáculos e os Planos de Ação publicados na{" "}
+        <Link href={`/municipio/${codigoIbge}/escolas`} className="font-semibold text-gov-blue underline underline-offset-2">
+          aba Escolas
+        </Link>
+        .
+      </p>
     </div>
   );
 }

@@ -25,3 +25,17 @@ O botão "Exportar" pode ser entregue como Fase 2 sem bloquear o lançamento do 
 Uma escola com `IN_ESPECIAL_EXCLUSIVA = 1` **e nenhuma** matrícula da educação especial em classe comum (`QT_MAT_ESP_CC = 0`) não deve ser exibida como "❌ Crítico" no Eixo IV da mesma forma que uma escola regular que segrega alunos indevidamente. A interface deve diferenciar (ex.: rótulo "Eixo IV não aplicável") em vez de aplicar cegamente a fórmula de taxa de inclusão em classe comum. Escolas com `IN_ESPECIAL_EXCLUSIVA = 1` que também têm matrículas em classe comum seguem a regra normal do Eixo IV.
 
 **Por quê**: no dicionário do Censo 2025, `IN_ESPECIAL_EXCLUSIVA = 1` significa que a escola **possui ao menos uma classe especial exclusiva**, não que seja exclusivamente especial (correção da `metodologia_score.md` v1.1). O tratamento de "não aplicável" vale só quando de fato não há classe comum para a educação especial.
+
+## RN-06 — Escola com menos de 5 matrículas da educação especial tem dados protegidos na área pública
+
+**Decisão de 2026-10-27** (pendência 13 da arquitetura; achado alto do AgLGPD). Quando a escola tem de 1 a 4 matrículas da educação especial, a API pública (`GET /escolas/{co}` e `GET /municipios/{c}/escolas`) e as telas:
+- devolvem `alunosEsp: null`, que a tela mostra como "menos de 5";
+- mostram o Eixo IV como "omitido" e não marcam a escola como "especial exclusiva";
+- calculam um **score público** que troca a taxa de classe comum da escola (`V_taxa_cc`) pela média das escolas do município com 5 ou mais matrículas (da UF, se o município não tiver nenhuma). É a mesma ideia da regra do ETL para escolas sem matrícula. Faixa, cor e ranking no município usam esse score público;
+- nas barreiras públicas (`GET /escolas/{co}/barreiras`), trocam a barreira do Eixo IV por um item fixo "dado omitido", igual com ou sem classe exclusiva.
+
+**Por quê:** com 1 aluno, a diferença entre ele estar em classe comum ou exclusiva é de 1,5 ponto no score. Somados à lista de barreiras e a um relato publicado na Declaração, o número exato e o score exato diriam onde aquela criança estuda.
+
+**Onde o score real continua:** no ETL (`data/incluia.db`), no score do município (agregação ponderada da RN-03 de `score-incluia.md`) e no painel privado do diretor e do secretário.
+
+**Risco que continua:** o score do município e o total de alunos são calculados com o score real. Num município com uma única escola pequena, subtrair as escolas públicas do total permite, em tese, chegar ao score real dela. Os microdados do INEP também são públicos. A proteção evita que a plataforma entregue a combinação pronta; não torna o dado secreto.

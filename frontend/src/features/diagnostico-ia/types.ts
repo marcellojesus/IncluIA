@@ -1,35 +1,20 @@
 // Ver docs/requirements/diagnostico-ia.md "Dados de entrada/saída".
 
-export type RecomendacaoIA = {
-  acao: string;
-  custoEstimado: string;
-  prazo: string;
-  impactoAlunos: number;
-  fundamentacao: string;
-};
-
 export type Eixo = "I" | "II" | "III" | "IV";
 
-export type DiagnosticoEixo = {
+export type NarrativaEixo = {
   eixo: Eixo;
   situacao: string;
   analise: string;
-  alertaLegal?: string;
-  recomendacoes: RecomendacaoIA[];
-  referenciaMunicipio?: string;
+  alertaLegal?: string | null;
+  referenciaMunicipio?: string | null;
+  // "dados_brutos" quando nenhum provedor de IA respondeu: o texto é só o dado calculado.
   modeloUsado: string;
   geradoEm: string;
-  recomendacaoAjustadaEm?: string;
-  reprocessadoEm?: string;
 };
 
-export type MensagemChat = {
-  papel: "user" | "assistant";
-  conteudo: string;
-  criadoEm: string;
-};
-
-export type RespostaChatIA = {
-  resposta: string;
-  recomendacoesAtualizadas?: RecomendacaoIA[] | null;
+export type NarrativaMunicipio = {
+  codigoIbge: number;
+  censoVersao: string;
+  eixos: NarrativaEixo[];
 };

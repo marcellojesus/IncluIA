@@ -12,7 +12,6 @@ from sqlalchemy import select
 
 from app.features.acesso import servico
 from app.features.acesso.modelos import CodigoUsoUnico, Conta, EventoAuditoria, Vinculo
-from app.features.login.security import criar_token as criar_token_fase1
 from app.main import app
 from app.shared import banco_gestao
 from app.shared import email as envio
@@ -247,9 +246,12 @@ def test_perfis_nao_cruzam_rotas(ambiente):
     assert cliente.get("/gestao/secretario/vinculos", headers=admin).status_code == 403
 
 
-def test_token_da_fase_1_nao_vale(ambiente):
+def test_token_de_outro_emissor_nao_vale(ambiente):
+    """O login da Fase 1 saiu do ar em 2026-10-27; um JWT com outro segredo e sem a audiência continua recusado."""
+    import jwt
+
     cliente, _ = ambiente
-    token = criar_token_fase1(usuario_id="u-joao-niteroi", nome="João", perfil="municipal", municipio_id=NITEROI, uf="RJ")
+    token = jwt.encode({"sub": "u-joao-niteroi", "perfil": "municipal", "municipioId": NITEROI}, "dev-secret-change-me", algorithm="HS256")
     assert cliente.get("/gestao/eu", headers=_auth(token)).status_code == 401
 
 

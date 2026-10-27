@@ -1,6 +1,6 @@
 # Requisitos — Diretor | Declaração de Obstáculos
 
-**Status:** Proposta para validação · atualizada em 2026-10-18 com as decisões da validação do protótipo  
+**Status:** Implementado, com publicação e retirada · notas de implementação até 2026-10-24  
 **PRD:** RF-07 a RF-11, RF-32 e RF-39 a RF-42  
 **Dependência:** acesso aprovado à escola, conforme `../acesso-gestao-ativa.md`
 
