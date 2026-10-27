@@ -12,7 +12,7 @@ import { ESTADOS_VERSAO_PLANO, dataCurta } from "../rotulos";
 import type { DashboardMunicipal as Dados, EscolaPrioritaria } from "../types";
 import { Aviso, Botao, Cartao, Selo } from "./ui";
 
-export type DestinoDashboard = "planos" | "municipal" | "declaracoes";
+export type DestinoDashboard = "planos" | "analitico" | "municipal" | "declaracoes";
 
 function tomDaFaixa(faixa: string): "verde" | "ambar" | "vermelho" {
   if (faixa === "Crítico" || faixa === "Insuficiente") return "vermelho";
@@ -185,12 +185,12 @@ export function DashboardMunicipal({ onAbrir }: { onAbrir: (destino: DestinoDash
               <Cartao className="p-5">
                 <p className="text-[11px] font-extrabold uppercase tracking-wider text-gray-500">Análise</p>
                 <h2 className="mt-1 flex items-center gap-2 text-base font-extrabold text-gov-blue-dark">
-                  Analítico de Barreiras <Selo tom="neutro">Em breve</Selo>
+                  Analítico de Barreiras
                 </h2>
                 <p className="mt-1 text-[13px] text-gray-600">
-                  Cruzar barreiras, obstáculos e propostas para identificar padrões da rede. Enquanto isso, as Declarações estão na aba própria.
+                  Cruze barreiras, obstáculos e propostas para identificar padrões da rede, com uma síntese assistida por IA.
                 </p>
-                <Botao variante="discreto" className="mt-3" onClick={() => onAbrir("declaracoes")}>Ver Declarações das escolas →</Botao>
+                <Botao variante="contorno" className="mt-3" onClick={() => onAbrir("analitico")}>Abrir analítico →</Botao>
               </Cartao>
             </div>
           </section>

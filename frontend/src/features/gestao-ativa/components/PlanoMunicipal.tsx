@@ -52,7 +52,7 @@ function Linha({ a }: { a: { responsavel: string | null; prazo: string | null; h
   return texto ? <p className="mt-1 text-[12px] text-gray-600">{texto}</p> : null;
 }
 
-export function PlanoMunicipal() {
+export function PlanoMunicipal({ foco = null }: { foco?: string | null }) {
   const [estado, setEstado] = useState<EstadoPlanoMunicipal | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -64,6 +64,14 @@ export function PlanoMunicipal() {
   useEffect(() => {
     getPlanoMunicipal().then(setEstado).catch((falha) => setErro((falha as Error).message));
   }, []);
+
+  // Vindo do Analítico, abre a tela já na barreira escolhida.
+  const carregado = estado !== null;
+  useEffect(() => {
+    if (!carregado || !foco) return;
+    const alvo = document.getElementById(`rede-${foco}`);
+    alvo?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [carregado, foco]);
 
   async function executar(acao: () => Promise<EstadoPlanoMunicipal>, mensagem?: string) {
     setErro(null);

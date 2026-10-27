@@ -383,3 +383,59 @@ export type DashboardMunicipal = {
   escolasNoRanking: number;
   escolasSemAlunosEsp: number;
 };
+
+// Analítico de Barreiras (requirements/secretario/analitico-barreiras.md).
+export type EvidenciaAnalitica = {
+  coEntidade: number;
+  escola: string;
+  posicao: "obstaculo" | "divergencia" | "sem_relato" | null;
+  resumo: string | null;
+  acoes: string[];
+  planoEstado: EstadoVersaoPlano | null;
+};
+
+export type BarreiraAnalitica = {
+  codigo: string;
+  eixo: string;
+  eixoNome: string;
+  nome: string;
+  nota: string | null;
+  escolas: number;
+  alunos: number;
+  altaRecorrencia: boolean;
+  comDeclaracao: number;
+  obstaculos: number;
+  divergencias: number;
+  semRelato: number;
+  comAcao: number;
+  comAcaoAceita: number;
+  evidencias: EvidenciaAnalitica[];
+};
+
+export type AchadoAnalitico = {
+  tipo: "observacao" | "hipotese" | "recomendacao";
+  texto: string;
+  barreiras: string[];
+  evidencias: { coEntidade: number; escola: string; codigo: string }[];
+};
+
+export type Analitico = {
+  municipio: string;
+  uf: string;
+  censoVersao: string | null;
+  escolasMunicipais: number;
+  alunos: number;
+  comDeclaracao: number;
+  comPlano: number;
+  altaRecorrencia: number;
+  barreiras: BarreiraAnalitica[];
+  sintese: {
+    geradaEm: string;
+    modelo: string;
+    desatualizada: boolean;
+    achados: AchadoAnalitico[];
+    limitacoes: string[];
+    relatosFora: number;
+  } | null;
+  avisoGuardiao: string | null;
+};

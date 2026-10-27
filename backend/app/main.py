@@ -31,6 +31,7 @@ from app.features.plano_municipal.router import router as plano_municipal_router
 from app.features.plano_municipal.router import router_diretor as acoes_municipais_router  # noqa: E402
 from app.features.plano.router_secretario import router as plano_secretario_router  # noqa: E402
 from app.features.dashboard_municipal.router import router as dashboard_municipal_router  # noqa: E402
+from app.features.analitico.router import router as analitico_router  # noqa: E402
 from app.features.acesso import servico as acesso_servico  # noqa: E402
 from app.features.declaracao.conversa import limpar_conversas_paradas  # noqa: E402
 from app.shared import banco_gestao  # noqa: E402
@@ -99,3 +100,4 @@ app.include_router(plano_municipal_router)
 app.include_router(acoes_municipais_router)
 app.include_router(plano_secretario_router)
 app.include_router(dashboard_municipal_router)
+app.include_router(analitico_router)

@@ -13,7 +13,7 @@ Este PRD preserva a proposta das fontes, mas registra como pendentes as decisõe
 
 **Decisões de produto de 2026-10-18 (validação do protótipo):** a Declaração de Obstáculos é **emitida** antes do Plano de Ação e serve de base de contexto para a IA do plano; **emitir** e **publicar** são etapas separadas; toda barreira precisa de uma **posição** antes da emissão; e passa a existir a posição **divergência com o dado do Censo**. Essas decisões estão detalhadas nas seções 1B, 2 e "Publicação da Declaração de Obstáculos". O protótipo em Linguagem de Marcação de Hipertexto (HTML, do inglês HyperText Markup Language) v2 (`FASE2/prototipo_gestao_ativa_v2.html`) foi aprovado em 2026-10-23, e a implementação começou em seguida.
 
-**Decisões de 2026-10-23 a 2026-10-27 (implementação):** o piloto atende só escolas da **rede municipal**, e o secretário do município aprova os diretores; a entrada é **sem senha**, por código enviado ao e-mail; o rascunho da Declaração é salvo e retomado; o Plano de Ação aceito pode ser **publicado** pelo diretor, só junto com a Declaração publicada; o Plano Estratégico Municipal parte **só dos planos aceitos**; o Dashboard Municipal ordena as escolas pelo **peso no score da rede**; e a Fase 1 foi integrada (seção "Integração com a Fase 1"). Os detalhes ficam nas notas de implementação de cada requisito.
+**Decisões de 2026-10-23 a 2026-10-27 (implementação):** o piloto atende só escolas da **rede municipal**, e o secretário do município aprova os diretores; a entrada é **sem senha**, por código enviado ao e-mail; o rascunho da Declaração é salvo e retomado; o Plano de Ação aceito pode ser **publicado** pelo diretor, só junto com a Declaração publicada; o Plano Estratégico Municipal parte **só dos planos aceitos**; o Dashboard Municipal ordena as escolas pelo **peso no score da rede** e o Analítico ordena as barreiras pelos **alunos atingidos**; e a Fase 1 foi integrada (seção "Integração com a Fase 1"). Os detalhes ficam nas notas de implementação de cada requisito.
 
 ## Estado da implementação (2026-10-27)
 
@@ -26,7 +26,7 @@ Este PRD preserva a proposta das fontes, mas registra como pendentes as decisõe
 | Dashboard Municipal | Implementado | RF-18, RF-34, RF-36 a RF-38 | [dashboard municipal](requirements/secretario/dashboard-municipal.md) |
 | Fila e Revisão | Implementada, com apontamentos por barreira e ação | RF-19 a RF-22 | [fila](requirements/secretario/fila-revisao-planos.md) |
 | Plano Estratégico Municipal | Implementado sem narrativa executiva | RF-26 a RF-29 (RF-30 pendente) | [plano municipal](requirements/secretario/plano-estrategico-municipal.md) |
-| Analítico de Barreiras | Não iniciado | RF-23 a RF-25 | [analítico](requirements/secretario/analitico-barreiras.md) |
+| Analítico de Barreiras | Implementado em 2026-10-27 | RF-23 a RF-25 | [analítico](requirements/secretario/analitico-barreiras.md) |
 | Documentos em PDF | Não iniciado | RF-31 | — |
 
 A arquitetura (banco próprio, Guardião LGPD, IA em camadas e validação de citações) está em [arquitetura.md](arquitetura.md).
@@ -219,4 +219,4 @@ A Narrativa V6 lista como extensões: Assistente de Preenchimento do Censo (sem 
 
 ## Etapas seguintes
 
-Requisitos de acesso: [Acesso à Gestão Ativa](requirements/acesso-gestao-ativa.md). O [índice das features de requisitos](requirements/planos-de-acao.md) aponta para Declaração de Obstáculos, Plano de Ação Escolar, Fila e Revisão do Secretário, Analítico de Barreiras e Plano Estratégico Municipal. As regras seguem a mesma separação no [índice de regras de negócio](business-rules/planos-de-acao.md). Próximas entregas: Analítico de Barreiras (RF-23 a RF-25), narrativa executiva do Plano Estratégico Municipal (RF-30) e documentos em PDF (RF-31). Antes de produção: provedor de e-mail real, retenção e auditoria pendentes (AD-03 e AD-07 em [arquitetura.md](arquitetura.md)) e o destino das contas da Fase 1 ([impacto-fase-1.md](impacto-fase-1.md)).
+Requisitos de acesso: [Acesso à Gestão Ativa](requirements/acesso-gestao-ativa.md). O [índice das features de requisitos](requirements/planos-de-acao.md) aponta para Declaração de Obstáculos, Plano de Ação Escolar, Fila e Revisão do Secretário, Analítico de Barreiras e Plano Estratégico Municipal. As regras seguem a mesma separação no [índice de regras de negócio](business-rules/planos-de-acao.md). Próximas entregas: narrativa executiva do Plano Estratégico Municipal (RF-30) e documentos em PDF (RF-31). Antes de produção: provedor de e-mail real, retenção e auditoria pendentes (AD-03 e AD-07 em [arquitetura.md](arquitetura.md)) e o destino das contas da Fase 1 ([impacto-fase-1.md](impacto-fase-1.md)).

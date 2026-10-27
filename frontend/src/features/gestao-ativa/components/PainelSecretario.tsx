@@ -1,18 +1,19 @@
 "use client";
 
-// Painel do secretário municipal: dashboard da rede (tela inicial, DMS-RF-01), fila de Planos de Ação, Plano Estratégico Municipal, Declarações e vínculos.
+// Painel do secretário municipal: dashboard da rede (tela inicial, DMS-RF-01), fila de Planos de Ação, Analítico de Barreiras, Plano Estratégico Municipal, Declarações e vínculos.
 // O topo destaca o que depende do secretário (planos aguardando análise, pedidos de acesso a validar).
 import { useCallback, useEffect, useState } from "react";
 
 import { getFilaPlanos, listarVinculos } from "../api";
 import type { Eu } from "../types";
+import { AnaliticoBarreiras } from "./AnaliticoBarreiras";
 import { DashboardMunicipal } from "./DashboardMunicipal";
 import { DeclaracoesRede } from "./DeclaracoesRede";
 import { FilaPlanos } from "./FilaPlanos";
 import { PlanoMunicipal } from "./PlanoMunicipal";
 import { VinculosSecretario } from "./VinculosSecretario";
 
-type Aba = "rede" | "planos" | "municipal" | "declaracoes" | "vinculos";
+type Aba = "rede" | "planos" | "analitico" | "municipal" | "declaracoes" | "vinculos";
 
 type Pendencias = { planos: number; planoMaisAntigo: string | null; vinculos: number; vinculoMaisAntigo: string | null };
 
@@ -30,6 +31,8 @@ function maisAntigo(datas: string[]) {
 
 export function PainelSecretario({ eu }: { eu: Eu }) {
   const [aba, setAba] = useState<Aba>("rede");
+  // Barreira aberta no plano municipal a partir do Analítico ("Planejar no plano municipal").
+  const [foco, setFoco] = useState<string | null>(null);
   const [pendencias, setPendencias] = useState<Pendencias | null>(null);
 
   const atualizar = useCallback(async () => {
@@ -52,7 +55,7 @@ export function PainelSecretario({ eu }: { eu: Eu }) {
     atualizar();
   }, [atualizar]);
 
-  const contagem: Record<Aba, number> = { rede: 0, planos: pendencias?.planos ?? 0, municipal: 0, declaracoes: 0, vinculos: pendencias?.vinculos ?? 0 };
+  const contagem: Record<Aba, number> = { rede: 0, analitico: 0, planos: pendencias?.planos ?? 0, municipal: 0, declaracoes: 0, vinculos: pendencias?.vinculos ?? 0 };
   const total = contagem.planos + contagem.vinculos;
 
   return (
@@ -100,6 +103,7 @@ export function PainelSecretario({ eu }: { eu: Eu }) {
             [
               ["rede", "Visão da rede"],
               ["planos", "Planos das escolas"],
+              ["analitico", "Analítico"],
               ["municipal", "Plano municipal"],
               ["declaracoes", "Declarações das escolas"],
               ["vinculos", "Vínculos de diretores"],
@@ -133,6 +137,20 @@ export function PainelSecretario({ eu }: { eu: Eu }) {
           </p>
           <FilaPlanos onMudou={atualizar} />
         </div>
+      ) : aba === "analitico" ? (
+        <div className="mx-auto max-w-6xl px-6 py-6">
+          <h1 className="text-3xl font-extrabold text-gov-blue-dark">Analítico de Barreiras</h1>
+          <p className="mb-5 mt-2 max-w-3xl text-[15px] text-gray-600">
+            Barreiras do Censo cruzadas com as Declarações emitidas e os planos enviados pelas escolas da rede, para ver o que é comum e
+            onde a rede pode responder em conjunto.
+          </p>
+          <AnaliticoBarreiras
+            onPlanejar={(codigo) => {
+              setFoco(codigo);
+              setAba("municipal");
+            }}
+          />
+        </div>
       ) : aba === "municipal" ? (
         <div className="mx-auto max-w-6xl px-6 py-6">
           <h1 className="text-3xl font-extrabold text-gov-blue-dark">Plano Estratégico Municipal</h1>
@@ -140,7 +158,7 @@ export function PainelSecretario({ eu }: { eu: Eu }) {
             Um plano para a rede, a partir dos Planos de Ação aceitos das escolas: o assistente junta necessidades comuns e propõe ações
             municipais; você decide, ajusta e confirma.
           </p>
-          <PlanoMunicipal />
+          <PlanoMunicipal foco={foco} />
         </div>
       ) : aba === "declaracoes" ? (
         <div className="mx-auto max-w-6xl px-6 py-6">

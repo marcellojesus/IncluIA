@@ -4,7 +4,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
 <style>
-/* Layout: documento técnico de coluna única; figuras largas com rolagem própria; exemplo em tabela de passos */
+/* Layout: documento técnico de coluna única; figuras largas com rolagem própria; fichas de componente em grade de duas colunas */
 :root {
   --bg: #f4f6f7;
   --surface: #ffffff;
@@ -16,18 +16,22 @@
   --guard-tint: #e2f1ea;
   --cross: #a8530c;
   --cross-tint: #faeee2;
+  --query: #2a5d9a;
+  --query-tint: #e3ecf7;
   --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #0f161c; --surface: #17212a; --fg: #e2e8ed; --muted: #95a3ae; --line: #34434f; --tint: #1c2832;
-    --guard: #5cc597; --guard-tint: #15302a; --cross: #f0a25a; --cross-tint: #33251a; color-scheme: dark;
+    --guard: #5cc597; --guard-tint: #15302a; --cross: #f0a25a; --cross-tint: #33251a;
+    --query: #8cb8ec; --query-tint: #1a2a3d; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0f161c; --surface: #17212a; --fg: #e2e8ed; --muted: #95a3ae; --line: #34434f; --tint: #1c2832;
-  --guard: #5cc597; --guard-tint: #15302a; --cross: #f0a25a; --cross-tint: #33251a; color-scheme: dark;
+  --guard: #5cc597; --guard-tint: #15302a; --cross: #f0a25a; --cross-tint: #33251a;
+  --query: #8cb8ec; --query-tint: #1a2a3d; color-scheme: dark;
 }
 body {
   background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: 16px; line-height: 1.55;
@@ -35,21 +39,27 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 32px 64px;
 }
-main { max-width: 1140px; margin: 0 auto; display: grid; gap: 48px; }
-header { display: grid; gap: 10px; max-width: 72ch; }
+main { max-width: 1140px; margin: 0 auto; display: grid; gap: 56px; }
+header { display: grid; gap: 10px; max-width: 74ch; }
 .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.15; margin: 0; font-weight: 700; text-wrap: balance; }
-h2 { font-size: 22px; margin: 0; font-weight: 600; text-wrap: balance; }
+h2 { font-size: 23px; margin: 0; font-weight: 600; text-wrap: balance; }
+h3 { font-size: 16px; margin: 0; font-weight: 600; }
 p { margin: 0; }
 .lead { font-size: 18px; color: var(--muted); }
-section { display: grid; gap: 16px; }
-section > p, section > ul, section > ol { max-width: 72ch; }
-code, .mono { font-family: var(--mono); font-size: .9em; }
+section { display: grid; gap: 18px; min-width: 0; }
+section > p, section > ul, section > ol { max-width: 74ch; }
+code, .mono { font-family: var(--mono); font-size: .88em; }
+.sub { color: var(--muted); }
+nav.toc { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
+nav.toc a { color: var(--query); text-decoration: none; border-bottom: 1px solid currentColor; }
+nav.toc a:focus-visible, a:focus-visible { outline: 2px solid var(--query); outline-offset: 2px; }
 
-figure { margin: 0; display: grid; gap: 12px; }
+figure { margin: 0; display: grid; gap: 12px; min-width: 0; }
 .canvas { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; }
-.canvas svg { display: block; width: 100%; min-width: 920px; height: auto; color: var(--fg); font-family: var(--sans); }
-figcaption { font-size: 14px; color: var(--muted); max-width: 80ch; }
+.canvas svg { display: block; width: 100%; height: auto; color: var(--fg); font-family: var(--sans); }
+.canvas svg.wide { min-width: 920px; }
+figcaption { font-size: 14px; color: var(--muted); max-width: 82ch; }
 
 /* elementos do SVG */
 .box { fill: var(--surface); stroke: var(--fg); stroke-width: 1.4; }
@@ -71,6 +81,16 @@ figcaption { font-size: 14px; color: var(--muted); max-width: 80ch; }
 .head { fill: var(--fg); }
 .head-ext { fill: var(--cross); }
 .head-alt { fill: var(--muted); }
+.axis { stroke: var(--line); stroke-width: 1.2; fill: none; }
+.vec { stroke: var(--muted); stroke-width: 1.6; fill: none; }
+.vec-q { stroke: var(--query); stroke-width: 2.4; fill: none; }
+.dot { fill: var(--muted); }
+.dot-near { fill: var(--guard); }
+.dot-q { fill: var(--query); }
+.q-t { fill: var(--query); font-size: 12.5px; font-weight: 700; }
+.near-t { fill: var(--guard); font-size: 12.5px; font-weight: 600; }
+.far-t { fill: var(--muted); font-size: 12.5px; }
+.vec-near { stroke: var(--guard); stroke-width: 2; fill: none; }
 
 .key { display: flex; flex-wrap: wrap; gap: 8px 24px; font-size: 14px; color: var(--muted); }
 .key span { display: inline-flex; align-items: center; gap: 8px; }
@@ -81,49 +101,92 @@ figcaption { font-size: 14px; color: var(--muted); max-width: 80ch; }
 
 ol.steps { margin: 0; padding-left: 1.4em; display: grid; gap: 10px; }
 ol.steps li::marker { font-family: var(--mono); color: var(--muted); }
-ol.steps b { font-weight: 600; }
+b { font-weight: 600; }
 
-.walk { width: 100%; border-collapse: collapse; font-size: 15px; }
-.walk-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
-.walk th, .walk td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
-.walk tr:last-child td { border-bottom: 0; }
-.walk th { font-size: 12px; font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--tint); }
-.walk td:first-child { white-space: nowrap; font-weight: 600; }
+/* fichas de componente */
+.parts { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0; border-top: 1px solid var(--line); }
+.part { display: grid; gap: 8px; padding: 18px 20px 20px 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.part h3 { display: flex; align-items: baseline; gap: 10px; }
+.part h3 .tag { font-family: var(--mono); font-size: 11px; font-weight: 500; color: var(--muted); letter-spacing: .04em; }
+.part p { font-size: 15px; }
+.part dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13.5px; }
+.part dt { color: var(--muted); font-family: var(--mono); font-size: 12px; padding-top: 2px; }
+.part dd { margin: 0; min-width: 0; }
+
+/* duas colunas: figura + texto */
+.split { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 820px) { .split { grid-template-columns: minmax(0, 1fr); } }
+.split .points { display: grid; gap: 14px; }
+.split .points p { font-size: 15.5px; }
+
+.formula { font-family: var(--mono); font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; overflow-x: auto; white-space: nowrap; }
+
+/* tabelas */
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 11.5px; font-family: var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--tint); white-space: nowrap; }
+td.n { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+td.k { white-space: nowrap; font-weight: 600; }
+.yes { color: var(--guard); font-weight: 600; }
+.no { color: var(--muted); }
 .walk .q { font-family: var(--mono); font-size: 13.5px; background: var(--tint); padding: 2px 6px; border-radius: 4px; }
 .walk .mask { color: var(--guard); font-weight: 600; }
 
-.pending { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
-footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+/* ficha do trecho */
+.chunk { border: 1px solid var(--line); border-radius: 8px; background: var(--surface); display: grid; grid-template-columns: max-content minmax(0, 1fr); font-size: 14.5px; }
+.chunk > div { padding: 9px 14px; border-bottom: 1px solid var(--line); }
+.chunk > div:nth-last-child(-n+2) { border-bottom: 0; }
+.chunk .f { font-family: var(--mono); font-size: 12px; color: var(--muted); background: var(--tint); }
+@media (max-width: 520px) { .chunk { grid-template-columns: minmax(0, 1fr); } .chunk .f { border-bottom: 0; padding-bottom: 2px; } }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.facts div { background: var(--surface); padding: 14px 16px; display: grid; gap: 2px; }
+.facts strong { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.facts span { font-size: 13px; color: var(--muted); }
+
+.note { border-left: 3px solid var(--query); background: var(--query-tint); padding: 12px 16px; border-radius: 0 6px 6px 0; font-size: 15px; max-width: 74ch; }
+.pending { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; max-width: 78ch; }
+footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 4px; }
 </style>
 
 <main>
   <header>
-    <span class="eyebrow">Escola Sem Barreiras · Fase 2 · AD-08 · proposta de 2026-10-23</span>
+    <span class="eyebrow">Escola Sem Barreiras · Fase 2 · AD-05 e AD-08 · como está no código em 27/10/2026</span>
     <h1>Como a IA da Gestão Ativa responde</h1>
-    <p class="lead">Com IA em plano gratuito não há treinamento. A precisão vem do contexto montado a cada chamada: fatos exatos por SQL, metodologia por chave, normas por busca híbrida, e uma validação que recusa citações inventadas.</p>
+    <p class="lead">Os modelos usados são gratuitos e não são treinados com os dados do projeto. A qualidade da resposta vem do que é entregue ao modelo a cada pedido: os fatos da escola consultados direto no banco, a regra da barreira, os trechos de lei encontrados por busca e uma conferência final que recusa citação inventada. Antes de qualquer coisa sair do servidor, o Guardião LGPD retira os dados pessoais.</p>
+    <nav class="toc" aria-label="Seções">
+      <a href="#fluxo">O caminho de um pedido</a>
+      <a href="#componentes">Os componentes</a>
+      <a href="#embedding">O que é um embedding</a>
+      <a href="#busca">A busca híbrida</a>
+      <a href="#rag">Onde há RAG</a>
+      <a href="#base">O que foi processado</a>
+      <a href="#exemplo">Exemplo</a>
+      <a href="#limites">Avaliação e limites</a>
+    </nav>
   </header>
 
-  <section aria-labelledby="h-runtime">
-    <h2 id="h-runtime">Uma pergunta, do chat à resposta</h2>
+  <section id="fluxo" aria-labelledby="h-fluxo">
+    <h2 id="h-fluxo">O caminho de um pedido, do diretor à resposta</h2>
     <figure>
       <div class="canvas">
-        <svg viewBox="0 0 1120 530" role="img" aria-label="Fluxo em tempo de execução: o texto do usuário passa pelo Guardião LGPD, o montador junta quatro camadas de contexto vindas de SQLite, arquivos de metodologia, base normativa e PostgreSQL, o prompt cortado pelo orçamento de tokens vai à cadeia de provedores gratuitos, e o validador só devolve respostas cujas citações estavam no contexto.">
+        <svg class="wide" viewBox="0 0 1120 540" role="img" aria-label="Fluxo em tempo de execução: o texto do diretor passa pelo Guardião LGPD; o montador junta quatro camadas de contexto, vindas do banco do Censo, da base normativa e do banco da Gestão Ativa; o contexto é cortado em 2.500 tokens e no máximo 6 trechos de lei; vai à cadeia de modelos gratuitos; o validador só devolve respostas cujas citações estavam no contexto.">
           <defs>
             <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker>
             <marker id="ax" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-ext" d="M0,0 L10,5 L0,10 z"/></marker>
             <marker id="aa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-alt" d="M0,0 L10,5 L0,10 z"/></marker>
           </defs>
 
-          <!-- zonas -->
-          <rect class="zone" x="185" y="14" width="675" height="510" rx="10"/>
-          <text class="zl" x="199" y="34">BACKEND FASTAPI · RENDER GRATUITO</text>
-          <rect class="zone-ext" x="880" y="14" width="232" height="510" rx="10"/>
+          <rect class="zone" x="185" y="14" width="675" height="518" rx="10"/>
+          <text class="zl" x="199" y="34">SERVIDOR DO PROJETO (FASTAPI)</text>
+          <rect class="zone-ext" x="880" y="14" width="232" height="518" rx="10"/>
           <text class="zl-ext" x="894" y="34">PROVEDORES GRATUITOS</text>
 
-          <!-- linha 1 -->
           <rect class="box" x="10" y="70" width="150" height="64" rx="6"/>
           <text class="t" x="85" y="98" text-anchor="middle">Diretor ou secretário</text>
-          <text class="s" x="85" y="117" text-anchor="middle">escreve no chat</text>
+          <text class="s" x="85" y="117" text-anchor="middle">escreve ou pede sugestão</text>
 
           <rect class="guardbox" x="205" y="70" width="150" height="64" rx="6"/>
           <text class="guard-t" x="280" y="98" text-anchor="middle">Guardião LGPD</text>
@@ -135,7 +198,7 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
 
           <rect class="box" x="635" y="70" width="200" height="64" rx="6"/>
           <text class="t" x="735" y="98" text-anchor="middle">Corte por orçamento</text>
-          <text class="s" x="735" y="117" text-anchor="middle">cabe no provedor mais restrito</text>
+          <text class="s" x="735" y="117" text-anchor="middle">2.500 tokens · até 6 trechos</text>
 
           <path class="edge" d="M160,102 H203" marker-end="url(#a)"/>
           <text class="lbl" x="182" y="94" text-anchor="middle">texto</text>
@@ -143,104 +206,94 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
           <text class="lbl" x="377" y="94" text-anchor="middle">limpo</text>
           <path class="edge" d="M590,102 H633" marker-end="url(#a)"/>
 
-          <!-- bloqueio -->
           <path class="edge-alt" d="M230,134 V158 H110 V136" marker-end="url(#aa)"/>
-          <text class="lbl" x="170" y="174" text-anchor="middle">risco alto: reescrever</text>
+          <text class="lbl" x="170" y="174" text-anchor="middle">laudo, CPF: reescrever</text>
 
-          <!-- cadeia de provedores -->
-          <rect class="extbox" x="905" y="50" width="180" height="176" rx="8"/>
-          <text class="t" x="995" y="72" text-anchor="middle">Cadeia de LLMs</text>
-          <rect class="box" x="925" y="84" width="140" height="32" rx="5"/>
-          <text class="t" x="995" y="105" text-anchor="middle">Gemini</text>
-          <rect class="box" x="925" y="134" width="140" height="32" rx="5"/>
-          <text class="t" x="995" y="155" text-anchor="middle">Groq</text>
-          <rect class="box" x="925" y="184" width="140" height="32" rx="5"/>
-          <text class="t" x="995" y="205" text-anchor="middle">Mistral</text>
-          <path class="edge-alt" d="M995,116 V132" marker-end="url(#aa)"/>
-          <path class="edge-alt" d="M995,166 V182" marker-end="url(#aa)"/>
-          <text class="lbl" x="1003" y="128">falhou</text>
-          <text class="lbl" x="1003" y="178">falhou</text>
-          <text class="lbl" x="995" y="242" text-anchor="middle">todos falham → segue sem IA</text>
+          <rect class="extbox" x="905" y="50" width="180" height="182" rx="8"/>
+          <text class="t" x="995" y="72" text-anchor="middle">Cadeia de modelos</text>
+          <rect class="box" x="920" y="84" width="150" height="34" rx="5"/>
+          <text class="t" x="995" y="105" text-anchor="middle">Gemini 3.5 Flash</text>
+          <rect class="box" x="920" y="136" width="150" height="34" rx="5"/>
+          <text class="t" x="995" y="157" text-anchor="middle">Groq · gpt-oss-120b</text>
+          <rect class="box" x="920" y="188" width="150" height="34" rx="5"/>
+          <text class="t" x="995" y="209" text-anchor="middle">Mistral Small</text>
+          <path class="edge-alt" d="M995,118 V134" marker-end="url(#aa)"/>
+          <path class="edge-alt" d="M995,170 V186" marker-end="url(#aa)"/>
+          <text class="lbl" x="1003" y="130">falhou</text>
+          <text class="lbl" x="1003" y="182">falhou</text>
+          <text class="lbl" x="995" y="248" text-anchor="middle">8 s por modelo · todos falham:</text>
+          <text class="lbl" x="995" y="262" text-anchor="middle">o registro fica, sem sugestão</text>
 
-          <path class="edge-ext" d="M835,100 H923" marker-end="url(#ax)"/>
-          <text class="cross-lbl" x="880" y="92" text-anchor="middle">prompt</text>
+          <path class="edge-ext" d="M835,100 H903" marker-end="url(#ax)"/>
+          <text class="cross-lbl" x="869" y="92" text-anchor="middle">prompt</text>
 
-          <!-- barramento das camadas -->
-          <path class="edge" d="M280,248 V215 H760 V248"/>
-          <path class="edge" d="M440,248 V215"/>
-          <path class="edge" d="M600,248 V215"/>
-          <path class="edge" d="M495,215 V136" marker-end="url(#a)"/>
+          <path class="edge" d="M280,282 V250 H760 V282"/>
+          <path class="edge" d="M440,282 V250"/>
+          <path class="edge" d="M600,282 V250"/>
+          <path class="edge" d="M495,250 V136" marker-end="url(#a)"/>
 
-          <!-- camadas -->
-          <rect class="box" x="205" y="248" width="150" height="60" rx="6"/>
-          <text class="t" x="280" y="273" text-anchor="middle">C1 · Fatos da escola</text>
-          <text class="s" x="280" y="292" text-anchor="middle">SQL pelo código INEP</text>
+          <rect class="box" x="205" y="282" width="150" height="60" rx="6"/>
+          <text class="t" x="280" y="307" text-anchor="middle">C1 · Fatos da escola</text>
+          <text class="s" x="280" y="326" text-anchor="middle">consulta pelo INEP</text>
 
-          <rect class="box" x="365" y="248" width="150" height="60" rx="6"/>
-          <text class="t" x="440" y="273" text-anchor="middle">C2 · Metodologia</text>
-          <text class="s" x="440" y="292" text-anchor="middle">seção pela barreira</text>
+          <rect class="box" x="365" y="282" width="150" height="60" rx="6"/>
+          <text class="t" x="440" y="307" text-anchor="middle">C4 · Registros</text>
+          <text class="s" x="440" y="326" text-anchor="middle">só do próprio vínculo</text>
 
-          <rect class="box" x="525" y="248" width="150" height="60" rx="6"/>
-          <text class="t" x="600" y="273" text-anchor="middle">C4 · Contexto privado</text>
-          <text class="s" x="600" y="292" text-anchor="middle">filtro pelo vínculo</text>
+          <rect class="box" x="525" y="282" width="150" height="60" rx="6"/>
+          <text class="t" x="600" y="307" text-anchor="middle">C2 · Metodologia</text>
+          <text class="s" x="600" y="326" text-anchor="middle">regra da barreira</text>
 
-          <rect class="box" x="685" y="248" width="150" height="60" rx="6"/>
-          <text class="t" x="760" y="273" text-anchor="middle">C3 · Base normativa</text>
-          <text class="s" x="760" y="292" text-anchor="middle">mapa + busca híbrida</text>
+          <rect class="box" x="685" y="282" width="150" height="60" rx="6"/>
+          <text class="t" x="760" y="307" text-anchor="middle">C3 · Normas</text>
+          <text class="s" x="760" y="326" text-anchor="middle">mapa + busca híbrida</text>
 
-          <!-- embeddings -->
-          <rect class="extbox" x="925" y="250" width="140" height="56" rx="6"/>
-          <text class="t" x="995" y="274" text-anchor="middle">API de embeddings</text>
-          <text class="s" x="995" y="292" text-anchor="middle">só a pergunta limpa</text>
-          <path class="edge-ext" d="M835,270 H923" marker-end="url(#ax)"/>
-          <text class="cross-lbl" x="880" y="263" text-anchor="middle">pergunta</text>
-          <path class="edge-ext" d="M925,290 H837" marker-end="url(#ax)"/>
-          <text class="cross-lbl" x="880" y="304" text-anchor="middle">vetor</text>
-          <text class="lbl" x="995" y="324" text-anchor="middle">falhou → só FTS5</text>
+          <rect class="extbox" x="920" y="284" width="150" height="58" rx="6"/>
+          <text class="t" x="995" y="307" text-anchor="middle">gemini-embedding-001</text>
+          <text class="s" x="995" y="325" text-anchor="middle">pergunta → 768 números</text>
+          <path class="edge-ext" d="M835,302 H918" marker-end="url(#ax)"/>
+          <text class="cross-lbl" x="877" y="295" text-anchor="middle">pergunta</text>
+          <path class="edge-ext" d="M920,328 H837" marker-end="url(#ax)"/>
+          <text class="cross-lbl" x="877" y="344" text-anchor="middle">vetor</text>
+          <text class="lbl" x="995" y="360" text-anchor="middle">falhou: só palavra-chave</text>
 
-          <!-- armazenamentos -->
-          <rect class="store" x="205" y="350" width="150" height="56" rx="6"/>
-          <text class="t" x="280" y="374" text-anchor="middle">incluia.db</text>
-          <text class="s" x="280" y="393" text-anchor="middle">Censo · só leitura</text>
+          <rect class="store" x="205" y="380" width="150" height="56" rx="6"/>
+          <text class="t" x="280" y="404" text-anchor="middle">incluia.db</text>
+          <text class="s" x="280" y="423" text-anchor="middle">Censo · só leitura</text>
 
-          <rect class="store" x="365" y="350" width="150" height="56" rx="6"/>
-          <text class="t" x="440" y="374" text-anchor="middle">metodologia_*.md</text>
-          <text class="s" x="440" y="393" text-anchor="middle">versão usada no ETL</text>
+          <rect class="store" x="365" y="380" width="150" height="56" rx="6"/>
+          <text class="t" x="440" y="404" text-anchor="middle">gestao_ativa.db</text>
+          <text class="s" x="440" y="423" text-anchor="middle">PostgreSQL no deploy</text>
 
-          <rect class="store" x="525" y="350" width="150" height="56" rx="6"/>
-          <text class="t" x="600" y="374" text-anchor="middle">PostgreSQL</text>
-          <text class="s" x="600" y="393" text-anchor="middle">Gestão Ativa</text>
+          <rect class="store" x="525" y="380" width="310" height="56" rx="6"/>
+          <text class="t" x="680" y="404" text-anchor="middle">base_normativa.db</text>
+          <text class="s" x="680" y="423" text-anchor="middle">metodologia · mapa · trechos · FTS5 · vetores</text>
 
-          <rect class="store" x="685" y="350" width="150" height="56" rx="6"/>
-          <text class="t" x="760" y="374" text-anchor="middle">base_normativa.db</text>
-          <text class="s" x="760" y="393" text-anchor="middle">FTS5 + vetores</text>
+          <path class="edge" d="M280,380 V344" marker-end="url(#a)"/>
+          <path class="edge" d="M440,380 V344" marker-end="url(#a)"/>
+          <path class="edge" d="M600,380 V344" marker-end="url(#a)"/>
+          <path class="edge" d="M760,380 V344" marker-end="url(#a)"/>
 
-          <path class="edge" d="M280,350 V310" marker-end="url(#a)"/>
-          <path class="edge" d="M440,350 V310" marker-end="url(#a)"/>
-          <path class="edge" d="M600,350 V310" marker-end="url(#a)"/>
-          <path class="edge" d="M760,350 V310" marker-end="url(#a)"/>
+          <path class="edge-ext" d="M1085,140 H1100 V506 H837" marker-end="url(#ax)"/>
+          <text class="cross-lbl" x="985" y="499" text-anchor="middle">resposta em JSON</text>
+          <path class="edge-alt" d="M835,474 H1078 V234" marker-end="url(#aa)"/>
+          <text class="lbl" x="960" y="467" text-anchor="middle">citação inválida → próximo modelo</text>
 
-          <!-- volta: resposta, validação, nova tentativa -->
-          <path class="edge-ext" d="M1085,150 H1100 V496 H837" marker-end="url(#ax)"/>
-          <text class="cross-lbl" x="1000" y="489" text-anchor="middle">resposta JSON</text>
-          <path class="edge-alt" d="M835,466 H1075 V228" marker-end="url(#aa)"/>
-          <text class="lbl" x="955" y="459" text-anchor="middle">citação inválida → próximo</text>
+          <rect class="box" x="635" y="458" width="200" height="64" rx="6"/>
+          <text class="t" x="735" y="484" text-anchor="middle">Validador</text>
+          <text class="s" x="735" y="503" text-anchor="middle">formato + citações do contexto</text>
 
-          <rect class="box" x="635" y="450" width="200" height="64" rx="6"/>
-          <text class="t" x="735" y="476" text-anchor="middle">Validador</text>
-          <text class="s" x="735" y="495" text-anchor="middle">Pydantic + IDs citados no contexto</text>
+          <rect class="box" x="400" y="458" width="190" height="64" rx="6"/>
+          <text class="t" x="495" y="484" text-anchor="middle">Resposta com fontes</text>
+          <text class="s" x="495" y="503" text-anchor="middle">ou lacuna declarada</text>
 
-          <rect class="box" x="400" y="450" width="190" height="64" rx="6"/>
-          <text class="t" x="495" y="476" text-anchor="middle">Resposta com fontes</text>
-          <text class="s" x="495" y="495" text-anchor="middle">ou lacuna declarada</text>
-
-          <path class="edge" d="M635,482 H592" marker-end="url(#a)"/>
-          <text class="lbl" x="613" y="474" text-anchor="middle">válida</text>
-          <path class="edge" d="M400,482 H60 V136" marker-end="url(#a)"/>
-          <text class="lbl" x="230" y="474" text-anchor="middle">o usuário revisa e decide</text>
+          <path class="edge" d="M635,490 H592" marker-end="url(#a)"/>
+          <text class="lbl" x="613" y="482" text-anchor="middle">válida</text>
+          <path class="edge" d="M400,490 H60 V136" marker-end="url(#a)"/>
+          <text class="lbl" x="230" y="482" text-anchor="middle">a pessoa revisa e decide</text>
         </svg>
       </div>
-      <figcaption>Tudo que cruza a linha laranja sai do servidor. Por isso só cruza depois do Guardião: o prompt para a cadeia de LLMs e a pergunta para a API de embeddings. Fatos da escola e conteúdo privado nunca passam por busca vetorial.</figcaption>
+      <figcaption>Tudo que cruza a linha laranja sai do servidor, e só cruza depois do Guardião: o prompt vai para a cadeia de modelos e a pergunta vai para a API de embeddings. Os fatos da escola e os registros privados nunca passam por busca vetorial: entram por consulta exata, filtrada pelo vínculo de quem pede.</figcaption>
       <div class="key" aria-hidden="true">
         <span><i class="sw"></i>fluxo interno</span>
         <span><i class="sw ext"></i>sai para provedor externo</span>
@@ -248,100 +301,281 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
         <span><i class="sw guard"></i>ponto de controle LGPD</span>
       </div>
     </figure>
-
-    <ol class="steps">
-      <li><b>Guardião LGPD.</b> Regras determinísticas, reconhecimento local de nomes e regras do contexto escolar mascaram o texto. Laudo ou documento de identificação bloqueiam o envio até o usuário reescrever.</li>
-      <li><b>Montador de contexto.</b> Busca cada camada pelo método mais exato. <b>C1</b> é consulta SQL: o score e as barreiras da escola vêm do Censo, nunca de uma busca aproximada. <b>C2</b> traz a seção da metodologia correspondente ao código da barreira. <b>C4</b> traz a Declaração emitida e o plano, só se o vínculo estiver aprovado. <b>C3</b> une o mapa curado barreira → dispositivos e, para perguntas livres, a busca por palavra-chave (FTS5) combinada com a vetorial.</li>
-      <li><b>Corte por orçamento.</b> O contexto é limitado ao que cabe no provedor mais restrito da cadeia, para o fallback não falhar por tamanho. Referência inicial: 4 a 6 trechos normativos.</li>
-      <li><b>Cadeia de LLMs.</b> Mesma ordem de fallback da Fase 1. Se todos falharem, o que já foi registrado permanece e o usuário continua sem sugestão.</li>
-      <li><b>Validador.</b> Além do formato, confere se cada identificador citado estava no contexto entregue. Citação fora do contexto é descartada e a chamada vai ao próximo provedor. Sem trecho de suporte, a resposta declara a lacuna.</li>
-      <li><b>Revisão humana.</b> A IA sugere; o diretor ou o secretário decide o que entra no plano.</li>
-    </ol>
   </section>
 
-  <section aria-labelledby="h-build">
-    <h2 id="h-build">Como a base normativa é construída</h2>
+  <section id="componentes" aria-labelledby="h-comp">
+    <h2 id="h-comp">Os componentes</h2>
+    <p>Cada peça tem uma tarefa só. A IA não decide números, situação nem pontuação: isso vem do cálculo do índice e do banco. Ela escreve, e o sistema confere o que ela escreveu.</p>
+    <div class="parts">
+      <div class="part">
+        <h3>Guardião LGPD <span class="tag">AD-05 · guardiao_lgpd/</span></h3>
+        <p>Lê todo texto antes de ele ir a um provedor. Em três camadas: documentos e contatos por regra (CPF, RG, cartão do SUS bloqueiam; telefone, e-mail, data de nascimento são trocados por marcadores); nomes de pessoas por um modelo de linguagem que roda no próprio servidor, uma lista de nomes comuns e frases como "a aluna X"; e o contexto escolar, frase a frase.</p>
+        <dl>
+          <dt>mascara</dt><dd>nome, turma e idade quando a frase fala de um estudante com deficiência; "único aluno"; endereço</dd>
+          <dt>bloqueia</dt><dd>documentos, CID, laudo e medicação de um estudante, situações sensíveis (abuso, gravidez, Conselho Tutelar)</dd>
+          <dt>garantia</dt><dd>o cliente de IA só aceita texto que passou pelo Guardião; um teste de arquitetura impede outro caminho</dd>
+        </dl>
+      </div>
+      <div class="part">
+        <h3>Montador de contexto <span class="tag">contexto_ia/montador.py</span></h3>
+        <p>Junta, para cada pedido, o que o modelo precisa saber, em quatro camadas, cada uma buscada pelo método mais exato possível.</p>
+        <dl>
+          <dt>C1</dt><dd>fatos da escola por consulta ao Censo: score, faixa, eixos, matrículas e barreiras. Sem o nome nem o código da escola. Com menos de 5 matrículas da educação especial, a contagem sai</dd>
+          <dt>C2</dt><dd>a regra de cada barreira em foco, da metodologia de barreiras</dd>
+          <dt>C3</dt><dd>trechos de lei: os do mapa da barreira, combinados com os que a busca encontra para a pergunta</dd>
+          <dt>C4</dt><dd>registros da própria escola, como a posição emitida na Declaração; registro de outra escola é recusado</dd>
+          <dt>corte</dt><dd>até 6 trechos e 2.500 tokens (cerca de 10 mil caracteres); fatos e registros nunca são cortados</dd>
+        </dl>
+      </div>
+      <div class="part">
+        <h3>Busca híbrida <span class="tag">contexto_ia/busca.py</span></h3>
+        <p>Encontra na base os trechos de lei ligados à pergunta, por dois caminhos: palavra-chave (o que está escrito) e embedding (o que quer dizer). Junta as duas listas pela posição de cada trecho, explicada <a href="#busca">abaixo</a>.</p>
+        <dl>
+          <dt>candidatos</dt><dd>20 por caminho</dd>
+          <dt>pesos</dt><dd>significado 1,0 · palavra-chave 0,5</dd>
+          <dt>sem vetor</dt><dd>se a API de embeddings falhar, segue só por palavra-chave e registra a lacuna</dd>
+        </dl>
+      </div>
+      <div class="part">
+        <h3>Cadeia de modelos <span class="tag">shared/ai_client.py</span></h3>
+        <p>Tenta os provedores sempre na mesma ordem. Pede resposta em JSON e confere o formato com um esquema; resposta fora do formato ou reprovada pelo validador conta como falha e passa ao próximo.</p>
+        <dl>
+          <dt>ordem</dt><dd>Gemini 3.5 Flash → Groq (gpt-oss-120b) → Mistral Small</dd>
+          <dt>limite</dt><dd>8 segundos por provedor; chamadas diretas, sem SDK</dd>
+          <dt>log</dt><dd>só o código do erro, nunca o prompt nem a resposta</dd>
+        </dl>
+      </div>
+      <div class="part">
+        <h3>Validador de citações <span class="tag">contexto_ia/citacoes.py</span></h3>
+        <p>Lê a resposta inteira e confere cada citação contra o que foi entregue no contexto. Uma resposta pode ser bem escrita e mesmo assim ser recusada.</p>
+        <dl>
+          <dt>recusa</dt><dd>identificador de trecho que não estava no contexto; lei, decreto ou artigo mencionado no texto e ausente dos trechos; identificador mal formado</dd>
+          <dt>exige</dt><dd>se não usou nenhuma fonte, a resposta precisa declarar a lacuna</dd>
+        </dl>
+      </div>
+      <div class="part">
+        <h3>Base normativa <span class="tag">data/base_normativa.db</span></h3>
+        <p>Um arquivo SQLite gerado pelo ETL, fora do servidor, e só lido em execução, como o banco do Censo. Guarda os trechos de lei, o índice de palavras, os vetores, a metodologia de barreiras e o mapa barreira → norma. Detalhes <a href="#base">abaixo</a>.</p>
+        <dl>
+          <dt>versão</dt><dd><span class="mono">1d8d2aad9541</span>, gerada em 23/10/2026</dd>
+          <dt>tamanho</dt><dd>132 trechos de 2 normas</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="embedding" aria-labelledby="h-emb">
+    <h2 id="h-emb">O que é um embedding</h2>
+    <div class="split">
+      <figure>
+        <div class="canvas">
+          <svg viewBox="0 0 560 360" role="img" aria-label="Projeção ilustrativa em duas dimensões: setas saem da origem; a seta da pergunta sobre material em Braille aponta quase na mesma direção do trecho da LBI que trata de Braille e Libras, um pouco afastada do trecho sobre formação em Libras, e longe dos trechos sobre rampas e sobre matrícula no AEE.">
+            <path class="axis" d="M60,320 H540 M60,320 V20"/>
+            <path class="axis" d="M290,320 A230,230 0 0 0 60,90" stroke-dasharray="3 5"/>
+            <path class="vec" d="M60,320 L108,95"/>
+            <circle class="dot" cx="108" cy="95" r="5"/>
+            <text class="far-t" x="118" y="92">Decreto, Art. 8º · matrícula no AEE</text>
+            <path class="vec" d="M60,320 L175,121"/>
+            <circle class="dot" cx="175" cy="121" r="5"/>
+            <text class="far-t" x="186" y="118">LBI, Art. 28, XI · formação em Libras</text>
+            <path class="vec-near" d="M60,320 L225,160"/>
+            <circle class="dot-near" cx="225" cy="160" r="6"/>
+            <text class="near-t" x="236" y="156">LBI, Art. 28, XII · Braille e Libras</text>
+            <path class="vec-q" d="M60,320 L246,185"/>
+            <circle class="dot-q" cx="246" cy="185" r="6"/>
+            <text class="q-t" x="257" y="190">pergunta: "não temos material</text>
+            <text class="q-t" x="257" y="206">em Braille para a aluna cega"</text>
+            <path class="vec" d="M60,320 L285,272"/>
+            <circle class="dot" cx="285" cy="272" r="5"/>
+            <text class="far-t" x="296" y="276">LBI, Art. 28, II · rampas e acesso</text>
+            <text class="lbl" x="70" y="345">projeção ilustrativa em 2 dimensões; os vetores reais têm 768</text>
+          </svg>
+        </div>
+        <figcaption>Cada texto vira uma seta. Quanto menor o ângulo entre duas setas, mais parecido é o sentido. A pergunta não usa a palavra "tecnologia assistiva" nem "sistema Braille", e mesmo assim fica perto do inciso XII.</figcaption>
+      </figure>
+      <div class="points">
+        <p>Um <b>embedding</b> é uma lista de números que representa o sentido de um texto. Um modelo treinado com muito texto em várias línguas, aqui o <span class="mono">gemini-embedding-001</span>, lê um trecho e devolve 768 números. Textos que falam da mesma coisa recebem listas parecidas, mesmo com palavras diferentes: "aluna cega" e "deficiência visual" ficam perto; "rampa" fica longe.</p>
+        <p>Para comparar, cada lista é tratada como uma seta num espaço de 768 dimensões e ajustada para ter comprimento 1. A semelhança é o <b>cosseno</b> do ângulo entre as setas: perto de 1 quando apontam para o mesmo lado. Com setas de comprimento 1, o cosseno é só a soma dos produtos dos números, uma conta que o servidor faz para os 132 trechos em menos de um milissegundo.</p>
+        <p>O modelo de embedding <b>não escreve nada</b> e não é o mesmo que redige as respostas. Ele só serve para achar, na base, os trechos de lei mais próximos da pergunta. Os vetores dos trechos foram calculados uma vez, no ETL; em cada pedido só a pergunta, já mascarada pelo Guardião, vai à API para virar vetor.</p>
+        <p class="sub">O pedido ao provedor diz o papel do texto: <span class="mono">RETRIEVAL_DOCUMENT</span> para os trechos da base e <span class="mono">RETRIEVAL_QUERY</span> para a pergunta. O modelo foi treinado para aproximar perguntas das respostas certas, não só textos iguais.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="busca" aria-labelledby="h-busca">
+    <h2 id="h-busca">A busca híbrida: palavra-chave e significado</h2>
+    <p>Cada caminho erra de um jeito. A busca por significado acha "deficiência visual" quando a pergunta diz "cega", mas pode confundir artigos de assunto parecido. A busca por palavra-chave acerta termos exatos, como "Fundeb" ou "sala de recursos", mas não entende sinônimos. Por isso o sistema roda as duas e junta os resultados.</p>
+    <ol class="steps">
+      <li><b>Palavra-chave.</b> A pergunta perde acentos, marcadores do Guardião e palavras comuns demais ("escola", "aluno", "de"); o que sobra vira uma busca no índice FTS5 do SQLite, ordenada pelo BM25, que valoriza termos raros na base e frequentes no trecho.</li>
+      <li><b>Significado.</b> A pergunta vira um vetor e é comparada com os 132 vetores da base.</li>
+      <li><b>Fusão por posição (RRF).</b> Os 20 primeiros de cada lista recebem pontos pela posição, não pela nota original, porque as notas dos dois caminhos não são comparáveis.</li>
+    </ol>
+    <div class="formula">pontos(trecho) = 1,0 / (60 + posição no significado) + 0,5 / (60 + posição na palavra-chave)</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Trecho (posições ilustrativas)</th><th>Significado</th><th>Palavra-chave</th><th>Conta</th><th>Pontos</th></tr></thead>
+        <tbody>
+          <tr><td class="k">LBI, Art. 28, XII</td><td class="n">1º</td><td class="n">3º</td><td class="mono">1/61 + 0,5/63</td><td class="n">0,0243</td></tr>
+          <tr><td class="k">LBI, Art. 28, XI</td><td class="n">9º</td><td class="n">1º</td><td class="mono">1/69 + 0,5/61</td><td class="n">0,0227</td></tr>
+          <tr><td class="k">Decreto, Art. 9º</td><td class="n">4º</td><td class="n">fora</td><td class="mono">1/64</td><td class="n">0,0156</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>O peso menor da palavra-chave foi escolhido na avaliação: com pesos iguais, termos comuns como "escola" puxavam trechos genéricos para cima. Depois da busca, o montador faz mais uma fusão, com pesos iguais, entre esse resultado e os trechos do <b>mapa</b> da barreira, e corta em 6. Quando não há pergunta, como na sugestão de ações municipais, entram só os trechos do mapa.</p>
+  </section>
+
+  <section id="rag" aria-labelledby="h-rag">
+    <h2 id="h-rag">Onde há RAG neste projeto</h2>
+    <p><b>RAG</b> (geração aumentada por recuperação) é recuperar informação de uma base e entregá-la ao modelo junto com o pedido, para ele responder com base nela, e não só no que aprendeu no treinamento. Aqui o RAG vale só para o <b>texto legal público</b>. Dados da escola e registros privados também entram no contexto, mas por consulta exata ao banco, nunca por busca aproximada.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Onde</th><th>Busca nas normas</th><th>O que entra no contexto</th><th>Cita</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Plano de Ação da escola</td><td class="yes">sim, mapa + busca</td><td>C1 a C4; a "pergunta" da busca é a posição emitida na Declaração</td><td>trechos de lei, conferidos pelo validador</td></tr>
+          <tr><td class="k">Declaração (conversa)</td><td class="yes">sim, mapa + busca</td><td>C1 a C3 com foco na barreira; a fala do diretor</td><td class="no">não: o texto formal da escola não cita leis; o validador só recusa lei mencionada fora do contexto</td></tr>
+          <tr><td class="k">Plano Estratégico Municipal</td><td class="yes">só o mapa</td><td>contagens da rede, regra da barreira, ações dos planos aceitos com referências [E1-A2]</td><td>trechos de lei e ações escolares, ambos conferidos</td></tr>
+          <tr><td class="k">Analítico de Barreiras</td><td class="no">não</td><td>proporções arredondadas da rede e resumos dos relatos com referências [R1]</td><td>barreiras e relatos, conferidos</td></tr>
+          <tr><td class="k">Diagnóstico público</td><td class="no">não</td><td>indicadores públicos do município e uma referência legal fixa por eixo</td><td>só a referência fixa do eixo</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub">Nenhum dos usos manda à IA o nome da escola, o código INEP ou, nos usos da rede, o município: nas sugestões municipais e no Analítico, as escolas viram referências como [E1-A2] e [R1], e o sistema as traduz de volta depois de conferir a resposta.</p>
+  </section>
+
+  <section id="base" aria-labelledby="h-base">
+    <h2 id="h-base">O que foi processado na base normativa</h2>
+    <div class="facts">
+      <div><strong>132</strong><span>trechos de lei</span></div>
+      <div><strong>2</strong><span>normas incluídas</span></div>
+      <div><strong>768</strong><span>números por vetor</span></div>
+      <div><strong>11</strong><span>barreiras da metodologia</span></div>
+      <div><strong>38</strong><span>ligações barreira → trecho</span></div>
+    </div>
     <figure>
       <div class="canvas">
-        <svg viewBox="0 0 1120 230" role="img" aria-label="Construção offline da base normativa: fontes validadas são divididas por artigo, recebem embeddings, passam por um conjunto de perguntas de avaliação e só então viram uma versão da base lida pelo backend; o mapa curado barreira para dispositivos entra na mesma base.">
+        <svg class="wide" viewBox="0 0 1120 300" role="img" aria-label="Construção offline: as normas listadas no corpus são divididas por dispositivo legal em 132 trechos; os trechos vão para um índice de palavras FTS5 e, em lotes, para a API de embeddings; a metodologia de barreiras e o mapa barreira para norma entram na mesma base; uma versão nova passa pela avaliação de 8 perguntas.">
           <defs>
             <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head" d="M0,0 L10,5 L0,10 z"/></marker>
             <marker id="bx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-ext" d="M0,0 L10,5 L0,10 z"/></marker>
-            <marker id="ba" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="head-alt" d="M0,0 L10,5 L0,10 z"/></marker>
           </defs>
 
-          <path class="edge-alt" d="M790,60 V30 H330 V58" marker-end="url(#ba)"/>
-          <text class="lbl" x="560" y="24" text-anchor="middle">reprovado: ajustar divisão ou corpus</text>
+          <rect class="store" x="10" y="40" width="200" height="82" rx="6"/>
+          <text class="t" x="110" y="64" text-anchor="middle">corpus.json</text>
+          <text class="s" x="110" y="84" text-anchor="middle">Decreto 12.686/2025, consolidado</text>
+          <text class="s" x="110" y="101" text-anchor="middle">LBI, Arts. 27 a 30</text>
+          <text class="lbl" x="110" y="138" text-anchor="middle">Decreto 12.773 fora: é um resumo</text>
 
-          <rect class="store" x="10" y="60" width="180" height="64" rx="6"/>
-          <text class="t" x="100" y="86" text-anchor="middle">Fontes validadas</text>
-          <text class="s" x="100" y="105" text-anchor="middle">legislacao.md · base/legislacao/</text>
+          <rect class="box" x="260" y="40" width="200" height="82" rx="6"/>
+          <text class="t" x="360" y="64" text-anchor="middle">Divisão por dispositivo</text>
+          <text class="s" x="360" y="84" text-anchor="middle">artigo · parágrafo · inciso</text>
+          <text class="s" x="360" y="101" text-anchor="middle">caput vira contexto do inciso</text>
 
-          <rect class="box" x="240" y="60" width="180" height="64" rx="6"/>
-          <text class="t" x="330" y="86" text-anchor="middle">Divisão por dispositivo</text>
-          <text class="s" x="330" y="105" text-anchor="middle">artigo · § · inciso + vigência</text>
+          <rect class="box" x="510" y="12" width="200" height="56" rx="6"/>
+          <text class="t" x="610" y="36" text-anchor="middle">Índice FTS5</text>
+          <text class="s" x="610" y="54" text-anchor="middle">palavras sem acento · BM25</text>
 
-          <rect class="extbox" x="470" y="60" width="180" height="64" rx="6"/>
-          <text class="t" x="560" y="86" text-anchor="middle">Embeddings</text>
-          <text class="s" x="560" y="105" text-anchor="middle">API · só corpus público</text>
+          <rect class="extbox" x="510" y="94" width="200" height="56" rx="6"/>
+          <text class="t" x="610" y="118" text-anchor="middle">gemini-embedding-001</text>
+          <text class="s" x="610" y="136" text-anchor="middle">lotes de 20 · RETRIEVAL_DOCUMENT</text>
 
-          <rect class="box" x="700" y="60" width="180" height="64" rx="6"/>
-          <text class="t" x="790" y="86" text-anchor="middle">Avaliação</text>
-          <text class="s" x="790" y="105" text-anchor="middle">30 a 50 perguntas reais</text>
+          <rect class="store" x="790" y="40" width="210" height="82" rx="6"/>
+          <text class="t" x="895" y="64" text-anchor="middle">base_normativa.db</text>
+          <text class="s" x="895" y="84" text-anchor="middle">versão 1d8d2aad9541</text>
+          <text class="s" x="895" y="101" text-anchor="middle">só leitura no servidor</text>
 
-          <rect class="store" x="930" y="60" width="180" height="64" rx="6"/>
-          <text class="t" x="1020" y="86" text-anchor="middle">base_normativa.db</text>
-          <text class="s" x="1020" y="105" text-anchor="middle">versão N · só leitura</text>
+          <path class="edge" d="M210,81 H258" marker-end="url(#b)"/>
+          <path class="edge" d="M460,70 H485 V40 H508" marker-end="url(#b)"/>
+          <path class="edge" d="M460,92 H485 V122 H508" marker-end="url(#b)"/>
+          <text class="lbl" x="485" y="88" text-anchor="middle">132</text>
+          <path class="edge" d="M710,40 H750 V70 H788" marker-end="url(#b)"/>
+          <path class="edge-ext" d="M710,122 H750 V92 H788" marker-end="url(#bx)"/>
+          <text class="cross-lbl" x="752" y="142" text-anchor="middle">vetores</text>
 
-          <path class="edge" d="M190,92 H238" marker-end="url(#b)"/>
-          <path class="edge" d="M420,92 H468" marker-end="url(#b)"/>
-          <text class="lbl" x="444" y="84" text-anchor="middle">trechos</text>
-          <path class="edge-ext" d="M650,92 H698" marker-end="url(#bx)"/>
-          <text class="cross-lbl" x="674" y="84" text-anchor="middle">vetores</text>
-          <path class="edge" d="M880,92 H928" marker-end="url(#b)"/>
-          <text class="lbl" x="904" y="84" text-anchor="middle">aprovada</text>
+          <rect class="store" x="10" y="190" width="200" height="64" rx="6"/>
+          <text class="t" x="110" y="214" text-anchor="middle">metodologia_barreiras.md</text>
+          <text class="s" x="110" y="233" text-anchor="middle">tabelas da §3 · v0.1</text>
 
-          <rect class="box" x="240" y="160" width="180" height="56" rx="6"/>
-          <text class="t" x="330" y="184" text-anchor="middle">Mapa barreira → norma</text>
-          <text class="s" x="330" y="202" text-anchor="middle">curado e validado</text>
-          <path class="edge" d="M420,188 H1020 V126" marker-end="url(#b)"/>
-          <text class="lbl" x="720" y="180" text-anchor="middle">entra na mesma versão da base</text>
+          <rect class="store" x="260" y="190" width="200" height="64" rx="6"/>
+          <text class="t" x="360" y="214" text-anchor="middle">mapa_barreira_norma.json</text>
+          <text class="s" x="360" y="233" text-anchor="middle">curado pela equipe · v0.1</text>
+
+          <path class="edge" d="M110,254 V280 H895 V124" marker-end="url(#b)"/>
+          <path class="edge" d="M360,254 V280"/>
+          <text class="lbl" x="630" y="274" text-anchor="middle">11 regras de barreira e 38 ligações entram na mesma versão</text>
+
+          <rect class="box" x="1020" y="40" width="90" height="82" rx="6"/>
+          <text class="t" x="1065" y="66" text-anchor="middle">Avaliação</text>
+          <text class="s" x="1065" y="86" text-anchor="middle">8</text>
+          <text class="s" x="1065" y="102" text-anchor="middle">perguntas</text>
+          <path class="edge" d="M1000,81 H1018" marker-end="url(#b)"/>
         </svg>
       </div>
-      <figcaption>A base é um artefato do ETL, como o <code>incluia.db</code>: gerada fora do servidor, versionada e só lida em execução. Uma versão nova só vai para produção se passar no conjunto de avaliação.</figcaption>
+      <figcaption>Gerado com <span class="mono">python -m etl.base_normativa.construir</span>. O ETL chama a API de embeddings direto, sem o Guardião, porque só envia texto legal público. Se a API falhar, a base sai só com o índice de palavras, e o motivo fica registrado nela.</figcaption>
     </figure>
-  </section>
 
-  <section aria-labelledby="h-example">
-    <h2 id="h-example">Exemplo: uma pergunta sobre Braille</h2>
-    <p>Escola com a barreira <span class="mono">B-III-02</span> (sem revisor de texto em Braille) e a Declaração já emitida. O diretor está montando o Plano de Ação.</p>
-    <div class="walk-wrap">
-      <table class="walk">
-        <thead><tr><th>Etapa</th><th>O que acontece</th></tr></thead>
+    <h3>Como a lei vira trechos</h3>
+    <p>A divisão segue a estrutura da lei, não um tamanho fixo de texto: cada inciso, parágrafo ou artigo sem incisos vira um trecho, com um identificador estável que o modelo usa para citar. O caput que só introduz incisos não vira trecho próprio; ele entra como contexto de cada inciso, para o inciso fazer sentido sozinho. Artigos vetados saem, e notas como "Redação dada por…" viram metadado. Resultado: 18 artigos inteiros, 24 parágrafos e 90 incisos, com 170 caracteres em média.</p>
+    <div class="chunk" role="table" aria-label="Exemplo de trecho guardado na base">
+      <div class="f" role="rowheader">id</div><div class="mono" role="cell">LBI-art28-XII</div>
+      <div class="f" role="rowheader">citação</div><div role="cell">Lei 13.146/2015 (LBI), Art. 28, XII</div>
+      <div class="f" role="rowheader">capítulo</div><div role="cell">Capítulo IV — Do direito à educação</div>
+      <div class="f" role="rowheader">contexto</div><div role="cell">Incumbe ao poder público assegurar, criar, desenvolver, implementar, incentivar, acompanhar e avaliar:</div>
+      <div class="f" role="rowheader">texto</div><div role="cell">oferta de ensino da Libras, do Sistema Braille e de uso de recursos de tecnologia assistiva, de forma a ampliar habilidades funcionais dos estudantes, promovendo sua autonomia e participação;</div>
+      <div class="f" role="rowheader">vetor</div><div role="cell">768 números de 4 bytes, calculados sobre citação + seção + contexto + texto</div>
+    </div>
+
+    <h3>O mapa barreira → norma</h3>
+    <p>Para cada barreira da metodologia, a equipe indicou os dispositivos legais que a fundamentam, partindo do mapeamento por eixo de <span class="mono">docs/legislacao.md</span>. Esses trechos entram no contexto mesmo quando a busca não os encontra. A validação jurídica do mapa ainda está pendente.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Barreira</th><th>Trechos ligados</th><th>Dispositivos</th></tr></thead>
         <tbody>
-          <tr><td>Pergunta</td><td><span class="q">O Pedro, do 3º ano, é cego e não temos material em Braille. Que ação proponho?</span></td></tr>
-          <tr><td>Guardião</td><td><span class="q">O <span class="mask">[NOME]</span>, do <span class="mask">[TURMA]</span>, é cego e não temos material em Braille. Que ação proponho?</span><br>O nome é mascarado. A turma também, porque deficiência + turma identifica o estudante mesmo sem o nome. A deficiência fica, porque a IA precisa dela para propor a ação. O diretor vê o que foi mascarado antes do envio.</td></tr>
-          <tr><td>C1 · SQL</td><td>Score, faixa e eixos da escola; barreira <span class="mono">B-III-02</span> ativa, com 1,0 ponto em jogo.</td></tr>
-          <tr><td>C2 · chave</td><td>Linha de <span class="mono">B-III-02</span> na metodologia de barreiras: regra <span class="mono">QT_PROF_REVISOR_BRAILLE = 0</span> e texto exibido.</td></tr>
-          <tr><td>C4 · vínculo</td><td>A posição que o diretor registrou para <span class="mono">B-III-02</span> na Declaração emitida.</td></tr>
-          <tr><td>C3 · normas</td><td>Pelo mapa do Eixo III: Lei 13.146/2015 (LBI), Art. 28, XI e XII. Pela busca: trechos de políticas públicas sobre material acessível, quando estiverem na base.</td></tr>
-          <tr><td>Validador</td><td>A resposta cita <span class="mono">LBI-art28-XII</span>, que estava no contexto: aceita. Se citasse um artigo que não foi entregue, seria descartada.</td></tr>
-          <tr><td>Resposta</td><td>Proposta de ação com a fonte de cada afirmação. O diretor ajusta e decide se entra no plano.</td></tr>
+          <tr><td class="k">B-I-01 · sem AEE</td><td class="n">14</td><td>Decreto 12.686/2025, Arts. 5º a 10 (só os 6 primeiros cabem no contexto)</td></tr>
+          <tr><td class="k">B-II-01 a 07 · acessibilidade física</td><td class="n">2 cada</td><td>LBI, Art. 28, II e XVI</td></tr>
+          <tr><td class="k">B-III-01 e 02 · Libras e Braille</td><td class="n">4 cada</td><td>LBI, Art. 28, XI, XII e § 2º, I e II</td></tr>
+          <tr><td class="k">B-IV-01 · classe exclusiva</td><td class="n">2</td><td>Decreto 12.686/2025, Art. 1º, § 3º, e Art. 8º</td></tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  <section aria-labelledby="h-pending">
-    <h2 id="h-pending">Decisões em aberto</h2>
+  <section id="exemplo" aria-labelledby="h-ex">
+    <h2 id="h-ex">Exemplo: uma sugestão de ação sobre Braille</h2>
+    <p>Escola com a barreira <span class="mono">B-III-02</span> (sem revisor de texto em Braille) e a Declaração já emitida. O diretor pede sugestões para o Plano de Ação.</p>
+    <div class="tbl-wrap walk">
+      <table>
+        <thead><tr><th>Etapa</th><th>O que acontece</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Posição emitida</td><td><span class="q">O Pedro, do 3º ano, é cego e não temos material em Braille.</span></td></tr>
+          <tr><td class="k">Guardião</td><td><span class="q">O <span class="mask">[NOME]</span>, do <span class="mask">[TURMA]</span>, é cego e não temos material em Braille.</span><br>Nome e turma são mascarados, porque deficiência + turma identifica o estudante. A deficiência fica: a IA precisa dela para propor a ação.</td></tr>
+          <tr><td class="k">C1 · Censo</td><td>Município, rede, score, faixa, eixos e barreiras da escola; <span class="mono">B-III-02</span> com 1,0 ponto em jogo. Sem nome nem código da escola.</td></tr>
+          <tr><td class="k">C2 · metodologia</td><td>Regra de <span class="mono">B-III-02</span>: o Censo não registra revisor de texto em Braille na escola.</td></tr>
+          <tr><td class="k">C4 · registros</td><td>A posição emitida, já mascarada, como registro da própria escola.</td></tr>
+          <tr><td class="k">C3 · normas</td><td>Mapa de <span class="mono">B-III-02</span>: LBI, Art. 28, XI, XII e § 2º, I e II. Busca com a posição como pergunta: o inciso XII aparece em 1º. A fusão mantém até 6 trechos.</td></tr>
+          <tr><td class="k">Modelo</td><td>Gemini 3.5 Flash devolve de 1 a 3 sugestões em JSON, cada uma com <span class="mono">fontes</span> e <span class="mono">lacunas</span>.</td></tr>
+          <tr><td class="k">Validador</td><td>A sugestão cita <span class="mono">LBI-art28-XII</span>, que estava no contexto: aceita. Se citasse um artigo que não foi entregue, a resposta inteira seria recusada e o pedido iria ao Groq.</td></tr>
+          <tr><td class="k">Diretor</td><td>Vê cada sugestão com a fonte em linguagem legível, ajusta, aceita ou descarta. Só o que ele aceitar entra no plano.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="limites" aria-labelledby="h-lim">
+    <h2 id="h-lim">Avaliação e limites</h2>
+    <p>O comando <span class="mono">python -m etl.base_normativa.avaliar</span> testa a busca com 8 perguntas escritas pela equipe (Braille, profissional de apoio, rampa e banheiro, formação do professor do AEE, sala de recursos, intérprete de Libras, Fundeb e estudo de caso), cada uma com o trecho que deveria aparecer. Mede em que posição o trecho esperado chega pela palavra-chave, pelo significado e pela busca híbrida. Com <span class="mono">--com-ia</span>, também monta o contexto, chama o modelo e confere se a resposta passou no validador e citou o trecho esperado.</p>
+    <div class="note">Resultado registrado: a busca híbrida pôs o trecho esperado entre os 3 primeiros nas 8 perguntas. Em 1º lugar, foram 6 de 8 com pesos iguais e 7 de 8 depois do peso 0,5 para a palavra-chave. O arquivo de avaliação ainda guarda só o primeiro resultado.</div>
     <ul class="pending">
-      <li>Provedor e modelo de embeddings (multilíngue, com plano gratuito); avaliar se um modelo local cabe na memória do servidor junto com o Guardião.</li>
-      <li>Lista inicial do corpus de políticas públicas, com fonte oficial e vigência de cada documento.</li>
-      <li>Ampliar o mapeamento eixo → base legal para barreira → dispositivos, com validação jurídica.</li>
-      <li>Conjunto de perguntas de avaliação e meta mínima de acerto antes do piloto.</li>
-      <li>Conferir modelos e cotas atuais dos provedores; o código ainda fixa <span class="mono">gemini-2.0-flash</span>.</li>
+      <li><b>Avaliação pequena.</b> 8 perguntas da equipe não bastam; a meta é um conjunto de 30 a 50 perguntas reais de diretores, com acerto mínimo definido antes do piloto.</li>
+      <li><b>Corpus curto.</b> Só duas normas. Os documentos de políticas públicas ainda vão entrar, com fonte oficial e vigência de cada um. O Decreto 12.773/2025 espera o texto literal.</li>
+      <li><b>Mapa sem validação jurídica.</b> O mapa barreira → norma foi feito pela equipe a partir do eixo de cada barreira. Na B-I-01, só 6 dos 14 trechos cabem no contexto, na ordem do decreto.</li>
+      <li><b>Embeddings de um só provedor.</b> A busca por significado depende da API do Gemini; se ela cair, a busca segue só por palavra-chave, sem outro provedor de embeddings.</li>
+      <li><b>Diagnóstico público fora do RAG.</b> A leitura pública do município usa uma referência legal fixa por eixo, não a base normativa.</li>
+      <li><b>Orçamento fixo.</b> Os 2.500 tokens (5.000 nos pedidos da rede) são um valor fixo, não medido pelo limite de cada provedor.</li>
     </ul>
   </section>
 
-  <footer>Registro: <span class="mono">docs/sdd/fase-2/arquitetura.md</span>, AD-08. Complementa AD-04 (artefatos do ETL) e AD-05 (Guardião LGPD).</footer>
+  <footer>
+    <span>Registro: <span class="mono">docs/sdd/fase-2/arquitetura.md</span>, AD-05 (Guardião LGPD) e AD-08 (contexto em camadas). Base normativa versão <span class="mono">1d8d2aad9541</span>, metodologia de barreiras v0.1.</span>
+    <span>Este documento descreve o código em 27/10/2026 e substitui a proposta de 23/10/2026.</span>
+  </footer>
 </main>

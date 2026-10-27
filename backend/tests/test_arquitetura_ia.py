@@ -59,6 +59,11 @@ _ARGUMENTOS_LIBERADOS = {
     # contexto_ia/montador.py, rede: só contagens calculadas e a regra da metodologia (sem município nem escola) e cabeçalho fixo
     "_renderizar_fatos_rede(codigo, fatos, base.metodologia[codigo])",
     "_CABECALHO_ACOES_ESCOLAS",
+    # analitico/sintese.py: instruções fixas e números da rede, sem município nem escolas
+    "INSTRUCOES_ANALITICO",
+    "renderizar_rede(rede)",
+    "_CABECALHO_RELATOS",
+    "PEDIDO_ANALITICO",
 }
 
 

@@ -59,7 +59,7 @@ Decisões do responsável em 2026-10-27: os botões "Registrar barreira" viram e
 ### Pendências que continuam
 
 - **Contas e histórico de chat da Fase 1:** em 2026-10-27 as tabelas `usuarios` e de chat foram apagadas de `data/incluia.db`, e o cache de narrativas foi esvaziado (o arquivo versionado volta a ter só o resultado do ETL). Continuam nos commits antigos publicados no GitHub; apagar de lá exige reescrever o histórico e forçar o envio, junto com a limpeza da chave do Gemini.
-- **Analítico do secretário (opção 3):** reaproveitar a IA da narrativa no Analítico de Barreiras, na entrega do Analítico.
+- **Analítico do secretário (opção 3):** feito em 2026-10-27 sobre a mesma cadeia de provedores e o Guardião, com contexto próprio da rede (contagens e resumos das Declarações); o texto da narrativa pública não é reaproveitado.
 - **Exportações** ("Exportar (em breve)" na aba Escolas): continuam fora do escopo.
 - **Contagem de alunos na área pública:** corrigida em 2026-10-27 (RN-06 de `docs/business-rules/escolas.md`). Fica o risco residual de recalcular o score real de uma escola pequena a partir do score do município, descrito na RN-06.
 - **Limites em memória:** o limite por IP vê o IP do proxy do Render (vale para o site inteiro) e, como o teto diário de 200 gerações da narrativa, é por processo. Pré-gerar as narrativas com `python -m app.features.diagnostico_ia.cli gerar <UF>` a cada edição do Censo.

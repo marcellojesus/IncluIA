@@ -10,6 +10,7 @@ from app.features.acesso import modelos  # noqa: F401 — registra as tabelas no
 from app.features.declaracao import modelos as modelos_declaracao  # noqa: F401
 from app.features.plano import modelos as modelos_plano  # noqa: F401
 from app.features.plano_municipal import modelos as modelos_plano_municipal  # noqa: F401
+from app.features.analitico import modelos as modelos_analitico  # noqa: F401
 from app.shared import banco_gestao
 
 alvo = banco_gestao.Base.metadata

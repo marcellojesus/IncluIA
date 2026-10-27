@@ -20,6 +20,7 @@ import type {
   PreviaPublica,
   DashboardEscola,
   DashboardMunicipal,
+  Analitico,
   EstadoDeclaracao,
   Eu,
   MensagemConversa,
@@ -150,6 +151,10 @@ export const submeterPlano = () => chamar<VersaoPlano>(`${plano}/submeter`, post
 export const getFilaPlanos = () => chamar<FilaPlanos>("/secretario/planos", {}, true);
 
 export const getDashboardMunicipal = () => chamar<DashboardMunicipal>("/secretario/dashboard", {}, true);
+
+export const getAnalitico = () => chamar<Analitico>("/secretario/analitico", {}, true);
+
+export const gerarSinteseAnalitica = () => chamar<Analitico>("/secretario/analitico/sintese", post({}), true);
 
 export const getRevisaoPlano = (coEntidade: number, numero: number) =>
   chamar<RevisaoPlano>(`/secretario/planos/${coEntidade}/versoes/${numero}`, {}, true);
