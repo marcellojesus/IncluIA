@@ -13,6 +13,8 @@ from app.features.acesso.protecao import exigir_configuracao
 from app.features.plano.fontes import citacoes
 from app.features.plano.router import nome_de
 from app.features.plano.servico import AVISO_MASCARA, ErroPlano
+from app.features.plano_municipal import base as base_rede
+from app.features.plano_municipal import narrativa as narrativa_ia
 from app.features.plano_municipal import servico, sugestoes
 from app.features.plano_municipal.schemas import (
     AceiteSugestaoMunicipal,
@@ -21,10 +23,13 @@ from app.features.plano_municipal.schemas import (
     AcoesMunicipaisDaEscola,
     BarreiraDaRede,
     Confirmacao,
+    EdicaoNarrativa,
     EscolaAtendida,
     EstadoPlanoMunicipal,
     ItemEscolarDaRede,
+    NarrativaExecutiva,
     NovaAcaoMunicipal,
+    NumerosDoPlano,
     PedidoSugestoesMunicipais,
     ResumoVersaoMunicipal,
     SugestaoMunicipal,
@@ -178,14 +183,55 @@ def obter_versao(numero: int, sessao_gestao: SessaoGestao = Depends(exigir_secre
     return _versao(sessao, _erro(servico.versao, sessao, sessao_gestao.co_municipio, numero))
 
 
-def _versao(sessao: Session, versao) -> VersaoPlanoMunicipal:
+def _narrativa(registro) -> NarrativaExecutiva | None:
+    if registro is None:
+        return None
+    return NarrativaExecutiva(
+        **registro.conteudo, modelo=registro.modelo, gerada_em=narrativa_ia._com_fuso(registro.gerada_em), editada=registro.editada,
+    )
+
+
+def _versao(sessao: Session, versao, aviso: str | None = None) -> VersaoPlanoMunicipal:
     municipio = censo.municipio(versao.co_municipio)
     nomes = {co: e.nome for co, e in censo.escolas({e["co_entidade"] for a in versao.acoes for e in a.get("escolas") or []}).items()}
+    narrativa = narrativa_ia.da_versao(sessao, versao.co_municipio, versao.versao)
+    usados = {f for a in versao.acoes for f in a.get("fontes") or []} | set(narrativa.conteudo.get("fontes") or [] if narrativa else [])
     return VersaoPlanoMunicipal(
         versao=versao.versao, municipio=municipio.nome if municipio else "", confirmada_em=versao.confirmada_em,
         confirmada_por=nome_de(sessao, versao.confirmada_por), acoes=[_acao(a, nomes) for a in versao.acoes],
-        escolas_atendidas=_atendidas(versao.acoes), fontes=citacoes({f for a in versao.acoes for f in a.get("fontes") or []}),
+        escolas_atendidas=_atendidas(versao.acoes), fontes=citacoes(usados),
+        numeros=NumerosDoPlano(**narrativa_ia.numeros(versao, len(base_rede._escolas_municipais(versao.co_municipio))).__dict__),
+        narrativa=_narrativa(narrativa), aviso_guardiao=aviso,
     )
+
+
+@router.post("/versoes/{numero}/narrativa", response_model=VersaoPlanoMunicipal)
+async def gerar_narrativa(
+    numero: int, sessao_gestao: SessaoGestao = Depends(exigir_secretario), sessao: Session = Depends(obter_sessao)
+) -> VersaoPlanoMunicipal:
+    """RF-30: narrativa executiva de uma versão confirmada; gerar de novo substitui o texto anterior."""
+    versao = _erro(servico.versao, sessao, sessao_gestao.co_municipio, numero)
+    try:
+        _, mascarou = await narrativa_ia.gerar(sessao, versao=versao, autor_id=sessao_gestao.conta.id)
+    except ErroPlano as erro:
+        raise HTTPException(erro.status, erro.mensagem) from None
+    except GuardiaoIndisponivel:
+        raise HTTPException(503, "O filtro de dados pessoais está indisponível. Tente de novo em instantes.") from None
+    except (RuntimeError, BaseNormativaIndisponivel):
+        raise HTTPException(503, "O assistente está indisponível agora. O plano e seus números continuam disponíveis; tente de novo em instantes.") from None
+    return _versao(sessao, versao, AVISO_SUGESTAO if mascarou else None)
+
+
+@router.put("/versoes/{numero}/narrativa", response_model=VersaoPlanoMunicipal)
+def editar_narrativa(
+    numero: int, corpo: EdicaoNarrativa, sessao_gestao: SessaoGestao = Depends(exigir_secretario), sessao: Session = Depends(obter_sessao)
+) -> VersaoPlanoMunicipal:
+    versao = _erro(servico.versao, sessao, sessao_gestao.co_municipio, numero)
+    mascarou = _erro(narrativa_ia.editar, sessao, versao=versao, autor_id=sessao_gestao.conta.id, dados=narrativa_ia.EdicaoNarrativa(
+        resumo=corpo.resumo, situacao=corpo.situacao, fundamentacao=corpo.fundamentacao, proximos_passos=corpo.proximos_passos,
+        estrategia=tuple((b.texto, tuple(b.acoes)) for b in corpo.estrategia), incertezas=tuple(corpo.incertezas),
+    ))
+    return _versao(sessao, versao, AVISO_MASCARA if mascarou else None)
 
 
 @router_diretor.get("", response_model=AcoesMunicipaisDaEscola)

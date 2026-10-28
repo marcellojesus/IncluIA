@@ -332,6 +332,49 @@ export type EstadoPlanoMunicipal = {
   avisoGuardiao: string | null;
 };
 
+export type NumerosDoPlano = {
+  acoes: number;
+  barreiras: number;
+  escolasAtendidas: number;
+  escolasMunicipais: number;
+  loa: number;
+  ppa: number;
+  prioridadeAlta: number;
+  comCustoEstimado: number;
+  comCoberturaParcial: number;
+};
+
+export type BlocoNarrativa = { texto: string; acoes: string[] };
+
+export type NarrativaExecutiva = {
+  resumo: string;
+  situacao: string;
+  estrategia: BlocoNarrativa[];
+  fundamentacao: string;
+  proximosPassos: string;
+  incertezas: string[];
+  lacunas: string[];
+  fontes: string[];
+  modelo: string;
+  geradaEm: string;
+  editada: boolean;
+};
+
+export type VersaoPlanoMunicipal = {
+  versao: number;
+  municipio: string;
+  confirmadaEm: string;
+  confirmadaPor: string | null;
+  acoes: AcaoMunicipal[];
+  escolasAtendidas: number;
+  fontes: Record<string, string>;
+  numeros: NumerosDoPlano | null;
+  narrativa: NarrativaExecutiva | null;
+  avisoGuardiao: string | null;
+};
+
+export type EdicaoNarrativa = Pick<NarrativaExecutiva, "resumo" | "situacao" | "estrategia" | "fundamentacao" | "proximosPassos" | "incertezas">;
+
 export type AcoesMunicipaisDaEscola = {
   versao: number | null;
   confirmadaEm: string | null;

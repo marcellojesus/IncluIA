@@ -10,8 +10,10 @@ import type {
   VersaoPlano,
   ApontamentoEntrada,
   AcoesMunicipaisDaEscola,
+  EdicaoNarrativa,
   EstadoPlanoMunicipal,
   NovaAcaoMunicipal,
+  VersaoPlanoMunicipal,
   DecisaoPlano,
   PreviaPlanoPublico,
   FilaPlanos,
@@ -195,5 +197,13 @@ export const editarAcaoMunicipal = (id: string, dados: NovaAcaoMunicipal) => cha
 export const removerAcaoMunicipal = (id: string) => chamar<EstadoPlanoMunicipal>(`${municipal}/acoes/${id}`, { method: "DELETE" }, true);
 
 export const confirmarPlanoMunicipal = () => chamar<{ versao: number }>(`${municipal}/confirmar`, post({ confirmado: true }), true);
+
+export const getVersaoMunicipal = (numero: number) => chamar<VersaoPlanoMunicipal>(`${municipal}/versoes/${numero}`, {}, true);
+
+export const gerarNarrativaMunicipal = (numero: number) =>
+  chamar<VersaoPlanoMunicipal>(`${municipal}/versoes/${numero}/narrativa`, post({}), true);
+
+export const editarNarrativaMunicipal = (numero: number, dados: EdicaoNarrativa) =>
+  chamar<VersaoPlanoMunicipal>(`${municipal}/versoes/${numero}/narrativa`, put(dados), true);
 
 export const getAcoesMunicipaisDaEscola = () => chamar<AcoesMunicipaisDaEscola>("/diretor/acoes-municipais", {}, true);

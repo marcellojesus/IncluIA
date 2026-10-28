@@ -25,7 +25,7 @@ Este PRD preserva a proposta das fontes, mas registra como pendentes as decisõe
 | Plano de Ação Escolar | Implementado, com publicação do plano aceito | RF-12 a RF-17 (contexto da IA só com a base normativa e a Declaração; sem orçamento e histórico da escola) | [plano escolar](requirements/diretor/plano-acao-escolar.md) |
 | Dashboard Municipal | Implementado | RF-18, RF-34, RF-36 a RF-38 | [dashboard municipal](requirements/secretario/dashboard-municipal.md) |
 | Fila e Revisão | Implementada, com apontamentos por barreira e ação | RF-19 a RF-22 | [fila](requirements/secretario/fila-revisao-planos.md) |
-| Plano Estratégico Municipal | Implementado sem narrativa executiva | RF-26 a RF-29 (RF-30 pendente) | [plano municipal](requirements/secretario/plano-estrategico-municipal.md) |
+| Plano Estratégico Municipal | Implementado, com narrativa executiva sem fonte de custo | RF-26 a RF-30 (no RF-30, custos só como estimativa da secretaria até as decisões 12 e 13) | [plano municipal](requirements/secretario/plano-estrategico-municipal.md) |
 | Analítico de Barreiras | Implementado em 2026-10-27 | RF-23 a RF-25 | [analítico](requirements/secretario/analitico-barreiras.md) |
 | Documentos em PDF | Não iniciado | RF-31 | — |
 
@@ -219,4 +219,4 @@ A Narrativa V6 lista como extensões: Assistente de Preenchimento do Censo (sem 
 
 ## Etapas seguintes
 
-Requisitos de acesso: [Acesso à Gestão Ativa](requirements/acesso-gestao-ativa.md). O [índice das features de requisitos](requirements/planos-de-acao.md) aponta para Declaração de Obstáculos, Plano de Ação Escolar, Fila e Revisão do Secretário, Analítico de Barreiras e Plano Estratégico Municipal. As regras seguem a mesma separação no [índice de regras de negócio](business-rules/planos-de-acao.md). Próximas entregas: narrativa executiva do Plano Estratégico Municipal (RF-30) e documentos em PDF (RF-31). Antes de produção: provedor de e-mail real, retenção e auditoria pendentes (AD-03 e AD-07 em [arquitetura.md](arquitetura.md)) e o destino das contas da Fase 1 ([impacto-fase-1.md](impacto-fase-1.md)).
+Requisitos de acesso: [Acesso à Gestão Ativa](requirements/acesso-gestao-ativa.md). O [índice das features de requisitos](requirements/planos-de-acao.md) aponta para Declaração de Obstáculos, Plano de Ação Escolar, Fila e Revisão do Secretário, Analítico de Barreiras e Plano Estratégico Municipal. As regras seguem a mesma separação no [índice de regras de negócio](business-rules/planos-de-acao.md). Próxima entrega: documentos em PDF (RF-31). A narrativa executiva (RF-30) foi entregue em 2026-10-27 sem fonte de custo. Antes de produção: provedor de e-mail real, retenção e auditoria pendentes (AD-03 e AD-07 em [arquitetura.md](arquitetura.md)) e o destino das contas da Fase 1 ([impacto-fase-1.md](impacto-fase-1.md)).

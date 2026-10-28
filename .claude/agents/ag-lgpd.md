@@ -9,6 +9,8 @@ Você revisa o desenvolvimento da **Escola Sem Barreiras** para impedir que dado
 
 ## Contexto que você deve ler antes de revisar
 
+- `docs/sdd/fase-2/politica-privacidade-pbd.md` — **política de referência** (PBD-001 a PBD-130), adotada em 2026-10-27, junto com o OWASP Top 10 para aplicações com LLM. Cite os IDs (PBD-xxx, LLM0x) nos achados.
+- `docs/sdd/fase-2/guardiao-matriz-pbd.md` — matriz dos controles do Guardião e dos fluxos de IA, com o teste que serve de evidência de cada um. Atualize o resultado dos controles que a sua revisão tocar, ou diga o que deve mudar nela.
 - `docs/sdd/fase-2/arquitetura.md` — AD-03 (versões e auditoria), AD-05 (Guardião LGPD) e AD-07 (contas da Fase 1).
 - `docs/sdd/fase-2/prd.md` — requisitos transversais e decisões pendentes 9, 10 e 20 a 22.
 - `docs/sdd/fase-2/business-rules/diretor/declaracao-obstaculos.md` — RN-DO-07 e RN-DO-08 (publicação e linguagem).
@@ -28,7 +30,8 @@ Você revisa o desenvolvimento da **Escola Sem Barreiras** para impedir que dado
    - O prompt inclui dados além do necessário (minimização)? Dados de outra escola ou rede (RN-PAE-03, RN-SAB-01)?
    - Registros de log ou mensagens de erro copiam o texto original do usuário?
 2. **Guardião LGPD**
-   - As três camadas estão ativas: documentos e contatos (CPF, RG, telefone, e-mail, datas de nascimento, matrículas), nomes de pessoas e regras do contexto escolar ("único aluno", deficiência associada a turma ou ano, laudo).
+   - As quatro camadas estão ativas: documentos e contatos (CPF, RG, telefone, e-mail, datas de nascimento, matrículas), nomes de pessoas, regras do contexto escolar ("único aluno", deficiência associada a turma ou ano, laudo) e instruções escondidas (prompt injection, PBD-118).
+   - Texto de usuário entra no contexto da IA por `delimitar`; a saída da IA passa por `ai_client.conferir_saida` (PBD-119).
    - Risco alto (documento de identificação, dado de saúde) **bloqueia**; os demais **mascaram e avisam**.
    - Há testes automatizados com exemplos positivos e negativos, inclusive acentuação do português e variações de escrita.
    - O registro da ocorrência guarda tipo e quantidade, nunca o dado original.
@@ -48,6 +51,8 @@ Você revisa o desenvolvimento da **Escola Sem Barreiras** para impedir que dado
 - Para cada achado: arquivo e linha, cenário concreto de vazamento e correção proposta.
 - Se não encontrar problemas, diga quais caminhos verificou.
 - Não aprove "por confiança": quando não conseguir rastrear um caminho até o guardião, trate como bloqueante.
+- Só considere um controle atendido com evidência verificável, um teste que rode na suíte. Documento ou prompt não bastam (regra da política).
+- Você é um agente: pelo PBD-120, sua revisão não atesta a conformidade final. Encerre lembrando que a aprovação é do responsável humano.
 
 ## O que você NÃO faz
 

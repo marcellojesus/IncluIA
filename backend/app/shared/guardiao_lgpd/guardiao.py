@@ -1,8 +1,8 @@
 """Spec: docs/sdd/fase-2/arquitetura.md AD-05 — Guardião LGPD.
 
 Todo texto escrito por usuário passa por `proteger` antes de qualquer chamada externa (provedor de
-IA ou API de embeddings). As três camadas rodam no próprio backend; nada é enviado para fora para
-decidir se um trecho é dado pessoal.
+IA ou API de embeddings). As quatro camadas (documentos, nomes, contexto escolar e instruções
+escondidas) rodam no próprio backend; nada é enviado para fora para decidir se um trecho é dado pessoal.
 
 `TextoProtegido` só é criado aqui: quem chama a IA exige esse tipo, então não há caminho que leve
 texto cru ao provedor (AD-05, "obrigatório por construção").
@@ -12,7 +12,7 @@ import logging
 from collections import Counter
 from dataclasses import dataclass, field
 
-from app.shared.guardiao_lgpd import contexto_escolar, documentos, nomes
+from app.shared.guardiao_lgpd import contexto_escolar, documentos, instrucoes, nomes
 from app.shared.guardiao_lgpd.texto import Trecho
 
 logger = logging.getLogger("guardiao_lgpd")
@@ -95,7 +95,9 @@ def _selecionar(trechos: list[Trecho]) -> list[Trecho]:
 def proteger(texto: str) -> ResultadoGuardiao:
     """Levanta `GuardiaoIndisponivel` se o modelo local de nomes não carregar."""
     encontrados_nomes = nomes.encontrar(texto)
-    candidatos = documentos.encontrar(texto) + encontrados_nomes + contexto_escolar.encontrar(texto, encontrados_nomes)
+    candidatos = (
+        documentos.encontrar(texto) + encontrados_nomes + contexto_escolar.encontrar(texto, encontrados_nomes) + instrucoes.encontrar(texto)
+    )
     return _aplicar(texto, candidatos)
 
 
@@ -139,9 +141,23 @@ def liberar_dados_publicos(texto: str) -> TextoProtegido:
 
 
 def verificar_regras(texto: str) -> ResultadoGuardiao:
-    """Só as camadas determinísticas (documentos, contatos e contexto escolar), sem reconhecimento de
-    nomes: para conferir de novo um texto já mascarado sem os falsos positivos do modelo."""
-    return _aplicar(texto, documentos.encontrar(texto) + contexto_escolar.encontrar(texto, []))
+    """Só as camadas determinísticas (documentos, contatos, contexto escolar e instruções escondidas),
+    sem reconhecimento de nomes: para conferir de novo um texto já mascarado, ou a resposta da IA, sem
+    os falsos positivos do modelo."""
+    return _aplicar(texto, documentos.encontrar(texto) + contexto_escolar.encontrar(texto, []) + instrucoes.encontrar(texto))
+
+
+INICIO_REGISTROS = "⟦INÍCIO DOS REGISTROS DE USUÁRIOS⟧"
+FIM_REGISTROS = "⟦FIM DOS REGISTROS DE USUÁRIOS⟧"
+
+
+def delimitar(cabecalho: TextoProtegido, registros: list[TextoProtegido]) -> TextoProtegido:
+    """Bloco de texto escrito por usuários (relatos, planos, ações), entre delimitadores fixos que o
+    preâmbulo do `ai_client` manda ler como dado, nunca como instrução (PBD-118; OWASP LLM01). A camada 4
+    tira os mesmos caracteres de todo texto de usuário, então o fim do bloco não pode ser forjado."""
+    return juntar_protegidos(
+        [cabecalho, TextoProtegido(INICIO_REGISTROS, _chave=_CHAVE), *registros, TextoProtegido(FIM_REGISTROS, _chave=_CHAVE)], "\n"
+    )
 
 
 def juntar_protegidos(partes: list[TextoProtegido], separador: str = "\n\n") -> TextoProtegido:

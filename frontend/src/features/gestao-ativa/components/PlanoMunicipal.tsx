@@ -19,6 +19,7 @@ import {
 } from "../api";
 import { dataCurta } from "../rotulos";
 import type { AcaoMunicipal, BarreiraDaRede, Cobertura, EscolaAtendida, EstadoPlanoMunicipal, NovaAcaoMunicipal, Prioridade, SugestaoMunicipal } from "../types";
+import { NarrativaExecutiva } from "./NarrativaExecutiva";
 import { Fontes } from "./PartesPlano";
 import { Aviso, Botao, Campo, CampoTexto, Cartao, Erro, Selo } from "./ui";
 
@@ -60,6 +61,7 @@ export function PlanoMunicipal({ foco = null }: { foco?: string | null }) {
   const [orientacoes, setOrientacoes] = useState<Record<string, string>>({});
   const [formulario, setFormulario] = useState<{ codigo: string; acao?: AcaoMunicipal; sugestao?: SugestaoMunicipal } | null>(null);
   const [confirmar, setConfirmar] = useState(false);
+  const [narrativa, setNarrativa] = useState<number | null>(null);
 
   useEffect(() => {
     getPlanoMunicipal().then(setEstado).catch((falha) => setErro((falha as Error).message));
@@ -201,6 +203,13 @@ export function PlanoMunicipal({ foco = null }: { foco?: string | null }) {
                   <li key={v.versao}>
                     v{v.versao} · {dataCurta(v.confirmadaEm)} · {v.acoes} ações · {v.escolasAtendidas} escolas
                     {v.confirmadaPor && <span className="text-gray-500"> · {v.confirmadaPor}</span>}
+                    <button
+                      type="button"
+                      onClick={() => setNarrativa(v.versao)}
+                      className="ml-1 font-bold text-gov-blue underline-offset-2 hover:underline"
+                    >
+                      Narrativa executiva
+                    </button>
                   </li>
                 ))}
               </ul>
@@ -240,6 +249,7 @@ export function PlanoMunicipal({ foco = null }: { foco?: string | null }) {
           }}
         />
       )}
+      {narrativa !== null && <NarrativaExecutiva numero={narrativa} onFechar={() => setNarrativa(null)} />}
     </div>
   );
 }

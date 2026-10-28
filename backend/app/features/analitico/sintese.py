@@ -22,7 +22,7 @@ from app.features.analitico.modelos import SinteseAnalitica
 from app.features.plano.sugestoes import _Mascara
 from app.shared import ai_client
 from app.shared.contexto_ia.barreiras import CLASSE_EXCLUSIVA
-from app.shared.guardiao_lgpd import TextoBloqueado, juntar_protegidos, liberar_dados_publicos, proteger
+from app.shared.guardiao_lgpd import TextoBloqueado, delimitar, juntar_protegidos, liberar_dados_publicos, proteger
 
 RELATOS_POR_BARREIRA = 8
 """Resumos de relato enviados por barreira; as barreiras vão na ordem de alunos atingidos."""
@@ -182,7 +182,7 @@ async def gerar(sessao: Session, *, co_municipio: int, secretario_id: str) -> tu
     try:
         partes = [liberar_dados_publicos(INSTRUCOES_ANALITICO), liberar_dados_publicos(renderizar_rede(rede))]
         if protegidos:
-            partes.append(juntar_protegidos([liberar_dados_publicos(_CABECALHO_RELATOS), *protegidos], "\n"))
+            partes.append(delimitar(liberar_dados_publicos(_CABECALHO_RELATOS), protegidos))
         sistema = juntar_protegidos(partes)
     except TextoBloqueado:
         raise ContextoBloqueado from None

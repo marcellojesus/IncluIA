@@ -1,0 +1,64 @@
+# Matriz de controles — Guardião LGPD e fluxos de IA
+
+**Referências:** [Política PBD-001 a PBD-130](politica-privacidade-pbd.md) e OWASP Top 10 for Large Language Model Applications (edição 2025).
+**Escopo:** o Guardião LGPD (`backend/app/shared/guardiao_lgpd/`), o `ai_client` e as funcionalidades que mandam texto à IA: conversa da Declaração, sugestões do Plano de Ação Escolar, sugestões e narrativa executiva do Plano Estratégico Municipal, Analítico de Barreiras e narrativa pública. Telas, contas, exportação e infraestrutura ficam para outra matriz.
+**Avaliação de 2026-10-27:** feita pela equipe de desenvolvimento (agente de código) e revisada pelo AgLGPD, que também é um agente. **Pelo PBD-120, nenhum dos dois atesta a conformidade final**: esta matriz aguarda a aprovação do responsável humano.
+
+**Estados** (da política): não avaliado, atendido, não atendido, não aplicável justificado. "Atendido" exige teste que rode na suíte; documento ou prompt não bastam. Mascaramento e pseudonimização reduzem risco, mas não garantem anonimização.
+
+**Responsável:** a implementação é da equipe de desenvolvimento; as decisões são do responsável pelo produto. Quando o controle depende de decisão, a linha diz qual.
+
+## Política PBD — controles aplicáveis
+
+| ID | Aplicabilidade e justificativa | Implementação | Evidência (teste na suíte) | Resultado |
+|---|---|---|---|---|
+| PBD-003 | Só o necessário vai à IA | Contexto em camadas; escola e município viram referências `[E<n>-A<m>]`, `[R<n>]` e `[A<n>]`; premissas e justificativa não vão na narrativa | `test_contexto_ia.py::test_nome_e_codigo_da_escola_nao_vao_a_ia`, `test_plano_municipal.py`, `test_analitico.py`, `test_narrativa_municipal.py` | atendido |
+| PBD-008 | A IA recebe só a escola ou rede do vínculo | Montador recusa registro de outra escola; rotas filtram pelo vínculo | `test_contexto_ia.py::test_registro_de_outra_escola_e_recusado`, `test_plano.py::test_outra_escola_nao_aceita_sugestao_nem_le_versao` | atendido |
+| PBD-026 | Dado de saúde de estudante | Camada 3 bloqueia saúde e situação sensível de um estudante; código CID bloqueia | `test_guardiao_lgpd.py::test_dado_de_saude_individual_bloqueia`, `test_guardiao_seguranca_ia.py::test_conjunto_sintetico_de_deteccao` | atendido |
+| PBD-028 | Biblioteca única de mascaramento | Guardião central para documentos, nomes, contexto escolar e instruções. **Desvio:** a troca de nomes de escola e município fica em `plano_municipal/narrativa.py` (`sem_nomes`), fora do Guardião | — | não atendido: levar a troca de nomes ao Guardião (pendência 16 da arquitetura) |
+| PBD-029 | Combinação de atributos reidentifica estudante | Célula pequena (menos de 5), proporções arredondadas, escola pequena só com linha estruturada | `test_escolas_protegidas.py`, `test_analitico.py::test_ia_nao_recebe_contagens_exatas`, `test_narrativa_municipal.py::test_texto_livre_retido_para_escola_pequena_ou_retirada_lgpd` | não atendido: nome de escola no texto livre ainda passa nas sugestões e no Analítico (pendência 16); o limiar de 5 não foi validado (pendência 13) |
+| PBD-030 | Falha segura | Sem modelo de nomes, nada vai à IA (`GuardiaoIndisponivel`); `liberar_dados_publicos` só com argumentos de lista fechada; resposta da IA com achado do Guardião é recusada (`conferir_saida`) | `test_arquitetura_ia.py::test_liberar_dados_publicos_so_com_argumentos_conhecidos`, `test_guardiao_seguranca_ia.py::test_saida_insegura_em_todos_os_provedores_vira_indisponivel` | atendido |
+| PBD-067 | Mensagem de erro sem dado pessoal | `TextoBloqueado` cita só o tipo; erros HTTP com texto fixo | nenhum teste confere as mensagens de erro | não avaliado |
+| PBD-079 | Inferência por contagens | Analítico e narrativa sem contagens exatas; faixas na narrativa | `test_analitico.py::test_ia_nao_recebe_contagens_exatas`, `test_narrativa_municipal.py::test_faixas_tiram_os_percentuais_do_contexto` | atendido no que vai à IA; o score do município ainda permite estimar o de escola pequena (risco documentado, decisão pendente) |
+| PBD-091 | Pseudonimização | Referências técnicas no lugar de escola e município | os mesmos de PBD-003 | atendido; pseudonimização não é anonimização |
+| PBD-095, 127 | Logs sem dado pessoal | Guardião registra só tipo e quantidade; `ai_client` registra tipo e código HTTP; `SaidaInsegura` registra só os tipos | `test_guardiao_lgpd.py::test_log_e_resumo_nao_guardam_o_dado_original`, `test_citacoes.py::test_log_nao_carrega_dado_ecoado_pela_ia`, `test_guardiao_seguranca_ia.py::test_logs_nao_levam_o_texto` | atendido no Guardião e no `ai_client`; logs do servidor web não avaliados |
+| PBD-098 | Integração externa (provedores de IA) | Só texto protegido sai; chamada REST única em `ai_client` | `test_arquitetura_ia.py::test_so_ai_client_acessa_a_rede_e_nenhum_sdk_de_ia_e_usado` | não atendido: o controle técnico existe, mas não há controle contratual. Os planos gratuitos podem usar os dados (AD-05). Decisão do responsável |
+| PBD-099, 111 | Dados sintéticos fora de produção | Testes com contas e relatos inventados; conjunto sintético de detecção | `tests/dados/guardiao_sintetico.json` | não atendido: há uma cópia do `incluia.db` com contas reais no diretório temporário da sessão (apagar) e as contas antigas seguem no histórico do Git (AD-07) |
+| PBD-101 | Retenção | Rascunhos de conversa apagados após 30 dias; sínteses limitadas a 5 por município; uma narrativa por versão | `test_declaracao.py::test_conversa_parada_e_apagada` | não atendido: prazos definitivos pendentes (pendências 4, 14 e 15) |
+| PBD-109 | Reidentificação em dado publicado | API pública com célula pequena omitida e score público protegido (RN-06) | `test_escolas_protegidas.py` | não atendido: risco residual do score municipal (ver PBD-079) |
+| PBD-110 | Reavaliação a cada mudança | Revisão do AgLGPD em cada feature com IA; lista fechada de `liberar_dados_publicos` exige revisão | `test_arquitetura_ia.py` | atendido para o código; a reavaliação de provedores e modelos segue manual |
+| PBD-112 | Minimização do prompt | Guardião em todo texto de usuário; `TextoProtegido` obrigatório no `ai_client` | `test_arquitetura_ia.py`, `test_guardiao_lgpd.py`, `test_guardiao_lgpd_regressao.py` | não atendido: nome de escola e município composto passam nas sugestões e no Analítico (pendência 16) |
+| PBD-113, 114 | Ferramentas do agente de IA do produto | A IA do produto não chama ferramentas: recebe texto e devolve JSON validado | `test_arquitetura_ia.py::test_chamadas_de_rede_do_ai_client_sao_privadas` | atendido. Os agentes de desenvolvimento ficam fora deste escopo |
+| PBD-115 | Isolamento entre usuários | Cada chamada é independente; conversa e planos por escola com vínculo; sem memória entre chamadas | `test_plano.py::test_outra_escola_nao_ajusta_sugestao`, `test_plano_municipal.py::test_secretario_de_outro_municipio_nao_alcanca_o_plano` | atendido |
+| PBD-116 | RAG restrito ao solicitante | O RAG busca só no texto legal público; registros privados entram filtrados pelo vínculo | `test_contexto_ia.py::test_registro_de_outra_escola_e_recusado`, `test_base_normativa.py` | atendido |
+| PBD-117 | MCP e conectores | O produto não usa MCP nem conectores | — | não aplicável justificado |
+| PBD-118 | Prompt injection | Camada 4 tira a frase com instrução escondida e os delimitadores forjados; registros de usuário vão entre `⟦INÍCIO/FIM DOS REGISTROS DE USUÁRIOS⟧`; preâmbulo de segurança em todo system prompt | `test_guardiao_seguranca_ia.py` (6 ataques, delimitador forjado, fluxo do Plano de Ação ponta a ponta) | atendido em camadas; padrões fixos não pegam toda reformulação, e a conferência da saída é a segunda defesa |
+| PBD-119 | Validação da saída | `conferir_saida` em toda resposta: documento, contato, saúde, instrução e vazamento do preâmbulo reprovam; validadores de citação, referências e números por funcionalidade | `test_guardiao_seguranca_ia.py::test_saida_insegura_passa_ao_proximo_provedor`, `test_citacoes.py`, `test_narrativa_municipal.py` | atendido; nome de pessoa na saída é tratado campo a campo ao gravar (`_Mascara`), não no centro |
+| PBD-120 | Aprovação independente | Esta matriz | — | não avaliado: aguarda o responsável humano |
+| PBD-121, 129 | Testes de máscara e regressão | Suíte do Guardião, regressão do AgLGPD e conjunto sintético (30 casos, todos passando) | `test_guardiao_lgpd.py`, `test_guardiao_lgpd_regressao.py`, `test_guardiao_seguranca_ia.py::test_conjunto_sintetico_de_deteccao` | atendido como regressão; a taxa real de detecção depende de relatos reais (pendência 1) |
+| PBD-124, 125 | Teste entre perfis e entre redes | Diretor não acessa rotas do secretário; secretário de outro município não alcança a rede | `test_analitico.py::test_so_o_secretario_ve`, `test_acesso_gestao.py::test_secretario_de_outra_rede_nao_ve_nem_decide`, `test_revisao_planos.py::test_secretario_de_outro_municipio_nao_ve_nem_decide` | atendido |
+| PBD-128 | Teste de ataque ao agente | Relatos maliciosos e saídas que vazam | `test_guardiao_seguranca_ia.py` | atendido no escopo da IA do produto |
+| PBD-130 | Gate de promoção | A suíte roda à mão; não há CI que bloqueie merge ou deploy | — | não atendido: criar um CI que rode a suíte antes do deploy |
+
+## OWASP Top 10 para LLM (2025)
+
+| Risco | Implementação | Evidência | Resultado |
+|---|---|---|---|
+| LLM01 Prompt Injection | Camada 4, delimitadores e preâmbulo (PBD-118) | `test_guardiao_seguranca_ia.py` | atendido em camadas |
+| LLM02 Sensitive Information Disclosure | Guardião (4 camadas), referências no lugar de escola e município, conferência da saída | ver PBD-112 e 119 | não atendido: pendência 16 |
+| LLM03 Supply Chain | Sem SDK de provedor; chamadas REST; modelo spaCy local | `test_arquitetura_ia.py` | não avaliado: versões do modelo e das dependências não são conferidas por hash |
+| LLM04 Data and Model Poisoning | Corpus legal montado offline a partir de textos oficiais, com versão da base | `test_base_normativa.py` | não avaliado: falta conferir a origem dos textos e a validação jurídica do mapa |
+| LLM05 Improper Output Handling | Schema Pydantic, `conferir_saida`, validadores; o React escapa o texto | `test_guardiao_seguranca_ia.py`, `test_citacoes.py` | atendido |
+| LLM06 Excessive Agency | A IA não tem ferramentas nem escreve no banco; quem grava é o código, depois da validação | `test_arquitetura_ia.py` | atendido |
+| LLM07 System Prompt Leakage | Prompts sem segredo; preâmbulo proíbe revelar; saída com o preâmbulo ou os delimitadores é recusada | `test_guardiao_seguranca_ia.py::test_saida_insegura_passa_ao_proximo_provedor` | atendido |
+| LLM08 Vector and Embedding Weaknesses | Só texto legal público vira vetor; a consulta exige `TextoProtegido` | `test_base_normativa.py`, `test_arquitetura_ia.py` | atendido |
+| LLM09 Misinformation | Validador de citações; números proibidos na narrativa; separação entre observação e hipótese | `test_citacoes.py`, `test_narrativa_municipal.py` | não atendido: o conjunto de avaliação tem 8 perguntas, e a meta é de 30 a 50 (pendência 10) |
+| LLM10 Unbounded Consumption | Narrativa pública com limite por IP e teto diário | `test_narrativa_publica.py::test_geracao_tem_limite_por_ip`, `test_geracao_tem_teto_diario_global` | não atendido: a Gestão Ativa não tem limite de chamadas por conta |
+
+## O que falta para aprovar
+
+1. Aprovação do responsável humano (PBD-120).
+2. Pendência 16: levar ao Guardião a troca de nomes de escola e município (PBD-028, 029 e 112; LLM02).
+3. CI com a suíte antes do deploy (PBD-130).
+4. Apagar a cópia do banco com contas reais e limpar o histórico do Git (PBD-099; AD-07).
+5. Prazos de retenção (PBD-101), limite por conta na Gestão Ativa (LLM10) e decisão sobre o uso de planos gratuitos sem contrato (PBD-098).

@@ -146,6 +146,21 @@ td.k { white-space: nowrap; font-weight: 600; }
 .facts strong { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .facts span { font-size: 13px; color: var(--muted); }
 
+/* fontes: dados e metodologia */
+.sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+.src-col { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.src-h { font-family: var(--mono); font-size: 12px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+ol.src { margin: 0; padding-left: 1.4em; display: grid; gap: 12px; }
+ol.src li::marker { font-family: var(--mono); color: var(--muted); }
+ol.src li b { display: block; }
+ol.src li span:not(.mono) { color: var(--muted); font-size: 14.5px; }
+tr.grp td { background: var(--tint); font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding-block: 7px; }
+.rag-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.rag-steps > div { padding: 14px 18px 14px 0; display: grid; gap: 6px; min-width: 0; }
+.rag-steps > div + div { border-left: 1px solid var(--line); padding-left: 18px; }
+.rag-steps .mono { color: var(--query); font-size: 12px; letter-spacing: .04em; }
+.rag-steps p { font-size: 14.5px; }
+@media (max-width: 700px) { .rag-steps > div + div { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); } }
 .note { border-left: 3px solid var(--query); background: var(--query-tint); padding: 12px 16px; border-radius: 0 6px 6px 0; font-size: 15px; max-width: 74ch; }
 .pending { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; max-width: 78ch; }
 footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; display: grid; gap: 4px; }
@@ -157,16 +172,87 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
     <h1>Como a IA da Gestão Ativa responde</h1>
     <p class="lead">Os modelos usados são gratuitos e não são treinados com os dados do projeto. A qualidade da resposta vem do que é entregue ao modelo a cada pedido: os fatos da escola consultados direto no banco, a regra da barreira, os trechos de lei encontrados por busca e uma conferência final que recusa citação inventada. Antes de qualquer coisa sair do servidor, o Guardião LGPD retira os dados pessoais.</p>
     <nav class="toc" aria-label="Seções">
+      <a href="#fontes">Dados e metodologia</a>
+      <a href="#tecnicas">Como cada base é usada</a>
+      <a href="#rag">O RAG no projeto</a>
       <a href="#fluxo">O caminho de um pedido</a>
       <a href="#componentes">Os componentes</a>
       <a href="#embedding">O que é um embedding</a>
       <a href="#busca">A busca híbrida</a>
-      <a href="#rag">Onde há RAG</a>
       <a href="#base">O que foi processado</a>
       <a href="#exemplo">Exemplo</a>
       <a href="#limites">Avaliação e limites</a>
     </nav>
   </header>
+
+  <section id="fontes" aria-labelledby="h-fontes">
+    <h2 id="h-fontes">Dados e metodologia</h2>
+    <p>Tudo o que a IA recebe sai de duas categorias. <b>Dados</b> são fatos de origem externa ou registrados pelos usuários. <b>Metodologia</b> são as regras que o projeto definiu para ler esses dados. Os modelos de IA de terceiros não aparecem aqui: eles processam o que estas fontes fornecem.</p>
+    <div class="sources">
+      <div class="src-col">
+        <h3 class="src-h">Dados</h3>
+        <ol class="src">
+          <li><b>Censo Escolar 2025 (INEP)</b><span>Tabelas de Escolas e de Matrículas, transformadas pelo ETL no <span class="mono">incluia.db</span>.</span></li>
+          <li><b>Registros da Gestão Ativa</b><span>Declarações, planos, decisões e plano municipal, produzidos por diretores e secretários no <span class="mono">gestao_ativa.db</span>.</span></li>
+          <li><b>Decreto 12.686/2025 (PNEEI), consolidado</b><span>101 trechos na base normativa.</span></li>
+          <li><b>Lei 13.146/2015 (LBI), Arts. 27 a 30</b><span>31 trechos na base normativa.</span></li>
+        </ol>
+      </div>
+      <div class="src-col">
+        <h3 class="src-h">Metodologia</h3>
+        <ol class="src">
+          <li><b>Metodologia do score</b><span>Regra de cálculo do índice, aplicada pelo ETL sobre o Censo.</span></li>
+          <li><b>Metodologia de barreiras</b><span>Regra das 11 barreiras, aplicada sobre o Censo e gravada na base normativa.</span></li>
+          <li><b>Mapeamento legal</b><span>Liga cada eixo e cada barreira aos dispositivos do decreto e da LBI. Montado pela equipe, ainda sem validação jurídica.</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="tecnicas" aria-labelledby="h-tec">
+    <h2 id="h-tec">Como cada base é usada</h2>
+    <p>Cada fonte chega à IA pela técnica que dá mais exatidão a ela. Número oficial nunca vem de busca aproximada: vem do banco. Busca por semelhança de sentido só é usada no texto legal, onde a pergunta do diretor é imprevisível.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Fonte</th><th>Técnica</th><th>Como funciona</th><th>Camada</th></tr></thead>
+        <tbody>
+          <tr class="grp"><td colspan="4">Dados</td></tr>
+          <tr><td class="k">Censo Escolar 2025</td><td>Consulta exata (SQL)</td><td>O ETL calcula variáveis e scores uma vez por edição. Em execução, o sistema lê a linha da escola ou da rede do vínculo: score, faixa, eixos, matrículas. Com menos de 5 matrículas da educação especial, a contagem é omitida.</td><td class="mono">C1</td></tr>
+          <tr><td class="k">Registros da Gestão Ativa</td><td>Leitura direta filtrada pelo vínculo</td><td>Só registros da própria escola, ou da própria rede no caso do secretário. Passam de novo pelo Guardião antes de ir à IA; nos pedidos da rede, as escolas viram referências como <span class="mono">[E1-A2]</span> e <span class="mono">[R1]</span>.</td><td class="mono">C4</td></tr>
+          <tr><td class="k">Decreto e LBI</td><td>RAG: mapa + busca híbrida</td><td>Divididos em 132 trechos por artigo, parágrafo e inciso, com índice de palavras (FTS5) e vetores de significado (embeddings). Em execução, os trechos ligados à barreira e os mais próximos da pergunta são recuperados e entregues com um identificador para citação, conferida pelo validador.</td><td class="mono">C3</td></tr>
+          <tr class="grp"><td colspan="4">Metodologia</td></tr>
+          <tr><td class="k">Metodologia do score</td><td>Implementada no ETL</td><td>O texto não vai à IA. O código do ETL aplica os pesos (30/30/25/15) e as faixas; a IA recebe só os números prontos e explica, sem recalcular nem reclassificar.</td><td class="mono">C1</td></tr>
+          <tr><td class="k">Metodologia de barreiras</td><td>Regra em código + consulta por chave</td><td>Uma função aplica as regras ao Censo e diz quais barreiras a escola tem. A regra e os pontos de cada barreira estão gravados na base normativa e entram pelo código da barreira (<span class="mono">B-III-02</span>), sem busca.</td><td class="mono">C2</td></tr>
+          <tr><td class="k">Mapeamento legal</td><td>Consulta por chave</td><td>Para cada barreira, a lista de trechos que a fundamentam entra no contexto mesmo que a busca não os encontre, e é combinada com o resultado da busca. Até 6 trechos por pedido.</td><td class="mono">C3</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="rag" aria-labelledby="h-rag">
+    <h2 id="h-rag">O RAG no projeto</h2>
+    <p><b>RAG</b> (do inglês <i>retrieval-augmented generation</i>, geração aumentada por recuperação) é uma técnica em três passos: <b>recuperar</b> numa base os trechos ligados ao pedido, <b>entregá-los</b> ao modelo junto com o pedido e pedir que ele <b>responda com base neles</b>. O modelo continua o mesmo; muda o que ele tem diante de si ao responder.</p>
+    <div class="rag-steps">
+      <div><span class="mono">1 · recuperar</span><p>Trechos do decreto e da LBI: os do mapa da barreira e os que a busca híbrida aproxima da pergunta.</p></div>
+      <div><span class="mono">2 · entregar</span><p>Os trechos entram no contexto com um identificador (<span class="mono">LBI-art28-XII</span>), junto com os fatos da escola e a regra da barreira.</p></div>
+      <div><span class="mono">3 · responder e conferir</span><p>O modelo cita os identificadores que usou. O validador recusa citação que não estava no contexto e lei mencionada de memória.</p></div>
+    </div>
+    <p><b>Por que RAG aqui.</b> Os modelos são gratuitos e não podem ser treinados com o conteúdo do projeto. Sozinhos, respondem com o que aprenderam e podem citar artigos de memória, às vezes errados ou revogados. Com o RAG, a fundamentação legal vem de um texto conferido, com versão conhecida, e cada citação é verificável.</p>
+    <p><b>Onde o RAG para.</b> Ele vale só para o texto legal público. Dados da escola e registros privados também entram no contexto, mas por consulta exata e filtrada pelo vínculo, nunca por busca aproximada e nunca transformados em vetor fora do servidor.</p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Funcionalidade</th><th>RAG nas normas</th><th>O que entra no contexto</th><th>Cita</th></tr></thead>
+        <tbody>
+          <tr><td class="k">Plano de Ação da escola</td><td class="yes">sim, mapa + busca</td><td>C1 a C4; a "pergunta" da busca é a posição emitida na Declaração</td><td>trechos de lei, conferidos pelo validador</td></tr>
+          <tr><td class="k">Declaração (conversa)</td><td class="yes">sim, mapa + busca</td><td>C1 a C3 com foco na barreira; a fala do diretor</td><td class="no">não: o texto formal da escola não cita leis; o validador só recusa lei mencionada fora do contexto</td></tr>
+          <tr><td class="k">Plano Estratégico Municipal</td><td class="yes">só o mapa</td><td>contagens da rede, regra da barreira, ações dos planos aceitos com referências [E1-A2]</td><td>trechos de lei e ações escolares, ambos conferidos</td></tr>
+          <tr><td class="k">Analítico de Barreiras</td><td class="no">não</td><td>proporções arredondadas da rede e resumos dos relatos com referências [R1]</td><td>barreiras e relatos, conferidos</td></tr>
+          <tr><td class="k">Diagnóstico público</td><td class="no">não</td><td>indicadores públicos do município e uma referência legal fixa por eixo</td><td>só a referência fixa do eixo</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="sub">Nenhum dos usos manda à IA o nome da escola, o código INEP ou, nos usos da rede, o município: nas sugestões municipais e no Analítico, as escolas viram referências como [E1-A2] e [R1], e o sistema as traduz de volta depois de conferir a resposta.</p>
+  </section>
 
   <section id="fluxo" aria-labelledby="h-fluxo">
     <h2 id="h-fluxo">O caminho de um pedido, do diretor à resposta</h2>
@@ -422,24 +508,6 @@ footer { font-size: 13px; color: var(--muted); border-top: 1px solid var(--line)
       </table>
     </div>
     <p>O peso menor da palavra-chave foi escolhido na avaliação: com pesos iguais, termos comuns como "escola" puxavam trechos genéricos para cima. Depois da busca, o montador faz mais uma fusão, com pesos iguais, entre esse resultado e os trechos do <b>mapa</b> da barreira, e corta em 6. Quando não há pergunta, como na sugestão de ações municipais, entram só os trechos do mapa.</p>
-  </section>
-
-  <section id="rag" aria-labelledby="h-rag">
-    <h2 id="h-rag">Onde há RAG neste projeto</h2>
-    <p><b>RAG</b> (geração aumentada por recuperação) é recuperar informação de uma base e entregá-la ao modelo junto com o pedido, para ele responder com base nela, e não só no que aprendeu no treinamento. Aqui o RAG vale só para o <b>texto legal público</b>. Dados da escola e registros privados também entram no contexto, mas por consulta exata ao banco, nunca por busca aproximada.</p>
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr><th>Onde</th><th>Busca nas normas</th><th>O que entra no contexto</th><th>Cita</th></tr></thead>
-        <tbody>
-          <tr><td class="k">Plano de Ação da escola</td><td class="yes">sim, mapa + busca</td><td>C1 a C4; a "pergunta" da busca é a posição emitida na Declaração</td><td>trechos de lei, conferidos pelo validador</td></tr>
-          <tr><td class="k">Declaração (conversa)</td><td class="yes">sim, mapa + busca</td><td>C1 a C3 com foco na barreira; a fala do diretor</td><td class="no">não: o texto formal da escola não cita leis; o validador só recusa lei mencionada fora do contexto</td></tr>
-          <tr><td class="k">Plano Estratégico Municipal</td><td class="yes">só o mapa</td><td>contagens da rede, regra da barreira, ações dos planos aceitos com referências [E1-A2]</td><td>trechos de lei e ações escolares, ambos conferidos</td></tr>
-          <tr><td class="k">Analítico de Barreiras</td><td class="no">não</td><td>proporções arredondadas da rede e resumos dos relatos com referências [R1]</td><td>barreiras e relatos, conferidos</td></tr>
-          <tr><td class="k">Diagnóstico público</td><td class="no">não</td><td>indicadores públicos do município e uma referência legal fixa por eixo</td><td>só a referência fixa do eixo</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="sub">Nenhum dos usos manda à IA o nome da escola, o código INEP ou, nos usos da rede, o município: nas sugestões municipais e no Analítico, as escolas viram referências como [E1-A2] e [R1], e o sistema as traduz de volta depois de conferir a resposta.</p>
   </section>
 
   <section id="base" aria-labelledby="h-base">

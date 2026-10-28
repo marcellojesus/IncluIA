@@ -27,7 +27,7 @@ from app.shared.contexto_ia.barreiras import (
 )
 from app.shared.contexto_ia.base_normativa import BaseNormativa, TrechoNormativo
 from app.shared.contexto_ia.busca import buscar, fundir
-from app.shared.guardiao_lgpd import TextoProtegido, juntar_protegidos, liberar_dados_publicos
+from app.shared.guardiao_lgpd import TextoProtegido, delimitar, juntar_protegidos, liberar_dados_publicos
 
 # Referência inicial do AD-08: cabe no provedor mais restrito da cadeia junto com instruções,
 # histórico e resposta. Ajustar quando as cotas forem medidas (decisão pendente 6).
@@ -186,7 +186,7 @@ async def montar_contexto(
 
     partes = [liberar_dados_publicos(_renderizar_fatos(escola, barreiras, foco, base))]
     if registros:
-        partes.append(juntar_protegidos([liberar_dados_publicos(_CABECALHO_PRIVADO), *(r.texto for r in registros)], "\n"))
+        partes.append(delimitar(liberar_dados_publicos(_CABECALHO_PRIVADO), [r.texto for r in registros]))
     fixo = juntar_protegidos(partes)
 
     # Corte por orçamento: entram trechos normativos enquanto couberem.
@@ -267,7 +267,7 @@ async def montar_contexto_rede(
         raise ValueError(f"Barreira fora da metodologia: {codigo}")
     fixo = juntar_protegidos([
         liberar_dados_publicos(_renderizar_fatos_rede(codigo, fatos, base.metodologia[codigo])),
-        juntar_protegidos([liberar_dados_publicos(_CABECALHO_ACOES_ESCOLAS), acoes_das_escolas], "\n"),
+        delimitar(liberar_dados_publicos(_CABECALHO_ACOES_ESCOLAS), [acoes_das_escolas]),
     ])
 
     lacunas: list[str] = []
@@ -288,5 +288,60 @@ async def montar_contexto_rede(
     return ContextoIA(
         texto=texto, ids_citaveis=frozenset(t.id for t in trechos), trechos=tuple(trechos), barreiras=(),
         barreiras_foco=(codigo,), modo_busca="sem_pergunta", lacunas=tuple(lacunas),
+        tokens_estimados=estimar_tokens(str(texto)), versao_base=base.meta.get("versao", ""),
+    )
+
+
+# --- Contexto do plano confirmado (narrativa executiva, RF-30) ----------------------------------
+
+_CABECALHO_PLANO = (
+    "## Ações do Plano Estratégico Municipal confirmado (escritas pela secretaria; já filtradas pelo Guardião LGPD; "
+    "cite pela referência entre colchetes, por exemplo [A1])"
+)
+
+
+async def montar_contexto_plano(
+    situacao_da_rede: TextoProtegido,
+    acoes_do_plano: TextoProtegido,
+    codigos: Sequence[str],
+    fontes_das_acoes: Sequence[str],
+    *,
+    max_trechos: int = MAX_TRECHOS + 2,
+    orcamento_tokens: int = ORCAMENTO_TOKENS * 2,
+    base: BaseNormativa | None = None,
+) -> ContextoIA:
+    """C1 a situação da rede (proporções, sem município), C4 as ações do plano já protegidas, com
+    referência [A<n>], e C3 a base normativa: primeiro os trechos que as ações já citam, depois os do
+    mapa de cada barreira, alternando entre barreiras até o limite de trechos ou de tokens."""
+    if not isinstance(situacao_da_rede, TextoProtegido) or not isinstance(acoes_do_plano, TextoProtegido):
+        raise TypeError("O contexto do plano precisa passar pelo Guardião LGPD (AD-05)")
+    base = base or base_mod.carregar()
+    fixo = juntar_protegidos([situacao_da_rede, delimitar(liberar_dados_publicos(_CABECALHO_PLANO), [acoes_do_plano])])
+
+    filas = [list(base.mapa.get(c, ())) for c in codigos]
+    candidatos = [f for f in fontes_das_acoes if f in base.trechos]
+    while any(filas):
+        for fila in filas:
+            if fila:
+                candidatos.append(fila.pop(0))
+
+    lacunas: list[str] = []
+    trechos: list[TrechoNormativo] = []
+    for trecho_id in dict.fromkeys(candidatos):
+        if len(trechos) == max_trechos:
+            break
+        tentativa = [*trechos, base.trechos[trecho_id]]
+        if estimar_tokens(str(fixo)) + estimar_tokens(_renderizar_normas(tentativa)) > orcamento_tokens:
+            break
+        trechos = tentativa
+    if estimar_tokens(str(fixo)) > orcamento_tokens:
+        lacunas.append("as ações do plano já passam do orçamento de tokens")
+    if not trechos:
+        lacunas.append("sem trecho normativo de suporte no contexto")
+
+    texto = juntar_protegidos([fixo, liberar_dados_publicos(_renderizar_normas(trechos))]) if trechos else fixo
+    return ContextoIA(
+        texto=texto, ids_citaveis=frozenset(t.id for t in trechos), trechos=tuple(trechos), barreiras=(),
+        barreiras_foco=tuple(codigos), modo_busca="sem_pergunta", lacunas=tuple(lacunas),
         tokens_estimados=estimar_tokens(str(texto)), versao_base=base.meta.get("versao", ""),
     )

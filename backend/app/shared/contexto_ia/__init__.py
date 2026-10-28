@@ -2,7 +2,15 @@
 
 from app.shared.contexto_ia.barreiras import BarreiraIdentificada, identificar
 from app.shared.contexto_ia.base_normativa import BaseNormativaIndisponivel, TrechoNormativo
-from app.shared.contexto_ia.montador import ContextoIA, EscolaNaoEncontrada, FatosDaRede, RegistroDaEscola, montar_contexto, montar_contexto_rede
+from app.shared.contexto_ia.montador import (
+    ContextoIA,
+    EscolaNaoEncontrada,
+    FatosDaRede,
+    RegistroDaEscola,
+    montar_contexto,
+    montar_contexto_plano,
+    montar_contexto_rede,
+)
 from app.shared.contexto_ia.citacoes import (  # noqa: E402 — depende do montador
     FORMATO_RESPOSTA_FUNDAMENTADA,
     INSTRUCOES_CITACAO,
@@ -30,5 +38,6 @@ __all__ = [
     "identificar",
     "montar_contexto",
     "montar_contexto_rede",
+    "montar_contexto_plano",
     "FatosDaRede",
 ]

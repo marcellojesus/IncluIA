@@ -1,7 +1,10 @@
 from app.shared.guardiao_lgpd.guardiao import (
+    FIM_REGISTROS,
+    INICIO_REGISTROS,
     ResultadoGuardiao,
     TextoBloqueado,
     TextoProtegido,
+    delimitar,
     juntar_protegidos,
     liberar_dados_publicos,
     proteger,
@@ -11,6 +14,9 @@ from app.shared.guardiao_lgpd.guardiao import (
 from app.shared.guardiao_lgpd.nomes import GuardiaoIndisponivel, carregar
 
 __all__ = [
+    "FIM_REGISTROS",
+    "INICIO_REGISTROS",
+    "delimitar",
     "GuardiaoIndisponivel",
     "ResultadoGuardiao",
     "TextoBloqueado",

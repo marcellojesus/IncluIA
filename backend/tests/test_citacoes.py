@@ -142,7 +142,21 @@ def test_log_nao_carrega_dado_ecoado_pela_ia(contexto, monkeypatch, caplog):
         _chamar(contexto, [("eco", _provedor(eco))], monkeypatch)
     for fragmento in ("João", "Joao", "laudo", "F84", "52998224725", "1234567"):
         assert fragmento not in caplog.text
-    assert "fonte_mal_formada=2" in caplog.text and "referencia_invalida=2" in caplog.text
+    # A conferência da saída (ai_client.conferir_saida) recusa o CPF e o laudo antes do validador.
+    assert "SaidaInsegura(CPF, SAUDE)" in caplog.text
+
+    # Sem CPF nem laudo, a resposta chega ao validador de citações, que também só registra contagens.
+    caplog.clear()
+    sem_documento = {
+        "resposta": "Ver [LBI-art28-JoaoPedroSilva] e a Lei 1234567.",
+        "fundamentos": [{"afirmacao": "x", "fontes": ["aluno João Pedro", "LBI-art28-JoaoPedroSilva"]}],
+        "lacunas": [],
+    }
+    with pytest.raises(RuntimeError):
+        _chamar(contexto, [("eco", _provedor(sem_documento))], monkeypatch)
+    for fragmento in ("João", "Joao", "1234567"):
+        assert fragmento not in caplog.text
+    assert "fonte_mal_formada=2" in caplog.text and "referencia_invalida=1" in caplog.text
 
 
 def test_identificador_com_sufixo_livre_nao_e_aceito(contexto):

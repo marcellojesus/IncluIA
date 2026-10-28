@@ -177,14 +177,18 @@ def test_nome_mascarado_na_acao_gera_aviso(ambiente):
 def test_resposta_da_ia_com_dado_sensivel_descarta_o_campo(ambiente, monkeypatch):
     cliente, diretora, _ = ambiente
     com_relato, _ = _emitir(cliente, diretora)
-    resposta = _sugestao()
-    resposta["sugestoes"][0]["relacao"] = "O aluno Pedro tem autismo e toma Ritalina, por isso precisa de apoio."
-    resposta["sugestoes"][0]["responsavel"] = "Professora Maria José"
-    monkeypatch.setattr(ai_client, "_PROVEDORES", [("teste", _provedor([resposta], []))])
+    # Dado de saúde: a resposta inteira é recusada na conferência central da saída (PBD-030 e 119)
+    # e o pedido passa ao próximo provedor.
+    com_saude = _sugestao()
+    com_saude["sugestoes"][0]["relacao"] = "O aluno Pedro tem autismo e toma Ritalina, por isso precisa de apoio."
+    # Nome de pessoa não é conferido no centro (falsos positivos); o campo é descartado ao gravar.
+    com_nome = _sugestao()
+    com_nome["sugestoes"][0]["responsavel"] = "Professora Maria José"
+    monkeypatch.setattr(ai_client, "_PROVEDORES", [("saude", _provedor([com_saude], [])), ("nome", _provedor([com_nome], []))])
     plano = cliente.post(f"/gestao/diretor/plano/barreiras/{com_relato}/sugestoes", json={}, headers=diretora).json()
     [sugestao] = plano["sugestoes"]
-    assert sugestao["relacao"] is None and sugestao["responsavel"] is None and plano["avisoGuardiao"]
-    assert "Ritalina" not in str(plano)
+    assert sugestao["responsavel"] is None and plano["avisoGuardiao"]
+    assert "Ritalina" not in str(plano) and "Maria José" not in str(plano)
 
 
 def test_orientacao_com_nome_vai_mascarada_para_a_ia(ambiente, monkeypatch):

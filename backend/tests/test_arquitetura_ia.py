@@ -64,6 +64,12 @@ _ARGUMENTOS_LIBERADOS = {
     "renderizar_rede(rede)",
     "_CABECALHO_RELATOS",
     "PEDIDO_ANALITICO",
+    # plano_municipal/narrativa.py (revisão do AgLGPD de 2026-10-27): instruções fixas, pedido fixo e a situação
+    # da rede do Analítico em faixas; as ações vão por proteger(), sem nomes da rede. Cabeçalho fixo no montador.
+    "INSTRUCOES_NARRATIVA",
+    "PEDIDO_NARRATIVA",
+    "sem_percentuais(sintese_analitica.renderizar_rede(rede))",
+    "_CABECALHO_PLANO",
 }
 
 

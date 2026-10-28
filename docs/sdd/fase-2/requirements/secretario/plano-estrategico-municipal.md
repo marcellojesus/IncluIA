@@ -1,6 +1,6 @@
 # Requisitos — Secretário | Plano Estratégico Municipal
 
-**Status:** Implementado · notas de implementação até 2026-10-26  
+**Status:** Implementado · notas de implementação até 2026-10-27  
 **PRD:** RF-26 a RF-30
 
 ## Objetivo
@@ -58,9 +58,31 @@ Permitir ao secretário compor um plano municipal a partir de padrões da rede, 
   - retenção das sugestões municipais aceitas ou descartadas;
   - um texto para as escolas, escrito pelo secretário, se a justificativa precisar chegar aos diretores.
 - **Ainda não implementado:**
-  - narrativa executiva escrita pela IA (hoje há o resumo calculado);
   - acompanhamento de execução (RN-SPM-05);
-  - exportação.
+  - exportação (RF-31).
+
+## Notas de implementação (2026-10-27): narrativa executiva (RF-30; SPM-RF-05 e 06)
+
+**Decisão do responsável:** entregar sem fonte de custo. Custos e projeções aparecem só como estimativas registradas pela secretaria até as decisões pendentes 12 e 13 do PRD (método de impacto no score; FNDE e SIOPE).
+
+- **Código:**
+  - `backend/app/features/plano_municipal/narrativa.py`, rotas `POST` e `PUT /gestao/secretario/plano-municipal/versoes/{n}/narrativa`;
+  - tabela `narrativas_plano_municipal` (migração `3bc6efcd2093`);
+  - contexto em `contexto_ia/montador.py` (`montar_contexto_plano`);
+  - tela `NarrativaExecutiva.tsx`, aberta por "Narrativa executiva" em cada versão confirmada;
+  - testes em `tests/test_narrativa_municipal.py`.
+- **Escopo:** a narrativa é de uma **versão confirmada**, que é congelada; a numeração [A<n>] das ações não muda. Uma narrativa por versão: gerar de novo substitui o texto (a tela pede confirmação quando o texto foi revisado).
+- **Seções:** resumo, situação da rede, estratégia (blocos que agrupam ações e citam quais), fundamentação legal, próximos passos, incertezas; e o que a base normativa entregue não sustenta.
+- **Números (SPM-RF-05):** calculados pelo sistema a partir da versão e mostrados ao lado do texto: ações, barreiras, escolas atendidas de quantas, LOA e PPA, prioridade alta, ações com custo estimado, ações com cobertura parcial. O validador recusa texto da IA com valor em reais, percentual ou contagem de escolas, alunos ou profissionais, e o pedido passa ao próximo provedor. A lista de ações mostra o custo como "estimativa registrada pela secretaria (não verificada)" ou "a estimar".
+- **O que vai à IA:** a situação da rede do Analítico em faixas ("a maioria das escolas"), as ações da versão com barreiras, horizonte, prioridade, responsável, prazo, alcance em faixa e custo só como "estimativa registrada" ou "a estimar", e os trechos da base normativa (primeiro os já citados pelas ações, depois o mapa de cada barreira).
+- **LGPD (revisão do AgLGPD em 2026-10-27, aplicada):**
+  - nomes do município e das escolas da rede e códigos INEP saem do texto das ações antes do Guardião, que os trata como nomes públicos; resposta com um deles é recusada;
+  - ação ligada a escola pequena numa barreira sensível (classe exclusiva ou poucas escolas), ou a escola com plano da base ou Declaração retirados por motivo LGPD, vai só com a linha estruturada, sem o texto;
+  - premissas e justificativa não vão;
+  - trilha das gerações sem texto e eventos de auditoria `narrativa_plano_municipal_gerada` e `narrativa_plano_municipal_editada`;
+  - só o secretário do município gera, lê e edita; o diretor e a área pública não veem a narrativa.
+- **Edição (SPM-RF-06):** o secretário edita cada seção; o texto passa pelo Guardião e a tela marca "Revisada pela secretaria".
+- **Pendente:** retenção definitiva; checagem de nomes na edição antes de exportar ou publicar; fonte de custo (decisões 12 e 13 do PRD).
 
 ## Decisões pendentes
 

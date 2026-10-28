@@ -97,6 +97,40 @@ class EstadoPlanoMunicipal(_Camel):
     aviso_guardiao: str | None = None
 
 
+class NumerosDoPlano(_Camel):
+    """Calculados pelo sistema a partir da versão congelada (SPM-RF-05)."""
+
+    acoes: int
+    barreiras: int
+    escolas_atendidas: int
+    escolas_municipais: int
+    loa: int
+    ppa: int
+    prioridade_alta: int
+    com_custo_estimado: int
+    com_cobertura_parcial: int
+
+
+class BlocoNarrativa(_Camel):
+    texto: str
+    acoes: list[str] = []
+    """Referências "A<n>": a n-ésima ação da versão."""
+
+
+class NarrativaExecutiva(_Camel):
+    resumo: str
+    situacao: str = ""
+    estrategia: list[BlocoNarrativa] = []
+    fundamentacao: str = ""
+    proximos_passos: str = ""
+    incertezas: list[str] = []
+    lacunas: list[str] = []
+    fontes: list[str] = []
+    modelo: str
+    gerada_em: datetime
+    editada: bool
+
+
 class VersaoPlanoMunicipal(_Camel):
     versao: int
     municipio: str
@@ -105,6 +139,23 @@ class VersaoPlanoMunicipal(_Camel):
     acoes: list[AcaoMunicipal]
     escolas_atendidas: int
     fontes: dict[str, str] = {}
+    numeros: NumerosDoPlano | None = None
+    narrativa: NarrativaExecutiva | None = None
+    aviso_guardiao: str | None = None
+
+
+class EdicaoBloco(_Camel):
+    texto: str = Field(max_length=3000)
+    acoes: list[str] = Field(default_factory=list, max_length=80)
+
+
+class EdicaoNarrativa(_Camel):
+    resumo: str = Field(max_length=3000)
+    situacao: str | None = Field(default=None, max_length=3000)
+    estrategia: list[EdicaoBloco] = Field(default_factory=list, max_length=12)
+    fundamentacao: str | None = Field(default=None, max_length=3000)
+    proximos_passos: str | None = Field(default=None, max_length=3000)
+    incertezas: list[str] = Field(default_factory=list, max_length=10)
 
 
 class NovaAcaoMunicipal(_Camel):
