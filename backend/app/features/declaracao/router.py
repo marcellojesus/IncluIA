@@ -3,14 +3,15 @@
 A escola é sempre a do vínculo aprovado (SessaoGestao); não há parâmetro de escola na URL.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.features.acesso import entrega_pdf
 from app.features.acesso.dependencias import SessaoGestao, exigir_admin, exigir_diretor
 from app.features.acesso.protecao import exigir_configuracao
 from app.features.declaracao import conversa as conversa_ia
-from app.features.declaracao import publicacao, servico
+from app.features.declaracao import documento, publicacao, servico
 from app.features.declaracao.modelos import Declaracao
 from app.features.declaracao.schemas import (
     Aprovacao,
@@ -111,6 +112,13 @@ def _versao(sessao: Session, declaracao) -> VersaoDeclaracao:
             for i in declaracao.itens
         ],
     )
+
+
+@router.get("/versoes/{numero}/pdf", response_class=Response)
+def baixar_pdf(numero: int, sessao_gestao: SessaoGestao = Depends(exigir_diretor), sessao: Session = Depends(obter_sessao)) -> Response:
+    """PDF-RF-01: o PDF da versão emitida, com o mesmo acesso da tela da versão (RN-PDF-02)."""
+    declaracao = _erro(servico.versao, sessao, sessao_gestao.co_entidade, numero)
+    return entrega_pdf.entregar(sessao, sessao_gestao, documento.documento(declaracao), declaracao.retirada_motivo)
 
 
 # --- Conversa com a IA ---------------------------------------------------------------------------

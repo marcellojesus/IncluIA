@@ -10,3 +10,5 @@ pt_core_news_sm @ https://github.com/explosion/spacy-models/releases/download/pt
 # Banco da Gestão Ativa (AD-01): SQLite local, PostgreSQL no deploy (driver psycopg entra com o provedor)
 sqlalchemy>=2.0,<2.1
 alembic>=1.13
+# Documentos em PDF (RF-31): biblioteca Python pura; a fonte Noto Sans (OFL) fica em app/shared/pdf/fontes
+fpdf2>=2.8,<3

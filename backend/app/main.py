@@ -75,6 +75,7 @@ app.add_middleware(
     allow_origins=_origins,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Content-Disposition"],  # nome do arquivo nos PDFs (RF-31)
 )
 
 

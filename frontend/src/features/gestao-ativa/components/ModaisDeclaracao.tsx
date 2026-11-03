@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 
 import { Modal } from "@/shared/components/Modal";
 
-import { emitirDeclaracao, getPreviaPublica, publicarDeclaracao, registrarPosicao, retirarPublicacao } from "../api";
+import { PDF, emitirDeclaracao, getPreviaPublica, publicarDeclaracao, registrarPosicao, retirarPublicacao } from "../api";
+import { BotaoPdf } from "./BotaoPdf";
 import { NOMES_EIXOS, POSICOES, dataCurta } from "../rotulos";
 import type { BarreiraDeclaracao, EstadoDeclaracao, PreviaPublica, VersaoDeclaracao } from "../types";
 import { Aviso, Botao, CampoTexto, Erro, Passos, Selecao, Selo } from "./ui";
@@ -233,6 +234,7 @@ export function DeclaracaoConsolidada({
         <Botao variante="discreto" onClick={onFechar}>
           Continuar registrando
         </Botao>
+        {ultima && <BotaoPdf caminho={PDF.declaracao(ultima.versao)} rotulo={`Baixar PDF da v${ultima.versao}`} />}
         {ultima && !ultima.publicadaEm && !estado.haAlteracoes && (
           <Botao variante="contorno" onClick={() => onPublicar(ultima.versao)}>
             Publicar versão v{ultima.versao}
@@ -270,6 +272,7 @@ export function VersaoEmitida({ versao, onFechar, onPublicar }: { versao: Versao
       <Aviso tom="atencao">A versão ainda não é pública. Publique quando quiser, depois da checagem de dados pessoais.</Aviso>
       <div className="mt-4 flex flex-wrap justify-end gap-2">
         <Botao variante="discreto" onClick={onFechar}>Fechar</Botao>
+        <BotaoPdf caminho={PDF.declaracao(versao.versao)} />
         <Botao variante="contorno" onClick={onPublicar}>Publicar agora</Botao>
         <Link
           href="/gestao/diretor/plano"

@@ -4,10 +4,10 @@ O município vem sempre do vínculo do secretário (sem parâmetro na URL); o di
 municipais confirmadas que atendem a própria escola (RN-SPM-03).
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session
 
-from app.features.acesso import censo
+from app.features.acesso import censo, entrega_pdf
 from app.features.acesso.dependencias import SessaoGestao, exigir_diretor, exigir_secretario
 from app.features.acesso.protecao import exigir_configuracao
 from app.features.plano.fontes import citacoes
@@ -15,7 +15,7 @@ from app.features.plano.router import nome_de
 from app.features.plano.servico import AVISO_MASCARA, ErroPlano
 from app.features.plano_municipal import base as base_rede
 from app.features.plano_municipal import narrativa as narrativa_ia
-from app.features.plano_municipal import servico, sugestoes
+from app.features.plano_municipal import documento, servico, sugestoes
 from app.features.plano_municipal.schemas import (
     AceiteSugestaoMunicipal,
     AcaoMunicipal,
@@ -181,6 +181,12 @@ def confirmar(corpo: Confirmacao, sessao_gestao: SessaoGestao = Depends(exigir_s
 @router.get("/versoes/{numero}", response_model=VersaoPlanoMunicipal)
 def obter_versao(numero: int, sessao_gestao: SessaoGestao = Depends(exigir_secretario), sessao: Session = Depends(obter_sessao)) -> VersaoPlanoMunicipal:
     return _versao(sessao, _erro(servico.versao, sessao, sessao_gestao.co_municipio, numero))
+
+
+@router.get("/versoes/{numero}/pdf", response_class=Response)
+def baixar_pdf(numero: int, sessao_gestao: SessaoGestao = Depends(exigir_secretario), sessao: Session = Depends(obter_sessao)) -> Response:
+    """PDF-RF-03: o PDF da versão confirmada, sem a narrativa executiva (RN-PDF-02)."""
+    return entrega_pdf.entregar(sessao, sessao_gestao, documento.documento(_erro(servico.versao, sessao, sessao_gestao.co_municipio, numero)))
 
 
 def _narrativa(registro) -> NarrativaExecutiva | None:

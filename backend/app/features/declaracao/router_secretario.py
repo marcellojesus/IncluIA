@@ -5,14 +5,15 @@ emitido", nunca como escola sem dificuldade).
 O escopo vem do vínculo do secretário; rascunho de escola nunca aparece, só versões emitidas.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database import get_connection
-from app.features.acesso import censo
+from app.features.acesso import censo, entrega_pdf
 from app.features.acesso.dependencias import SessaoGestao, exigir_secretario
 from app.features.acesso.protecao import exigir_configuracao
+from app.features.declaracao import documento
 from app.features.declaracao.modelos import Declaracao
 from app.features.declaracao.schemas import DeclaracaoDaEscola, DeclaracoesDaRede, ItemVersao, VersaoDeclaracao
 from app.shared.banco_gestao import obter_sessao
@@ -54,14 +55,19 @@ def listar(sessao_gestao: SessaoGestao = Depends(exigir_secretario), sessao: Ses
     )
 
 
+def _da_rede(sessao: Session, co_municipio: int, co_entidade: int, numero: int) -> Declaracao:
+    declaracao = sessao.scalar(select(Declaracao).where(Declaracao.co_entidade == co_entidade, Declaracao.versao == numero))
+    # Escola de outra rede responde como inexistente (RN-07 do acesso).
+    if declaracao is None or declaracao.co_municipio != co_municipio:
+        raise HTTPException(404, "Declaração não encontrada.")
+    return declaracao
+
+
 @router.get("/{co_entidade}/versoes/{numero}", response_model=VersaoDeclaracao)
 def ver_versao(
     co_entidade: int, numero: int, sessao_gestao: SessaoGestao = Depends(exigir_secretario), sessao: Session = Depends(obter_sessao)
 ) -> VersaoDeclaracao:
-    declaracao = sessao.scalar(select(Declaracao).where(Declaracao.co_entidade == co_entidade, Declaracao.versao == numero))
-    # Escola de outra rede responde como inexistente (RN-07 do acesso).
-    if declaracao is None or declaracao.co_municipio != sessao_gestao.co_municipio:
-        raise HTTPException(404, "Declaração não encontrada.")
+    declaracao = _da_rede(sessao, sessao_gestao.co_municipio, co_entidade, numero)
     escola = censo.escola(co_entidade)
     return VersaoDeclaracao(
         versao=declaracao.versao, escola=escola.nome if escola else f"INEP {co_entidade}", censo_versao=declaracao.censo_versao,
@@ -73,3 +79,12 @@ def ver_versao(
             for i in declaracao.itens
         ],
     )
+
+
+@router.get("/{co_entidade}/versoes/{numero}/pdf", response_class=Response)
+def baixar_pdf(
+    co_entidade: int, numero: int, sessao_gestao: SessaoGestao = Depends(exigir_secretario), sessao: Session = Depends(obter_sessao)
+) -> Response:
+    """PDF-RF-01: o PDF da versão emitida, para o secretário da rede da escola (RN-PDF-02)."""
+    declaracao = _da_rede(sessao, sessao_gestao.co_municipio, co_entidade, numero)
+    return entrega_pdf.entregar(sessao, sessao_gestao, documento.documento(declaracao), declaracao.retirada_motivo)

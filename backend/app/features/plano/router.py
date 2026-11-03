@@ -3,14 +3,15 @@
 A escola é sempre a do vínculo aprovado (SessaoGestao); não há parâmetro de escola na URL.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.orm import Session, object_session
 
+from app.features.acesso import entrega_pdf
 from app.features.acesso.dependencias import SessaoGestao, exigir_admin, exigir_diretor
 from app.features.acesso.modelos import Conta
 from app.features.acesso.protecao import exigir_configuracao
 from app.features.declaracao.servico import escola_com_barreiras
-from app.features.plano import publicacao, servico, sugestoes
+from app.features.plano import documento, publicacao, servico, sugestoes
 from app.features.plano.fontes import citacoes
 from app.features.plano.schemas import (
     AceiteSugestao,
@@ -183,6 +184,13 @@ def submeter(corpo: Confirmacao, sessao_gestao: SessaoGestao = Depends(exigir_di
 @router.get("/versoes/{numero}", response_model=VersaoPlano)
 def obter_versao(numero: int, sessao_gestao: SessaoGestao = Depends(exigir_diretor), sessao: Session = Depends(obter_sessao)) -> VersaoPlano:
     return versao_para_resposta(_erro(servico.versao_do_plano, sessao, sessao_gestao.co_entidade, numero))
+
+
+@router.get("/versoes/{numero}/pdf", response_class=Response)
+def baixar_pdf(numero: int, sessao_gestao: SessaoGestao = Depends(exigir_diretor), sessao: Session = Depends(obter_sessao)) -> Response:
+    """PDF-RF-02: o PDF da versão enviada, com o mesmo acesso da tela da versão (RN-PDF-02)."""
+    versao = _erro(servico.versao_do_plano, sessao, sessao_gestao.co_entidade, numero)
+    return entrega_pdf.entregar(sessao, sessao_gestao, documento.documento(versao), versao.retirada_motivo)
 
 
 def versao_para_resposta(versao) -> VersaoPlano:

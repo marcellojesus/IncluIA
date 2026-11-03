@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/shared/components/Modal";
 
 import {
+  PDF,
   SemAcesso,
   aceitarSugestao,
   ajustarSugestao,
@@ -25,6 +26,7 @@ import type { AcaoPlano, Apontamento, CamposAcao, EstadoPlano, SugestaoPlano } f
 import { Detalhes, Fontes, SeloOrigem } from "./PartesPlano";
 import { PreviaPlano } from "./PreviaPlano";
 import { PublicarPlano } from "./PublicarPlano";
+import { BotaoPdf } from "./BotaoPdf";
 import { Aviso, Botao, Cartao, Campo, CampoTexto, Erro, Selo } from "./ui";
 
 const AVISO_ESTIMATIVA = "Estimativa não é orçamento aprovado. Não informe valor sem base; indique a premissa.";
@@ -335,7 +337,10 @@ export function PlanoAcao() {
               <ul className="mt-2 space-y-2 text-[12px]">
                 {[...estado.versoes].reverse().map((v) => (
                   <li key={v.versao} className="flex items-center justify-between gap-2">
-                    <span>v{v.versao} · {dataCurta(v.submetidaEm)}</span>
+                    <span>
+                      v{v.versao} · {dataCurta(v.submetidaEm)} ·
+                      <BotaoPdf comoLink caminho={PDF.plano(v.versao)} rotulo="PDF" />
+                    </span>
                     <Selo tom={ESTADOS_VERSAO[v.estado].tom}>{ESTADOS_VERSAO[v.estado].texto}</Selo>
                   </li>
                 ))}

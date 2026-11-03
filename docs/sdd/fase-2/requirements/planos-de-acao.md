@@ -15,6 +15,10 @@ Este arquivo é somente o mapa das especificações; requisitos detalhados estã
 3. **Analítico de Barreiras** — varredura assistida por IA de barreiras, obstáculos e ações da rede: [requisitos](secretario/analitico-barreiras.md), [regras](../business-rules/secretario/analitico-barreiras.md).
 4. **Plano Estratégico Municipal** — composição de ações sistêmicas e cobertura parcial de ações escolares: [requisitos](secretario/plano-estrategico-municipal.md), [regras](../business-rules/secretario/plano-estrategico-municipal.md).
 
+## Compartilhada
+
+- **Documentos em PDF** — Declaração, Plano de Ação Escolar e Plano Estratégico Municipal, gerados a partir da versão congelada: [requisitos](documentos-pdf.md), [regras](../business-rules/documentos-pdf.md).
+
 ## Fluxo de ponta a ponta
 
 `Dashboard da Escola` → `Declaração de Obstáculos` → `Plano de Ação Escolar` → submissão → `Dashboard Municipal`/`Fila e Revisão` → `Analítico de Barreiras` → `Plano Estratégico Municipal`.

@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 
 import { Modal } from "@/shared/components/Modal";
 
-import { decidirPlano, getFilaPlanos, getRevisaoPlano, getVersaoDaRede } from "../api";
+import { PDF, decidirPlano, getFilaPlanos, getRevisaoPlano, getVersaoDaRede } from "../api";
+import { BotaoPdf } from "./BotaoPdf";
 import { ESTADOS_VERSAO_PLANO, NOMES_EIXOS, POSICOES, dataCurta } from "../rotulos";
 import type { DecisaoPlano, FilaPlanos as Fila, RevisaoPlano, VersaoDeclaracao } from "../types";
 import { ListaPorEixo } from "./ModaisDeclaracao";
@@ -259,7 +260,8 @@ function Revisao({
       </div>
       <p className="mt-1 text-[13px] text-gray-600">
         Enviada em {dataCurta(v.submetidaEm)} · baseada na Declaração v{v.declaracaoVersao} ·{" "}
-        <button onClick={lerDeclaracao} className="font-bold text-gov-blue hover:underline">Ler a Declaração v{v.declaracaoVersao}</button>
+        <button onClick={lerDeclaracao} className="font-bold text-gov-blue hover:underline">Ler a Declaração v{v.declaracaoVersao}</button> ·
+        <BotaoPdf comoLink caminho={PDF.planoDaRede(revisao.coEntidade, v.versao)} rotulo={`Baixar PDF da v${v.versao}`} />
       </p>
       {revisao.ultimaDeclaracao > v.declaracaoVersao && (
         <div className="mt-3">
@@ -411,6 +413,9 @@ function Revisao({
             <ListaPorEixo
               itens={declaracao.itens.map((i) => ({ codigo: i.codigo, eixo: i.eixo, nome: i.barreira, dadoCenso: i.dadoCenso, posicao: i.posicao, texto: i.texto }))}
             />
+          </div>
+          <div className="mt-3 flex justify-end">
+            <BotaoPdf caminho={PDF.declaracaoDaRede(revisao.coEntidade, declaracao.versao)} />
           </div>
         </Modal>
       )}

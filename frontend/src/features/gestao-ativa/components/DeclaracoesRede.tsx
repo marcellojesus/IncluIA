@@ -6,16 +6,17 @@ import { useEffect, useState } from "react";
 
 import { Modal } from "@/shared/components/Modal";
 
-import { getDeclaracoesRede, getVersaoDaRede } from "../api";
+import { PDF, getDeclaracoesRede, getVersaoDaRede } from "../api";
 import { dataCurta } from "../rotulos";
 import type { DeclaracoesDaRede, VersaoDeclaracao } from "../types";
+import { BotaoPdf } from "./BotaoPdf";
 import { ListaPorEixo } from "./ModaisDeclaracao";
 import { Aviso, Cartao, Erro, Selo } from "./ui";
 
 export function DeclaracoesRede() {
   const [rede, setRede] = useState<DeclaracoesDaRede | null>(null);
   const [erro, setErro] = useState<string | null>(null);
-  const [aberta, setAberta] = useState<VersaoDeclaracao | null>(null);
+  const [aberta, setAberta] = useState<(VersaoDeclaracao & { coEntidade: number }) | null>(null);
 
   useEffect(() => {
     getDeclaracoesRede().then(setRede).catch((falha) => setErro((falha as Error).message));
@@ -24,7 +25,7 @@ export function DeclaracoesRede() {
   async function abrir(coEntidade: number, versao: number) {
     setErro(null);
     try {
-      setAberta(await getVersaoDaRede(coEntidade, versao));
+      setAberta({ ...(await getVersaoDaRede(coEntidade, versao)), coEntidade });
     } catch (falha) {
       setErro((falha as Error).message);
     }
@@ -120,6 +121,9 @@ export function DeclaracoesRede() {
             Versão emitida pela escola; os dados do Censo e o score não mudam com a declaração.
             {aberta.publicadaEm && !aberta.retiradaEm ? " Esta versão está publicada." : " Documento interno da rede: não divulgue."}
           </p>
+          <div className="mt-3 flex justify-end">
+            <BotaoPdf caminho={PDF.declaracaoDaRede(aberta.coEntidade, aberta.versao)} />
+          </div>
         </Modal>
       )}
     </div>

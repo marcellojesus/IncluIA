@@ -1,2 +1,4 @@
 -r requirements.txt
 pytest>=8
+# Leitura dos PDFs gerados nos testes (RF-31)
+pypdf>=5,<7

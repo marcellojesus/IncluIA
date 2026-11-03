@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/shared/components/Modal";
 
 import {
+  PDF,
   aceitarSugestaoMunicipal,
   confirmarPlanoMunicipal,
   descartarSugestaoMunicipal,
@@ -21,6 +22,7 @@ import { dataCurta } from "../rotulos";
 import type { AcaoMunicipal, BarreiraDaRede, Cobertura, EscolaAtendida, EstadoPlanoMunicipal, NovaAcaoMunicipal, Prioridade, SugestaoMunicipal } from "../types";
 import { NarrativaExecutiva } from "./NarrativaExecutiva";
 import { Fontes } from "./PartesPlano";
+import { BotaoPdf } from "./BotaoPdf";
 import { Aviso, Botao, Campo, CampoTexto, Cartao, Erro, Selo } from "./ui";
 
 const PRIORIDADE: Record<Prioridade, { texto: string; tom: "vermelho" | "ambar" | "neutro" }> = {
@@ -210,6 +212,7 @@ export function PlanoMunicipal({ foco = null }: { foco?: string | null }) {
                     >
                       Narrativa executiva
                     </button>
+                    <BotaoPdf comoLink caminho={PDF.planoMunicipal(v.versao)} rotulo="PDF" />
                   </li>
                 ))}
               </ul>

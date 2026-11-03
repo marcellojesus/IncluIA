@@ -4,15 +4,15 @@ O município vem do vínculo do secretário; escola de outra rede responde como 
 versões enviadas aparecem: rascunho, sugestões da IA e quem enviou ficam com a escola.
 """
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.features.acesso import censo
+from app.features.acesso import censo, entrega_pdf
 from app.features.acesso.dependencias import SessaoGestao, exigir_secretario
 from app.features.acesso.protecao import exigir_configuracao
 from app.features.declaracao.modelos import Declaracao
-from app.features.plano import revisao
+from app.features.plano import documento, revisao
 from app.features.plano.router import resumo_versao, versao_para_resposta
 from app.features.plano.schemas import BarreiraBase, Decisao, FilaPlanos, PlanoNaFila, RevisaoPlano
 from app.features.plano.servico import ErroPlano
@@ -65,6 +65,16 @@ def ver(co_entidade: int, numero: int, sessao_gestao: SessaoGestao = Depends(exi
         return _revisao(sessao, sessao_gestao.co_municipio, co_entidade, numero)
     except ErroPlano as erro:
         raise HTTPException(erro.status, erro.mensagem) from None
+
+
+@router.get("/{co_entidade}/versoes/{numero}/pdf", response_class=Response)
+def baixar_pdf(co_entidade: int, numero: int, sessao_gestao: SessaoGestao = Depends(exigir_secretario), sessao: Session = Depends(obter_sessao)) -> Response:
+    """PDF-RF-02: o PDF da versão enviada, para o secretário da rede da escola (RN-PDF-02)."""
+    try:
+        versao = revisao.versao(revisao.versoes_da_escola(sessao, sessao_gestao.co_municipio, co_entidade), numero)
+    except ErroPlano as erro:
+        raise HTTPException(erro.status, erro.mensagem) from None
+    return entrega_pdf.entregar(sessao, sessao_gestao, documento.documento(versao), versao.retirada_motivo)
 
 
 @router.post("/{co_entidade}/versoes/{numero}/decisao", response_model=RevisaoPlano)

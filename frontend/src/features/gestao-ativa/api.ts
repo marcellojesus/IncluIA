@@ -62,6 +62,40 @@ async function chamar<T>(caminho: string, opcoes: RequestInit = {}, autenticado 
   return corpo as T;
 }
 
+// --- Documentos em PDF (RF-31; backend/app/shared/pdf) --------------------------------------------
+// O PDF sai da versão congelada, no backend; aqui só baixamos com o token e salvamos com o nome dado
+// pelo servidor (sem nome de pessoa nem de escola, RN-PDF-06).
+export async function baixarPdf(caminho: string): Promise<void> {
+  const token = useGestaoStore.getState().token;
+  let resposta: Response;
+  try {
+    resposta = await fetch(`${API_BASE_URL}/gestao${caminho}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  } catch {
+    throw new Error("Não foi possível falar com o servidor. Verifique a conexão e tente de novo.");
+  }
+  if (!resposta.ok) {
+    const corpo = await resposta.json().catch(() => null);
+    const mensagem = typeof corpo?.detail === "string" ? corpo.detail : "Não foi possível gerar o PDF. Tente de novo.";
+    if (resposta.status === 401 || resposta.status === 403) throw new SemAcesso(resposta.status, mensagem);
+    throw new Error(mensagem);
+  }
+  const nome = /filename="([^"]+)"/.exec(resposta.headers.get("Content-Disposition") ?? "")?.[1] ?? "documento.pdf";
+  const url = URL.createObjectURL(await resposta.blob());
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = nome;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export const PDF = {
+  declaracao: (numero: number) => `/diretor/declaracao/versoes/${numero}/pdf`,
+  declaracaoDaRede: (coEntidade: number, numero: number) => `/secretario/declaracoes/${coEntidade}/versoes/${numero}/pdf`,
+  plano: (numero: number) => `/diretor/plano/versoes/${numero}/pdf`,
+  planoDaRede: (coEntidade: number, numero: number) => `/secretario/planos/${coEntidade}/versoes/${numero}/pdf`,
+  planoMunicipal: (numero: number) => `/secretario/plano-municipal/versoes/${numero}/pdf`,
+};
+
 const post = (corpo: unknown): RequestInit => ({ method: "POST", body: JSON.stringify(corpo) });
 
 export const solicitarAcessoDiretor = (dados: { nome: string; email: string; coEntidade: number }) =>

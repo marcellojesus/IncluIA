@@ -27,7 +27,7 @@ Este PRD preserva a proposta das fontes, mas registra como pendentes as decisõe
 | Fila e Revisão | Implementada, com apontamentos por barreira e ação | RF-19 a RF-22 | [fila](requirements/secretario/fila-revisao-planos.md) |
 | Plano Estratégico Municipal | Implementado, com narrativa executiva sem fonte de custo | RF-26 a RF-30 (no RF-30, custos só como estimativa da secretaria até as decisões 12 e 13) | [plano municipal](requirements/secretario/plano-estrategico-municipal.md) |
 | Analítico de Barreiras | Implementado em 2026-10-27 | RF-23 a RF-25 | [analítico](requirements/secretario/analitico-barreiras.md) |
-| Documentos em PDF | Não iniciado | RF-31 | — |
+| Documentos em PDF | Implementado em 2026-11-03 | RF-31 (Declaração, Plano Escolar e Plano Municipal; sem narrativa executiva e sem PDF público) | [documentos em PDF](requirements/documentos-pdf.md) |
 
 A arquitetura (banco próprio, Guardião LGPD, IA em camadas e validação de citações) está em [arquitetura.md](arquitetura.md).
 
@@ -205,7 +205,7 @@ Os critérios de aceite detalhados e as notas de implementação de cada requisi
 13. Fontes concretas, cobertura e atualização de estimativas do Fundo Nacional de Desenvolvimento da Educação (FNDE) e do Sistema de Informações sobre Orçamentos Públicos em Educação (SIOPE).
 14. Ano da LOA, horizonte do PPA e critérios de classificação orçamentária.
 15. Edição de Censo usada para comparação de evolução do score.
-16. Campos, assinatura, identidade visual e valor formal dos PDFs.
+16. **Parcialmente resolvida em 2026-11-03:** no piloto o PDF é informativo, sem assinatura, com versão, datas, quem confirmou, código de conferência e ressalvas ([documentos em PDF](requirements/documentos-pdf.md)). Continuam pendentes a assinatura, a identidade visual e o valor formal depois da validação jurídica.
 17. Vocabulário e relação entre “barreira” identificada nos dados e “obstáculo” relatado pelo diretor. Em 2026-10-18 foi adotado “posição” como termo para o que o diretor registra sobre cada barreira (obstáculo relatado, divergência com o dado do Censo ou sem relato nesta versão).
 18. Cronograma de dois meses indicado na Narrativa V6, escopo incluído e disponibilidade para validação.
 19. **Resolvida em 2026-10-23:** o piloto atende só escolas da rede municipal.

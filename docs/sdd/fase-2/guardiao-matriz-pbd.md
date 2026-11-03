@@ -1,7 +1,7 @@
 # Matriz de controles — Guardião LGPD e fluxos de IA
 
 **Referências:** [Política PBD-001 a PBD-130](politica-privacidade-pbd.md) e OWASP Top 10 for Large Language Model Applications (edição 2025).
-**Escopo:** o Guardião LGPD (`backend/app/shared/guardiao_lgpd/`), o `ai_client` e as funcionalidades que mandam texto à IA: conversa da Declaração, sugestões do Plano de Ação Escolar, sugestões e narrativa executiva do Plano Estratégico Municipal, Analítico de Barreiras e narrativa pública. Telas, contas, exportação e infraestrutura ficam para outra matriz.
+**Escopo:** o Guardião LGPD (`backend/app/shared/guardiao_lgpd/`), o `ai_client` e as funcionalidades que mandam texto à IA: conversa da Declaração, sugestões do Plano de Ação Escolar, sugestões e narrativa executiva do Plano Estratégico Municipal, Analítico de Barreiras e narrativa pública. A exportação em PDF (RF-31) tem seção própria, no fim. Telas, contas e infraestrutura ficam para outra matriz.
 **Avaliação de 2026-10-27:** feita pela equipe de desenvolvimento (agente de código) e revisada pelo AgLGPD, que também é um agente. **Pelo PBD-120, nenhum dos dois atesta a conformidade final**: esta matriz aguarda a aprovação do responsável humano.
 
 **Estados** (da política): não avaliado, atendido, não atendido, não aplicável justificado. "Atendido" exige teste que rode na suíte; documento ou prompt não bastam. Mascaramento e pseudonimização reduzem risco, mas não garantem anonimização.
@@ -62,3 +62,20 @@
 3. CI com a suíte antes do deploy (PBD-130).
 4. Apagar a cópia do banco com contas reais e limpar o histórico do Git (PBD-099; AD-07).
 5. Prazos de retenção (PBD-101), limite por conta na Gestão Ativa (LLM10) e decisão sobre o uso de planos gratuitos sem contrato (PBD-098).
+
+## Exportação em PDF (RF-31) — avaliação de 2026-11-03
+
+Escopo: `backend/app/shared/pdf/`, `backend/app/features/acesso/entrega_pdf.py`, os `documento.py` da Declaração, do Plano Escolar e do Plano Municipal, as rotas `.../pdf` e `BotaoPdf.tsx`. A revisão do AgLGPD de 2026-11-03 foi aplicada no mesmo dia. Os testes estão em `test_documentos_pdf.py`.
+
+| ID | Aplicabilidade e justificativa | Implementação | Evidência (teste na suíte) | Resultado |
+|---|---|---|---|---|
+| PBD-057 | Impressão com a minimização da tela | O PDF mostra o mesmo que a tela ou menos: sem resumo, autoria, e-mail nem motivo de retirada; nome de pessoa só como papel; marca de uso interno, ressalva de cópia e aviso antes do primeiro download | `test_declaracao_em_pdf_para_diretor_e_secretario`, `test_plano_escolar_em_pdf_com_decisao_e_base_desatualizada` | atendido; o uso do arquivo fora da plataforma depende de orientação aos usuários |
+| PBD-059 | Exportação não é canal alternativo | Mesmo acesso da tela; nada além do que a tela mostra; nome de pessoa só como papel; retirada por dado pessoal ou pedido de titular bloqueia o PDF; Guardião na geração, com camada de nomes | `test_so_versao_emitida_e_do_proprio_escopo`, `test_secretario_de_outro_municipio_nao_baixa`, `test_retirada_por_dado_pessoal_bloqueia_o_pdf`, `test_nome_que_escapou_na_gravacao_e_mascarado_so_no_pdf` | atendido |
+| PBD-047, 060 | Auditoria e extração em volume | Auditoria de cada pedido, entregue ou recusado, sem conteúdo; limite de 40 PDFs por conta a cada 10 minutos | `test_declaracao_em_pdf_para_diretor_e_secretario`, `test_limite_de_downloads_por_conta` | atendido; a auditoria registra o pedido, não a finalidade; não há alerta de volume atípico além do limite; retenção pendente (AD-07) |
+| PBD-054 | Exportação excepcional | O PDF é de uma versão por vez, do escopo do vínculo; não há exportação em lote | — | não aplicável justificado: o PDF não é extração excepcional. Uma exportação em lote, se vier, precisará de autorização específica |
+| PBD-067 | Mensagem de erro sem dado pessoal | 409 com texto fixo | `test_achado_do_guardiao_na_rota_nao_vaza_no_log_nem_na_resposta` | atendido |
+| PBD-069 | Cache do arquivo | `Cache-Control: no-store`, `X-Content-Type-Options: nosniff`; o arquivo não é guardado no servidor | `test_documentos_pdf.py::_texto` | atendido |
+| PBD-095, 127 | Log sem dado pessoal | Bloqueio registra só os tipos; logs do `fpdf2` e do `fontTools` em ERROR | `test_achado_do_guardiao_na_rota_nao_vaza_no_log_nem_na_resposta` | atendido |
+| PBD-123 | A resposta não entrega atributo não autorizado | Cabeçalhos, nome do arquivo e metadados do PDF sem pessoa: título e assunto com tipo, versão e escola ou município do Censo; autor fixo | `test_declaracao_em_pdf_para_diretor_e_secretario` | atendido |
+| PBD-124, 125 | Teste entre perfis e entre redes | Diretor não alcança rotas do secretário; secretário de outro município recebe 404 nas três rotas | `test_so_versao_emitida_e_do_proprio_escopo`, `test_secretario_de_outro_municipio_nao_baixa` | atendido |
+| PBD-120 | Aprovação independente | Esta seção | — | não avaliado: aguarda o responsável humano |
