@@ -64,18 +64,19 @@ function CamadaMunicipios({
   const router = useRouter();
   const layersRef = useRef<Record<number, L.Polygon>>({});
   const geoJsonRef = useRef<L.GeoJSON | null>(null);
-  const [geojson, setGeojson] = useState<GeoJSON.FeatureCollection | null>(null);
+  // Guardado com a UF de origem: ao trocar de UF, o mapa anterior some sem setState dentro do efeito.
+  const [carregado, setCarregado] = useState<{ uf: number; dados: GeoJSON.FeatureCollection } | null>(null);
+  const geojson = carregado?.uf === uf.codigoIbge ? carregado.dados : null;
 
   useEffect(() => {
     let cancelado = false;
-    setGeojson(null);
     layersRef.current = {};
     onEstadoChange({ carregando: true, erro: null });
 
     fetchGeoJsonUf(uf.codigoIbge)
       .then((data) => {
         if (cancelado) return;
-        setGeojson(data);
+        setCarregado({ uf: uf.codigoIbge, dados: data });
         onEstadoChange({ carregando: false, erro: null });
       })
       .catch(() => {

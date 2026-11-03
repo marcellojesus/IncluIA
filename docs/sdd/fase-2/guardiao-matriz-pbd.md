@@ -38,7 +38,7 @@
 | PBD-121, 129 | Testes de máscara e regressão | Suíte do Guardião, regressão do AgLGPD e conjunto sintético (30 casos, todos passando) | `test_guardiao_lgpd.py`, `test_guardiao_lgpd_regressao.py`, `test_guardiao_seguranca_ia.py::test_conjunto_sintetico_de_deteccao` | atendido como regressão; a taxa real de detecção depende de relatos reais (pendência 1) |
 | PBD-124, 125 | Teste entre perfis e entre redes | Diretor não acessa rotas do secretário; secretário de outro município não alcança a rede | `test_analitico.py::test_so_o_secretario_ve`, `test_acesso_gestao.py::test_secretario_de_outra_rede_nao_ve_nem_decide`, `test_revisao_planos.py::test_secretario_de_outro_municipio_nao_ve_nem_decide` | atendido |
 | PBD-128 | Teste de ataque ao agente | Relatos maliciosos e saídas que vazam | `test_guardiao_seguranca_ia.py` | atendido no escopo da IA do produto |
-| PBD-130 | Gate de promoção | A suíte roda à mão; não há CI que bloqueie merge ou deploy | — | não atendido: criar um CI que rode a suíte antes do deploy |
+| PBD-130 | Gate de promoção | CI no GitHub Actions (`.github/workflows/ci.yml`, 2026-11-03): suíte do backend no Python 3.11 (deploy) e 3.14, tipos e lint do frontend, em todo push e pull request; os textos legais da base normativa passaram a ser versionados para os testes de citação rodarem na CI | `.github/workflows/ci.yml` | parcial: a CI roda, mas ainda não bloqueia. Falta exigir o check na proteção do main e ligar o deploy do Render só depois da CI |
 
 ## OWASP Top 10 para LLM (2025)
 
@@ -59,7 +59,7 @@
 
 1. Aprovação do responsável humano (PBD-120).
 2. Limites da camada 5 (sigla do município, nome pela metade, apelido da escola) e conferência de locais na saída das sugestões e do Analítico (PBD-112; LLM02). A pendência 16 foi resolvida em 2026-11-03.
-3. CI com a suíte antes do deploy (PBD-130).
+3. Fazer a CI bloquear: check obrigatório na proteção do main e deploy do Render só depois da CI (PBD-130). A CI existe desde 2026-11-03.
 4. Apagar a cópia do banco com contas reais e limpar o histórico do Git (PBD-099; AD-07).
 5. Prazos de retenção (PBD-101), limite por conta na Gestão Ativa (LLM10) e decisão sobre o uso de planos gratuitos sem contrato (PBD-098).
 

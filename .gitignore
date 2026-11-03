@@ -1,5 +1,7 @@
 # Microdados do Censo (brutos, ~400MB — nunca versionar; entrada do ETL, não do app em si)
-base/
+base/*
+# Exceto os textos legais da base normativa (AD-08): leis públicas, sem dado pessoal, usadas pelos testes na CI
+!base/legislacao/
 
 # Banco de dados gerado pelo ETL: versionado de propósito (deploy/README.md explica por quê) —
 # é o artefato pronto que o backend em produção lê; só muda quando o ETL é rodado de novo.

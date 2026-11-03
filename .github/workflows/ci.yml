@@ -1,0 +1,60 @@
+# CI da Escola Sem Barreiras (PBD-130): testes do backend e checagem de tipos e lint do frontend.
+# Não usa segredo nem chama provedor de IA: os testes simulam os provedores e rodam com AMBIENTE=dev
+# (backend/tests/conftest.py). O Python 3.11 é o do deploy (render.yaml); o 3.14, o do desenvolvimento.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (Python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.14"]
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - name: Instalar dependências
+        run: pip install -r requirements-dev.txt
+      - name: Testes
+        run: python -m pytest -q
+
+  frontend:
+    name: Frontend (tipos e lint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Instalar dependências
+        run: npm ci
+      - name: Tipos
+        run: npx tsc --noEmit
+      - name: Lint
+        run: npx eslint .
