@@ -81,8 +81,9 @@ Permitir ao secretário compor um plano municipal a partir de padrões da rede, 
   - premissas e justificativa não vão;
   - trilha das gerações sem texto e eventos de auditoria `narrativa_plano_municipal_gerada` e `narrativa_plano_municipal_editada`;
   - só o secretário do município gera, lê e edita; o diretor e a área pública não veem a narrativa.
-- **Edição (SPM-RF-06):** o secretário edita cada seção; o texto passa pelo Guardião e a tela marca "Revisada pela secretaria".
-- **Pendente:** retenção definitiva; checagem de nomes na edição antes de exportar ou publicar; fonte de custo (decisões 12 e 13 do PRD).
+- **Edição (SPM-RF-06):** o secretário edita cada seção; o texto passa pelo Guardião e a tela marca "Revisada pela secretaria". Desde 2026-11-03 a edição passa também pela checagem de números e de nomes da rede da resposta da IA (`narrativa.problema`) e não é salva se tiver algum (RN-PDF-09).
+- **PDF:** a narrativa tem PDF próprio, para quem decide o orçamento (PDF-RF-07).
+- **Pendente:** retenção definitiva; fonte de custo (decisões 12 e 13 do PRD).
 
 ## Decisões pendentes
 

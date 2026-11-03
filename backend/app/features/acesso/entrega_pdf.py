@@ -22,13 +22,23 @@ logger = logging.getLogger(__name__)
 MOTIVOS_LGPD = ("dado_pessoal", "pedido_de_titular")
 
 
-def _auditar(sessao: Session, sessao_gestao: SessaoGestao, documento: Documento, resultado: str, detalhe: str) -> None:
-    alvo_tipo, alvo_id = documento.alvo
+def _registrar(sessao: Session, sessao_gestao: SessaoGestao, alvo: tuple[str, str], versao: int, resultado: str, detalhe: str) -> None:
+    alvo_tipo, alvo_id = alvo
     sessao.add(EventoAuditoria(
         ator_id=sessao_gestao.conta.id, acao="pdf_baixado", alvo_tipo=alvo_tipo, alvo_id=alvo_id, resultado=resultado,
-        detalhe=f"{detalhe}; v{documento.versao}",
+        detalhe=f"{detalhe}; v{versao}",
     ))
     sessao.commit()
+
+
+def _auditar(sessao: Session, sessao_gestao: SessaoGestao, documento: Documento, resultado: str, detalhe: str) -> None:
+    _registrar(sessao, sessao_gestao, documento.alvo, documento.versao, resultado, detalhe)
+
+
+def recusar(sessao: Session, sessao_gestao: SessaoGestao, alvo: tuple[str, str], versao: int, detalhe: str) -> None:
+    """Pedido recusado antes de montar o documento: conta no limite e entra na auditoria (RN-PDF-08)."""
+    limitar_pdf.contar(sessao_gestao.conta.id)
+    _registrar(sessao, sessao_gestao, alvo, versao, "recusado", detalhe)
 
 
 def entregar(sessao: Session, sessao_gestao: SessaoGestao, documento: Documento, retirada_motivo: str | None = None) -> Response:

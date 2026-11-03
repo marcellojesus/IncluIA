@@ -193,3 +193,137 @@ def test_texto_livre_retido_para_escola_pequena_ou_retirada_lgpd():
     assert narrativa.motivo_restricao(retirada, restricoes) == "retirada_lgpd"
     comum = {**retirada, "escolas": [{"co_entidade": 3}, {"co_entidade": 4}, {"co_entidade": 5}]}
     assert narrativa.motivo_restricao(comum, restricoes) is None
+
+
+# --- Edição conferida e PDF da narrativa (PDF-RF-07; RN-PDF-09; decisões de 2026-11-03) -----------
+
+def _gerada(cliente, diretora, monkeypatch):
+    _versao_confirmada(cliente, diretora)
+    monkeypatch.setattr(ai_client, "_PROVEDORES", [("teste", _provedor([_resposta()], []))])
+    assert cliente.post(f"{URL}/versoes/1/narrativa", headers=_sec(cliente)).status_code == 200
+
+
+def test_edicao_com_numero_ou_nome_da_rede_nao_e_salva(ambiente, monkeypatch):
+    from app.features.acesso import censo
+
+    cliente, diretora, _ = ambiente
+    _gerada(cliente, diretora, monkeypatch)
+    escola = censo.escola(_co_entidade(cliente, diretora))
+    base = {"resumo": "Resumo revisto.", "estrategia": [{"texto": "Atendimento especializado.", "acoes": ["A1"]}]}
+
+    for trecho, motivo in ((f"O plano começa pela {escola.nome}.", "nomes de escola"), ("Em Niterói, a rede avança.", "nomes de escola"),
+                           ("O plano custa R$ 120 mil.", "valores em reais"), ("Atende 12 escolas.", "valores em reais")):
+        resposta = cliente.put(f"{URL}/versoes/1/narrativa", json={**base, "resumo": trecho}, headers=_sec(cliente))
+        assert resposta.status_code == 422 and motivo in resposta.json()["detail"], trecho
+    em_incerteza = {**base, "incertezas": [f"Obra na {escola.nome} depende de licitação."]}
+    assert cliente.put(f"{URL}/versoes/1/narrativa", json=em_incerteza, headers=_sec(cliente)).status_code == 422
+
+    versao = cliente.get(f"{URL}/versoes/1", headers=_sec(cliente)).json()
+    assert versao["narrativa"]["editada"] is False and versao["narrativa"]["resumo"] == _resposta()["resumo"]
+    assert cliente.put(f"{URL}/versoes/1/narrativa", json=base, headers=_sec(cliente)).status_code == 200
+
+
+def test_pdf_da_narrativa_sem_escola_nem_texto_das_acoes(ambiente, monkeypatch):
+    from app.features.acesso import censo
+    from tests.test_documentos_pdf import _eventos, _texto
+
+    cliente, diretora, _ = ambiente
+    assert cliente.get(f"{URL}/versoes/1/narrativa/pdf", headers=_sec(cliente)).status_code == 404
+    _gerada(cliente, diretora, monkeypatch)
+    assert cliente.get(f"{URL}/versoes/1/narrativa/pdf", headers=diretora).status_code == 403
+
+    chamadas = []
+    monkeypatch.setattr(ai_client, "_PROVEDORES", [("teste", lambda *a, **k: chamadas.append(a))])
+    resposta = cliente.get(f"{URL}/versoes/1/narrativa/pdf", headers=_sec(cliente))
+    texto = _texto(resposta)
+    assert chamadas == []
+    assert resposta.headers["content-disposition"].endswith('_v1.pdf"') and "narrativa-executiva_" in resposta.headers["content-disposition"]
+    for esperado in ("Narrativa executiva do Plano Estratégico Municipal — versão 1", "apoio à decisão orçamentária",
+                     "A rede enfrenta falta de atendimento especializado", "Frente 1", "Escolas municipais atendidas",
+                     "Estimativa registrada pela secretaria", "Escrito pelo assistente de IA, sem revisão", "Custos ainda a estimar."):
+        assert esperado in texto, esperado
+    escola = censo.escola(_co_entidade(cliente, diretora))
+    for proibido in (escola.nome, "Contratar profissionais de AEE", "Dotação aprovada", "120.000", "Uso interno"):
+        assert proibido not in texto, proibido
+    assert _eventos()[-1].alvo_tipo == "narrativa_plano_municipal" and _eventos()[-1].resultado == "ok"
+
+
+def test_pdf_recusa_narrativa_gravada_com_nome_da_rede(ambiente, monkeypatch):
+    """Narrativa editada antes da checagem ao salvar: o PDF confere de novo (RN-PDF-09)."""
+    from app.features.plano_municipal.modelos import NarrativaPlanoMunicipal
+    from app.shared import banco_gestao
+    from tests.test_documentos_pdf import _eventos
+
+    cliente, diretora, _ = ambiente
+    _gerada(cliente, diretora, monkeypatch)
+    sessao = next(banco_gestao.obter_sessao())
+    try:
+        registro = sessao.query(NarrativaPlanoMunicipal).one()
+        registro.conteudo = {**registro.conteudo, "situacao": "Em Niterói a barreira é comum."}
+        sessao.commit()
+    finally:
+        sessao.close()
+    resposta = cliente.get(f"{URL}/versoes/1/narrativa/pdf", headers=_sec(cliente))
+    assert resposta.status_code == 409 and "Edite o texto" in resposta.json()["detail"]
+    assert "Niterói" not in resposta.text
+    assert _eventos()[-1].resultado == "recusado"
+
+
+# --- Revisão do AgLGPD do PDF da narrativa (2026-11-03) -------------------------------------------
+
+def test_estudante_descrito_com_a_condicao_e_recusado():
+    """A1: dado de saúde de pessoa identificável não sai no texto para fora da secretaria."""
+    for texto in ("Um estudante cego precisa de material em braile.", "Uma aluna surda depende de intérprete.",
+                  "A aluna com autismo precisa de apoio.", "O aluno cadeirante não entra na sala.",
+                  "Esse estudante, que tem laudo de TEA, ficou sem AEE."):
+        assert narrativa.problema([texto], SEM_LOCAIS) == "estudante", texto
+    for texto in ("Estudantes surdos da rede precisam de intérprete.", "O estudante com deficiência tem direito ao AEE.",
+                  "A criança com deficiência deve estar na classe comum."):
+        assert narrativa.problema([texto], SEM_LOCAIS) is None, texto
+
+
+def test_contagem_por_extenso_e_unica_escola_sao_recusadas():
+    """M2: "a única escola com classe exclusiva", junto do Censo, aponta a escola."""
+    for texto in ("A única escola com classe exclusiva precisa de apoio.", "Duas escolas atendem estudantes surdos.",
+                  "Apenas uma turma tem intérprete.", "Três professores fazem o AEE."):
+        assert narrativa.problema([texto], SEM_LOCAIS) == "numero", texto
+    for texto in ("O plano quer uma rede inclusiva.", "Cada estudante tem direito a uma escola acessível."):
+        assert narrativa.problema([texto], SEM_LOCAIS) is None, texto
+
+
+def test_bairro_de_uma_palavra_so_na_conferencia_do_que_sai():
+    """M1: bairro de uma palavra entra só na conferência do texto que sai, e só com maiúscula."""
+    from app.shared.guardiao_lgpd import nomes_da_rede
+
+    para_ia = nomes_da_rede("Rio de Janeiro", [], ["Jacarepaguá", "Centro"])
+    para_fora = nomes_da_rede("Rio de Janeiro", [], ["Jacarepaguá", "Centro"], bairros_curtos=True)
+    assert narrativa.problema(["No Jacarepaguá a barreira é comum."], para_ia) is None
+    assert narrativa.problema(["No Jacarepaguá a barreira é comum."], para_fora) == "local"
+    assert narrativa.problema(["No Centro a barreira é comum.", "O centro da estratégia é o AEE."], para_fora) is None
+
+
+def test_lacunas_editaveis_e_conferidas(ambiente, monkeypatch):
+    """B2: a lacuna da IA também é texto do PDF e o secretário consegue revisá-la."""
+    cliente, diretora, _ = ambiente
+    _gerada(cliente, diretora, monkeypatch)
+    base = {"resumo": "Resumo revisto.", "estrategia": [{"texto": "Atendimento especializado.", "acoes": ["A1"]}]}
+
+    mantidas = cliente.put(f"{URL}/versoes/1/narrativa", json=base, headers=_sec(cliente)).json()
+    assert mantidas["narrativa"]["lacunas"] == _resposta()["lacunas"]  # cliente sem o campo mantém as gravadas
+    ruim = cliente.put(f"{URL}/versoes/1/narrativa", json={**base, "lacunas": ["Falta norma para as duas escolas."]}, headers=_sec(cliente))
+    assert ruim.status_code == 422 and "lacunas" in ruim.json()["detail"]
+    novas = cliente.put(f"{URL}/versoes/1/narrativa", json={**base, "lacunas": ["Sem norma sobre transporte."]}, headers=_sec(cliente))
+    assert novas.json()["narrativa"]["lacunas"] == ["Sem norma sobre transporte."]
+
+
+def test_pdf_nao_mostra_alcance_nem_contagem_pequena():
+    """B1: ação retida aparece como localizada e poucas escolas viram "menos de N"."""
+    from app.features.plano_municipal import documento
+
+    restricoes = narrativa.Restricoes(nomes=SEM_LOCAIS, pequenas=frozenset({1}), retiradas=frozenset({2}))
+    retida = {"codigos": ["B-I-01"], "escolas": [{"co_entidade": 2}]}
+    comum = {"codigos": ["B-I-01"], "escolas": [{"co_entidade": e} for e in (3, 4, 5)]}
+    assert documento._alcance(retida, restricoes) == "Ação localizada"
+    assert documento._alcance(comum, restricoes) == "Nas escolas da rede"
+    assert documento._alcance({"codigos": ["B-I-01"]}, restricoes) == "Ação da rede, sem escola específica"
+    assert [documento._poucas(n) for n in (0, 1, 2, 3, 40)] == ["0", "menos de 3", "menos de 3", "3", "40"]

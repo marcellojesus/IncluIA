@@ -11,11 +11,11 @@ Permitir que diretor e secretário baixem, em Formato de Documento Portátil (PD
 
 - **Documentos desta entrega:** Declaração de Obstáculos (versão emitida), Plano de Ação Escolar (versão enviada) e Plano Estratégico Municipal (versão confirmada).
 - **Fora desta entrega:**
-  - a narrativa executiva (RF-30), porque antes a edição do secretário precisa passar pela troca de nomes ([arquitetura.md](../arquitetura.md), pendência 16);
   - o PDF na página pública;
   - o PDF das ações municipais na visão do diretor.
 - **Valor formal (questão 16 do PRD, parcialmente resolvida):** documento informativo com ressalvas. Traz versão, datas, quem confirmou e um código de conferência, mas não tem assinatura. A assinatura digital (ICP-Brasil ou gov.br) fica para depois da validação jurídica.
 - **Geração:** no backend, a partir da versão gravada. Nunca a partir da tela nem de rascunho.
+- **Narrativa executiva (RF-30), decidida depois da pendência 16 da arquitetura:** PDF próprio, feito para quem decide o orçamento e com marca própria; a edição do secretário com número ou nome da rede não é salva (RN-PDF-09).
 
 ## Requisitos funcionais
 
@@ -35,6 +35,12 @@ Permitir que diretor e secretário baixem, em Formato de Documento Portátil (PD
     - traz as ações da rede com barreiras, prioridade, responsável, prazo, horizonte, custo estimado, premissas, fontes, origem e as escolas atendidas com cobertura total ou parcial;
     - traz os planos escolares usados como base (escola e versão);
     - diz que confirmar o plano não é aprovar orçamento, financiar nem executar (SPM-RF-08).
+- **PDF-RF-07:** gerar o PDF da narrativa executiva de uma versão confirmada do Plano Estratégico Municipal, só para o secretário do município.
+  - **Aceite:**
+    - traz os números calculados pelo sistema, resumo, situação da rede, estratégia por frente, fundamentação legal com as fontes, próximos passos e incertezas;
+    - diz se o texto foi revisado pela secretaria ou é do assistente sem revisão;
+    - as ações citadas aparecem só pela linha estruturada, sem texto livre, valor de custo nem escolas;
+    - é recusado quando o texto gravado tem número ou nome da rede (RN-PDF-09).
 - **PDF-RF-04:** todo PDF traz:
   - um cabeçalho com o tipo de documento, a escola ou o município, a versão e a data da versão;
   - a data da decisão ou da confirmação, com o papel (Secretaria Municipal de Educação), sem nome de pessoa (RN-PDF-06);
@@ -64,6 +70,7 @@ Permitir que diretor e secretário baixem, em Formato de Documento Portátil (PD
 | Declaração | `GET /gestao/diretor/declaracao/versoes/{n}/pdf` | `GET /gestao/secretario/declaracoes/{co_entidade}/versoes/{n}/pdf` |
 | Plano Escolar | `GET /gestao/diretor/plano/versoes/{n}/pdf` | `GET /gestao/secretario/planos/{co_entidade}/versoes/{n}/pdf` |
 | Plano Municipal | — | `GET /gestao/secretario/plano-municipal/versoes/{n}/pdf` |
+| Narrativa executiva | — | `GET /gestao/secretario/plano-municipal/versoes/{n}/narrativa/pdf` |
 
 Cada rota usa a mesma dependência de acesso da rota que já mostra a versão em tela (`exigir_diretor` ou `exigir_secretario`, mais o filtro pela escola ou pela rede do vínculo).
 
@@ -101,6 +108,13 @@ Cada rota usa a mesma dependência de acesso da rota que já mostra a versão em
 - Identidade visual definitiva (logotipo e cores do programa e do município).
 - PDF da versão publicada na página pública, só com o texto público aprovado.
 - PDF em formato PDF/UA (marcado para acessibilidade), que a `fpdf2` não gera por completo.
-- PDF da narrativa executiva, depois da pendência 16 da arquitetura.
 - Retenção da auditoria de downloads (AD-07).
 - Uma página pública para conferir o código não pode revelar conteúdo nem a existência de versão não publicada. Ela deve exigir entrada na plataforma ou responder só sobre versões publicadas, sempre com limite de frequência.
+
+## Notas de implementação da narrativa executiva (2026-11-03)
+
+- `plano_municipal/documento.py::documento_narrativa`, rota em `plano_municipal/router.py` e botão na tela `NarrativaExecutiva.tsx`, com aviso próprio antes do download (`BotaoPdf` com `externo`).
+- A checagem de número e nome da rede é a `narrativa.problema`, usada na resposta da IA, na edição e no PDF.
+- Recusa antes de montar o documento conta no limite e entra na auditoria (`entrega_pdf.recusar`).
+- Campo sem rótulo vira texto corrido no layout comum.
+- Testes em `backend/tests/test_narrativa_municipal.py`.

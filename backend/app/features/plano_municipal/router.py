@@ -185,8 +185,24 @@ def obter_versao(numero: int, sessao_gestao: SessaoGestao = Depends(exigir_secre
 
 @router.get("/versoes/{numero}/pdf", response_class=Response)
 def baixar_pdf(numero: int, sessao_gestao: SessaoGestao = Depends(exigir_secretario), sessao: Session = Depends(obter_sessao)) -> Response:
-    """PDF-RF-03: o PDF da versão confirmada, sem a narrativa executiva (RN-PDF-02)."""
+    """PDF-RF-03: o PDF da versão confirmada; a narrativa executiva tem PDF próprio (PDF-RF-07)."""
     return entrega_pdf.entregar(sessao, sessao_gestao, documento.documento(_erro(servico.versao, sessao, sessao_gestao.co_municipio, numero)))
+
+
+@router.get("/versoes/{numero}/narrativa/pdf", response_class=Response)
+def baixar_pdf_narrativa(numero: int, sessao_gestao: SessaoGestao = Depends(exigir_secretario), sessao: Session = Depends(obter_sessao)) -> Response:
+    """PDF-RF-07: a narrativa executiva, para quem decide o orçamento; recusada se o texto gravado tiver
+    número ou nome da rede (RN-PDF-09)."""
+    versao = _erro(servico.versao, sessao, sessao_gestao.co_municipio, numero)
+    registro = narrativa_ia.da_versao(sessao, versao.co_municipio, versao.versao)
+    if registro is None:
+        raise HTTPException(404, "Gere a narrativa antes de baixar o PDF.")
+    try:
+        doc = documento.documento_narrativa(sessao, versao, registro)
+    except ErroPlano as erro:
+        entrega_pdf.recusar(sessao, sessao_gestao, ("narrativa_plano_municipal", registro.id), versao.versao, "texto com número ou nome da rede")
+        raise HTTPException(erro.status, erro.mensagem) from None
+    return entrega_pdf.entregar(sessao, sessao_gestao, doc)
 
 
 def _narrativa(registro) -> NarrativaExecutiva | None:
@@ -236,6 +252,7 @@ def editar_narrativa(
     mascarou = _erro(narrativa_ia.editar, sessao, versao=versao, autor_id=sessao_gestao.conta.id, dados=narrativa_ia.EdicaoNarrativa(
         resumo=corpo.resumo, situacao=corpo.situacao, fundamentacao=corpo.fundamentacao, proximos_passos=corpo.proximos_passos,
         estrategia=tuple((b.texto, tuple(b.acoes)) for b in corpo.estrategia), incertezas=tuple(corpo.incertezas),
+        lacunas=None if corpo.lacunas is None else tuple(corpo.lacunas),
     ))
     return _versao(sessao, versao, AVISO_MASCARA if mascarou else None)
 

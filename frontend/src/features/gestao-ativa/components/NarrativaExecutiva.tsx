@@ -7,9 +7,10 @@ import { useEffect, useState } from "react";
 
 import { Modal } from "@/shared/components/Modal";
 
-import { editarNarrativaMunicipal, gerarNarrativaMunicipal, getVersaoMunicipal } from "../api";
+import { editarNarrativaMunicipal, gerarNarrativaMunicipal, getVersaoMunicipal, PDF } from "../api";
 import { dataCurta } from "../rotulos";
 import type { EdicaoNarrativa, NarrativaExecutiva as Narrativa, VersaoPlanoMunicipal } from "../types";
+import { BotaoPdf } from "./BotaoPdf";
 import { Aviso, Botao, Cartao, CampoTexto, Erro, Selo } from "./ui";
 
 /** "[A2]" no texto da IA vira "(ação 2)", a numeração da lista de ações desta versão. */
@@ -81,6 +82,7 @@ export function NarrativaExecutiva({ numero, onFechar }: { numero: number; onFec
                       Editar texto
                     </Botao>
                   )}
+                  {versao.narrativa && !gerando && <BotaoPdf caminho={PDF.narrativaMunicipal(versao.versao)} externo />}
                   <Botao
                     variante={versao.narrativa ? "discreto" : "primario"}
                     disabled={gerando}
@@ -230,6 +232,7 @@ function Edicao({
     fundamentacao: narrativa.fundamentacao,
     proximosPassos: narrativa.proximosPassos,
     incertezas: narrativa.incertezas,
+    lacunas: narrativa.lacunas,
   });
   const [erro, setErro] = useState<string | null>(null);
   const [salvando, setSalvando] = useState(false);
@@ -243,7 +246,8 @@ function Edicao({
     setSalvando(true);
     setErro(null);
     try {
-      await onSalvar({ ...dados, incertezas: dados.incertezas.map((i) => i.trim()).filter(Boolean) });
+      const linhas = (lista: string[]) => lista.map((i) => i.trim()).filter(Boolean);
+      await onSalvar({ ...dados, incertezas: linhas(dados.incertezas), lacunas: linhas(dados.lacunas) });
     } catch (falha) {
       setErro((falha as Error).message);
     } finally {
@@ -254,7 +258,9 @@ function Edicao({
   return (
     <form onSubmit={enviar} className="mt-4 space-y-3">
       <p className="text-[12px] text-gray-600">
-        Referências como [A2] apontam a ação 2 desta versão (de 1 a {total}). O texto passa pelo filtro de dados pessoais ao salvar.
+        Referências como [A2] apontam a ação 2 desta versão (de 1 a {total}). O texto passa pelo filtro de dados pessoais ao salvar e não
+        pode ter valores, percentuais, quantidades, nomes de escola, bairro ou município nem descrição de um estudante: os números já
+        aparecem ao lado, e a narrativa vai a quem decide o orçamento.
       </p>
       <CampoTexto id="nar-resumo" rotulo="Resumo" rows={4} required {...campo("resumo")} />
       <CampoTexto id="nar-situacao" rotulo="Situação da rede" rows={3} {...campo("situacao")} />
@@ -277,6 +283,14 @@ function Edicao({
         rows={3}
         value={dados.incertezas.join("\n")}
         onChange={(e) => setDados({ ...dados, incertezas: e.target.value.split("\n") })}
+      />
+      <CampoTexto
+        id="nar-lacunas"
+        rotulo="O que a base normativa entregue não sustenta"
+        ajuda="Uma por linha."
+        rows={2}
+        value={dados.lacunas.join("\n")}
+        onChange={(e) => setDados({ ...dados, lacunas: e.target.value.split("\n") })}
       />
       <Erro mensagem={erro} />
       <div className="flex gap-2">

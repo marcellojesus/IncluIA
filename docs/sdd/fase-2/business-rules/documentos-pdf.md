@@ -56,3 +56,20 @@ Montar o PDF não chama nenhum provedor de IA. O conteúdo é o texto gravado e 
 ## RN-PDF-08 — Auditoria e limite
 
 Cada pedido de PDF, entregue ou recusado, entra na auditoria com a conta, o tipo e o identificador da versão e o resultado, sem conteúdo. Cada conta pode baixar até 40 PDFs a cada 10 minutos (revisão do AgLGPD, M3).
+
+## RN-PDF-09 — Narrativa executiva sem escola e sem número no texto
+
+A narrativa executiva (PDF-RF-07) é feita para quem decide o orçamento, fora da secretaria (decisão do responsável em 2026-11-03). Por isso:
+- o texto (resumo, situação, estratégia, fundamentação, próximos passos, incertezas e lacunas) não pode ter:
+  - valor em reais, percentual ou quantidade de escolas, alunos ou profissionais, também por extenso ("duas escolas", "a única escola", "apenas uma turma");
+  - nome de escola, bairro (também de uma palavra, com maiúscula) ou município da rede, ou código de 8 dígitos;
+  - um estudante descrito com deficiência ou condição de saúde ("um estudante cego", "a aluna com autismo"); frases gerais como "o estudante com deficiência tem direito ao AEE" passam.
+
+  É a mesma checagem da resposta da IA (revisão do AgLGPD de 2026-11-03, A1, M1 e M2);
+- a edição do secretário que tiver um desses itens não é salva, e a tela diz o que tirar. As lacunas da IA também são editáveis (B2);
+- o PDF confere o texto gravado de novo e é recusado (409, com auditoria) se achar um deles, o que cobre narrativa editada antes desta regra;
+- as ações citadas aparecem só pela linha estruturada (barreiras, horizonte, prioridade, alcance e se há estimativa de custo), sem o texto livre, o valor do custo nem as escolas. A ação que a IA recebeu só pela barreira (escola pequena ou retirada por LGPD) aparece com alcance "Ação localizada", e menos de 3 escolas atendidas aparece como "menos de 3" (B1);
+- os números vêm da versão congelada, calculados pelo sistema;
+- o cabeçalho traz a rede do município, porque o documento é da própria secretaria;
+- a marca no topo é "Documento da Secretaria Municipal de Educação para apoio à decisão orçamentária. Não contém dado pessoal nem nome de escola.", e o aviso antes do download pede para conferir o texto antes de enviar;
+- o código de conferência é calculado da versão do plano e do texto da narrativa (sem a trilha de geração); muda quando a narrativa é editada ou gerada de novo.

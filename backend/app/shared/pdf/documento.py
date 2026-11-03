@@ -216,7 +216,7 @@ class _Pdf(FPDF):
         if not campo.valor:
             return 0
         self.set_font("Noto", "B", 8.5)
-        rotulo = self.multi_cell(0, 4.5, campo.rotulo, dry_run=True, output="HEIGHT")
+        rotulo = self.multi_cell(0, 4.5, campo.rotulo, dry_run=True, output="HEIGHT") if campo.rotulo else 0
         self.set_font("Noto", "", 10)
         return rotulo + self.multi_cell(0, 5, campo.valor, dry_run=True, output="HEIGHT") + 1
 
@@ -241,9 +241,10 @@ class _Pdf(FPDF):
         if not campo.valor:
             return
         self._quebra_se_faltar(10)
-        self.set_font("Noto", "B", 8.5)
-        self.set_text_color(*_ROTULO)
-        self.multi_cell(0, 4.5, campo.rotulo, align="L", new_x="LMARGIN", new_y="NEXT")
+        if campo.rotulo:  # sem rótulo: texto corrido, como os da narrativa executiva
+            self.set_font("Noto", "B", 8.5)
+            self.set_text_color(*_ROTULO)
+            self.multi_cell(0, 4.5, campo.rotulo, align="L", new_x="LMARGIN", new_y="NEXT")
         self.set_font("Noto", "", 10)
         self.set_text_color(*_TEXTO)
         self.multi_cell(0, 5, campo.valor, align="L", new_x="LMARGIN", new_y="NEXT")

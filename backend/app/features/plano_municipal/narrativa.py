@@ -25,6 +25,7 @@ secretaria até haver fonte de custo definida (decisões pendentes 12 e 13 do PR
 """
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
@@ -86,6 +87,24 @@ _NUMERO_PROIBIDO = re.compile(
     r"profissionais?\b|professor(?:es|as?)?\b|crian[çc]as?\b|turmas?\b|salas?\b|unidades?\b)",
     re.IGNORECASE,
 )
+_CONTADO = r"(?:escolas?|alun[oa]s?|estudantes?|matr[íi]culas?|profissionais?|professor(?:es|as?)?|crian[çc]as?|turmas?|salas?|unidades?)\b"
+_CONTAGEM_POR_EXTENSO = re.compile(
+    # "Duas escolas", "a única escola", "apenas uma turma" (revisão do AgLGPD, M2). "Um" e "uma" sozinhos
+    # ficam de fora: "uma escola acessível" é frase comum de política.
+    rf"\b(?:dois|duas|tr[êe]s|quatro|cinco|seis|sete|oito|nove|dez|[úu]nic[oa]s?|(?:apenas|s[óo]|somente)\s+(?:um|uma))\s+{_CONTADO}",
+    re.IGNORECASE,
+)
+_CONDICAO = (r"(?:ceg[oa]|surd[oa]|surdoceg[oa]|autista|cadeirante|autismo|tea\b|tdah|s[íi]ndrome|paralisia|surdez|"
+             r"cegueira|baixa\s+vis[ãa]o|laudo|defici[êe]ncia|transtorno|altas\s+habilidades)")
+_ESTUDANTE_COM_CONDICAO = re.compile(
+    # Um estudante descrito sozinho com a condição é dado de saúde de pessoa identificável (AgLGPD, A1).
+    # Com artigo definido só a condição logo depois ("o aluno cego"); "o estudante com deficiência" é
+    # frase genérica de norma e passa.
+    rf"\b(?:(?:um|uma|esse|essa|este|esta|aquele|aquela|nosso|nossa|certo|certa)\s+(?:alun[oa]|estudante|crian[çc]a|menin[oa]|jovem)\b"
+    rf"[^.;!?\n]{{0,60}}?\b{_CONDICAO}|\b(?:o|a)\s+(?:alun[oa]|estudante|crian[çc]a|menin[oa])\s+"
+    rf"(?:ceg[oa]|surd[oa]|surdoceg[oa]|autista|cadeirante|com\s+(?:autismo|tea\b|tdah|surdez|cegueira|laudo)))",
+    re.IGNORECASE,
+)
 _SEM_CUSTO = {"", "a estimar"}
 
 
@@ -116,18 +135,30 @@ def _textos(resposta: RespostaNarrativa) -> list[str]:
             *(b.texto for b in resposta.estrategia), *resposta.incertezas, *resposta.lacunas]
 
 
+def problema(textos: Iterable[str], nomes: Locais) -> str | None:
+    """"estudante" (um estudante descrito com deficiência ou condição de saúde), "numero" (custo,
+    proporção ou contagem, também por extenso; SPM-RF-05), "local" (nome do município, de escola ou
+    bairro da rede, ou código de 8 dígitos) ou None. Vale para a resposta da IA, para a edição do
+    secretário e para o PDF (SPM-RF-06; RN-PDF-09)."""
+    for texto in textos:
+        if _ESTUDANTE_COM_CONDICAO.search(texto):
+            return "estudante"
+        if _NUMERO_PROIBIDO.search(texto) or _CONTAGEM_POR_EXTENSO.search(texto):
+            return "numero"
+        if contem_local(texto, nomes):
+            return "local"
+    return None
+
+
 def conferir(resposta: RespostaNarrativa, total_acoes: int, nomes: Locais = SEM_LOCAIS) -> None:
-    """Referências [A<n>] só das ações da versão; nenhum número de custo, proporção ou contagem
-    (SPM-RF-05); nenhum nome do município ou das escolas. A mensagem diz só o tipo do problema."""
+    """Referências [A<n>] só das ações da versão e nenhum `problema`. A mensagem diz só o tipo do problema."""
     citadas = [int(n) for t in _textos(resposta) for n in _REF_ACAO.findall(t)]
     citadas += [int(m) for b in resposta.estrategia for a in b.acoes for m in _REF_ACAO.findall(a)]
     if any(not 1 <= n <= total_acoes for n in citadas):
         raise NarrativaReprovada("referência a ação fora do plano")
-    for texto in _textos(resposta):
-        if _NUMERO_PROIBIDO.search(texto):
-            raise NarrativaReprovada("número no texto")
-        if contem_local(texto, nomes):
-            raise NarrativaReprovada("nome de escola ou município no texto")
+    if motivo := problema(_textos(resposta), nomes):
+        raise NarrativaReprovada({"estudante": "estudante descrito com a condição", "numero": "número no texto"}.get(
+            motivo, "nome de escola ou município no texto"))
 
 
 # --- O que vai à IA ---------------------------------------------------------------------------
@@ -327,6 +358,18 @@ async def gerar(sessao: Session, *, versao: VersaoPlanoMunicipal, autor_id: str)
     return narrativa, mascarar.alterou or mascaradas > 0
 
 
+MENSAGENS_EDICAO = {
+    "estudante": "Tire do texto a descrição de um estudante com deficiência ou condição de saúde: fale das barreiras "
+                 "da rede, não de pessoas.",
+    "numero": "Tire do texto valores em reais, percentuais e quantidades de escolas, alunos ou profissionais: "
+              "o sistema mostra os números ao lado da narrativa.",
+    "local": "Tire do texto nomes de escola, bairro ou município e códigos de 8 dígitos: a narrativa vai a quem decide "
+             "o orçamento, fora da secretaria.",
+    "lacuna": "As lacunas da base normativa escritas pelo assistente têm trecho que não pode sair da secretaria. "
+              "Revise as lacunas ou gere a narrativa de novo.",
+}
+
+
 @dataclass(frozen=True)
 class EdicaoNarrativa:
     resumo: str
@@ -335,12 +378,14 @@ class EdicaoNarrativa:
     fundamentacao: str | None
     proximos_passos: str | None
     incertezas: tuple[str, ...]
+    lacunas: tuple[str, ...] | None = None
+    """None mantém as lacunas gravadas (cliente antigo); elas são conferidas do mesmo jeito (AgLGPD, B2)."""
 
 
 def editar(sessao: Session, *, versao: VersaoPlanoMunicipal, dados: EdicaoNarrativa, autor_id: str) -> bool:
-    """SPM-RF-06: o secretário revisa o texto. Passa pelo Guardião; números e nomes não são conferidos
-    aqui, porque o texto passa a ser do secretário (a tela diz que foi editado). A narrativa não é
-    pública: antes de exportá-la ou publicá-la, a edição precisa da mesma checagem de nomes (AgLGPD, O2)."""
+    """SPM-RF-06: o secretário revisa o texto. Passa pelo Guardião e pela mesma checagem de números e
+    nomes da resposta da IA (`problema`): a narrativa vai a quem decide o orçamento, fora da secretaria,
+    e o PDF dela sai sem nome de escola (decisão de 2026-11-03; AgLGPD, O2). Texto com problema não é salvo."""
     narrativa = da_versao(sessao, versao.co_municipio, versao.versao)
     if narrativa is None:
         raise ErroPlano("Gere a narrativa antes de editá-la.", 404)
@@ -364,9 +409,25 @@ def editar(sessao: Session, *, versao: VersaoPlanoMunicipal, dados: EdicaoNarrat
         mascarou = mascarou or m
         if limpo:
             incertezas.append(limpo)
+    if dados.lacunas is None:
+        lacunas = list(narrativa.conteudo.get("lacunas") or [])
+    else:
+        lacunas = []
+        for texto in dados.lacunas:
+            limpo, m = _campo(texto)
+            mascarou = mascarou or m
+            if limpo:
+                lacunas.append(limpo)
+    locais = censo.locais_da_rede(versao.co_municipio, bairros_curtos=True)
+    textos = [resumo, situacao or "", fundamentacao or "", proximos or "", *(b["texto"] for b in estrategia), *incertezas]
+    if motivo := problema(textos, locais):
+        raise ErroPlano(MENSAGENS_EDICAO[motivo], 422)
+    if problema(lacunas, locais):
+        raise ErroPlano(MENSAGENS_EDICAO["lacuna"], 422)
     narrativa.conteudo = {
         **narrativa.conteudo, "resumo": resumo, "situacao": situacao or "", "estrategia": estrategia,
         "fundamentacao": fundamentacao or "", "proximos_passos": proximos or "", "incertezas": incertezas,
+        "lacunas": lacunas,
     }
     narrativa.editada = True
     _auditar(sessao, autor_id, "narrativa_plano_municipal_editada", versao, "texto revisado pela secretaria")

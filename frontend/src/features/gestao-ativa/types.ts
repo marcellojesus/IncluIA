@@ -373,7 +373,7 @@ export type VersaoPlanoMunicipal = {
   avisoGuardiao: string | null;
 };
 
-export type EdicaoNarrativa = Pick<NarrativaExecutiva, "resumo" | "situacao" | "estrategia" | "fundamentacao" | "proximosPassos" | "incertezas">;
+export type EdicaoNarrativa = Pick<NarrativaExecutiva, "resumo" | "situacao" | "estrategia" | "fundamentacao" | "proximosPassos" | "incertezas" | "lacunas">;
 
 export type AcoesMunicipaisDaEscola = {
   versao: number | null;

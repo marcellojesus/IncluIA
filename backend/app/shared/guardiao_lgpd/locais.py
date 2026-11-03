@@ -145,8 +145,11 @@ def _eh_fraco(palavras: tuple[str, ...]) -> bool:
     return all(p in _COMUNS for p in uteis)
 
 
-def nomes_da_rede(municipio: str, escolas: Iterable[str], bairros: Iterable[str] = ()) -> Locais:
-    """Município, escolas (todas as redes do município) e bairros de duas ou mais palavras."""
+def nomes_da_rede(municipio: str, escolas: Iterable[str], bairros: Iterable[str] = (), bairros_curtos: bool = False) -> Locais:
+    """Município, escolas (todas as redes do município) e bairros de duas ou mais palavras. Com
+    `bairros_curtos`, também o bairro de uma palavra fora de `_COMUNS`, como nome fraco (só com
+    maiúscula): para conferir texto que sai da secretaria, como a narrativa executiva (AgLGPD, M1).
+    No que vai à IA ele não entra, para não mascarar palavra do dia a dia."""
     vistos: dict[tuple[str, ...], bool] = {}
 
     def incluir(variante: tuple[str, ...], fraco: bool) -> None:
@@ -167,6 +170,8 @@ def nomes_da_rede(municipio: str, escolas: Iterable[str], bairros: Iterable[str]
         uteis = [p for p in palavras if p not in _CONECTORES]
         if len(uteis) >= 2 and not all(p in _COMUNS for p in uteis):
             incluir(palavras, False)
+        elif bairros_curtos and len(uteis) == 1 and uteis[0] not in _COMUNS and uteis[0] not in _TIPO_DE_ESCOLA:
+            incluir((uteis[0],), True)
     return Locais(tuple(_Nome(v, f) for v, f in vistos.items()))
 
 

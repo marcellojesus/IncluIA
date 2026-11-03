@@ -94,6 +94,7 @@ export const PDF = {
   plano: (numero: number) => `/diretor/plano/versoes/${numero}/pdf`,
   planoDaRede: (coEntidade: number, numero: number) => `/secretario/planos/${coEntidade}/versoes/${numero}/pdf`,
   planoMunicipal: (numero: number) => `/secretario/plano-municipal/versoes/${numero}/pdf`,
+  narrativaMunicipal: (numero: number) => `/secretario/plano-municipal/versoes/${numero}/narrativa/pdf`,
 };
 
 const post = (corpo: unknown): RequestInit => ({ method: "POST", body: JSON.stringify(corpo) });

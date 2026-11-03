@@ -156,6 +156,7 @@ class EdicaoNarrativa(_Camel):
     fundamentacao: str | None = Field(default=None, max_length=3000)
     proximos_passos: str | None = Field(default=None, max_length=3000)
     incertezas: list[str] = Field(default_factory=list, max_length=10)
+    lacunas: list[str] | None = Field(default=None, max_length=5)
 
 
 class NovaAcaoMunicipal(_Camel):
