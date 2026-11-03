@@ -83,31 +83,50 @@ def _escola(co_entidade: int):
         conn.close()
 
 
+def _faixa_matriculas(total: float) -> str:
+    if total < 10:
+        return "de 5 a 9"
+    if total < 30:
+        return "de 10 a 29"
+    return "30 ou mais"
+
+
 def _linha_matriculas(escola) -> str:
-    total, comum = escola["qt_mat_esp"] or 0, escola["qt_mat_esp_cc"] or 0
+    """Só em faixas: com município, score e eixos, a contagem exata identificava 68% das escolas
+    municipais pelo score público da Fase 1 (revisão do AgLGPD de 2026-11-03, A1)."""
+    total = escola["qt_mat_esp"] or 0
     if total == 0:
         return "Matrículas da educação especial: nenhuma no Censo"
     if celula_pequena(escola):
-        # Sem a taxa: com 1 a 4 matrículas, qualquer percentual revela a contagem.
         return f"Matrículas da educação especial: menos de {LIMIAR_CELULA_PEQUENA} (número omitido para não identificar estudantes)"
-    return f"Matrículas da educação especial: {total:g}, sendo {comum:g} em classe comum"
+    return f"Matrículas da educação especial: {_faixa_matriculas(total)}"
+
+
+def _faixa_eixo(valor: float | None) -> str:
+    if not valor:
+        return "zerado"
+    if valor >= 10:
+        return "máximo"
+    return "abaixo de 5" if valor < 5 else "5 ou mais"
 
 
 def _linha_score(escola) -> str:
-    """Com célula pequena, o eixo IV e o score total saem do texto: o eixo IV é a taxa em classe
-    comum, e o total, com os outros eixos, permite recalculá-lo (revisão do AgLGPD)."""
-    eixos = f"Eixos: I {_numero(escola['score_eixo_i'])}; II {_numero(escola['score_eixo_ii'])}; III {_numero(escola['score_eixo_iii'])}"
+    """Só a faixa do score e faixas grossas por eixo (revisão do AgLGPD de 2026-11-03, A1): o score
+    é público por escola, e o valor exato com os eixos apontava a escola. Com célula pequena, o eixo IV
+    sai, porque é a taxa em classe comum."""
+    eixos = f"Eixos: I {_faixa_eixo(escola['score_eixo_i'])}; II {_faixa_eixo(escola['score_eixo_ii'])}; III {_faixa_eixo(escola['score_eixo_iii'])}"
     if celula_pequena(escola):
         return f"Score Escola Sem Barreiras: faixa {escola['faixa']}. {eixos}; IV omitido para não identificar estudantes"
-    return f"Score Escola Sem Barreiras: {_numero(escola['score'])} de 10 ({escola['faixa']}). {eixos}; IV {_numero(escola['score_eixo_iv'])}"
+    return f"Score Escola Sem Barreiras: faixa {escola['faixa']}. {eixos}; IV {_faixa_eixo(escola['score_eixo_iv'])}"
 
 
 def _renderizar_fatos(escola, barreiras: Sequence[BarreiraIdentificada], foco: Sequence[str], base: BaseNormativa) -> str:
-    # Minimização: nome e código INEP da escola não vão à IA; a resposta fala de "a escola" e quem
-    # exibe recoloca o nome a partir do código.
+    # Minimização: nome, código INEP e município da escola não vão à IA; a resposta fala de "a escola"
+    # e quem exibe recoloca o nome a partir do código. A base normativa é federal: o município não ajuda
+    # a busca nem as citações (revisão do AgLGPD de 2026-11-03, A1).
     linhas = [
         f"## Fatos da escola (Censo Escolar {escola['censo_versao']}; dados calculados, não reavalie)",
-        f"Escola: a escola em análise, {escola['no_municipio']}/{escola['sg_uf']}, rede {escola['rede']}",
+        f"Escola: a escola em análise, rede {escola['rede'].lower()}",
         _linha_score(escola),
         _linha_matriculas(escola),
         f"Barreiras identificadas (metodologia de barreiras v{base.meta.get('metodologia_barreiras_versao', '?')}), por pontos do score em jogo:",

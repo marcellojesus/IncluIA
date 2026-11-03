@@ -1,8 +1,9 @@
 """Spec: docs/sdd/fase-2/arquitetura.md AD-05 — Guardião LGPD.
 
 Todo texto escrito por usuário passa por `proteger` antes de qualquer chamada externa (provedor de
-IA ou API de embeddings). As quatro camadas (documentos, nomes, contexto escolar e instruções
-escondidas) rodam no próprio backend; nada é enviado para fora para decidir se um trecho é dado pessoal.
+IA ou API de embeddings). As camadas (documentos, nomes, contexto escolar, instruções escondidas e,
+quando quem chama passa os nomes da rede, locais) rodam no próprio backend; nada é enviado para fora
+para decidir se um trecho é dado pessoal.
 
 `TextoProtegido` só é criado aqui: quem chama a IA exige esse tipo, então não há caminho que leve
 texto cru ao provedor (AD-05, "obrigatório por construção").
@@ -10,9 +11,10 @@ texto cru ao provedor (AD-05, "obrigatório por construção").
 
 import logging
 from collections import Counter
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
-from app.shared.guardiao_lgpd import contexto_escolar, documentos, instrucoes, nomes
+from app.shared.guardiao_lgpd import contexto_escolar, documentos, instrucoes, locais, nomes
+from app.shared.guardiao_lgpd.locais import Locais
 from app.shared.guardiao_lgpd.texto import Trecho
 
 logger = logging.getLogger("guardiao_lgpd")
@@ -84,19 +86,27 @@ class TextoBloqueado(Exception):
 
 
 def _selecionar(trechos: list[Trecho]) -> list[Trecho]:
-    """Resolve sobreposições: bloqueio vence máscara; entre iguais, o trecho mais longo."""
+    """Resolve sobreposições: bloqueio vence máscara; entre iguais, o trecho mais longo. Duas máscaras
+    que se sobrepõem em parte viram a união, para não sobrar pedaço do nome (revisão do AgLGPD, B4)."""
     escolhidos: list[Trecho] = []
     for t in sorted(trechos, key=lambda t: (t.acao == "bloquear", t.fim - t.inicio), reverse=True):
-        if not any(t.inicio < e.fim and e.inicio < t.fim for e in escolhidos):
+        sobrepostos = [e for e in escolhidos if t.inicio < e.fim and e.inicio < t.fim]
+        if not sobrepostos:
             escolhidos.append(t)
+        elif t.acao == "mascarar" and len(sobrepostos) == 1 and sobrepostos[0].acao == "mascarar":
+            e = sobrepostos[0]
+            if t.inicio < e.inicio or t.fim > e.fim:
+                escolhidos[escolhidos.index(e)] = replace(e, inicio=min(e.inicio, t.inicio), fim=max(e.fim, t.fim))
     return sorted(escolhidos, key=lambda t: t.inicio)
 
 
-def proteger(texto: str) -> ResultadoGuardiao:
-    """Levanta `GuardiaoIndisponivel` se o modelo local de nomes não carregar."""
+def proteger(texto: str, locais_da_rede: Locais | None = None) -> ResultadoGuardiao:
+    """Levanta `GuardiaoIndisponivel` se o modelo local de nomes não carregar. Texto que vai à IA usa
+    `proteger_para_ia`, que exige os locais da rede (camada 5)."""
     encontrados_nomes = nomes.encontrar(texto)
     candidatos = (
         documentos.encontrar(texto) + encontrados_nomes + contexto_escolar.encontrar(texto, encontrados_nomes) + instrucoes.encontrar(texto)
+        + locais.encontrar(texto, locais_da_rede)
     )
     return _aplicar(texto, candidatos)
 
@@ -179,6 +189,22 @@ def juntar_protegidos(partes: list[TextoProtegido], separador: str = "\n\n") -> 
 def proteger_ou_falhar(texto: str) -> TextoProtegido:
     """Atalho para quem só precisa do texto protegido: levanta `TextoBloqueado` em risco alto."""
     resultado = proteger(texto)
+    if resultado.texto_protegido is None:
+        raise TextoBloqueado(resultado.motivos_bloqueio)
+    return resultado.texto_protegido
+
+
+def proteger_para_ia(texto: str, locais_da_rede: Locais) -> ResultadoGuardiao:
+    """Todo texto de usuário que vai à IA: as cinco camadas, sempre com a de locais (revisão do AgLGPD,
+    M4: a camada não pode ser esquecida nem desligar em silêncio). Sem nomes da rede (escola fora do
+    Censo), os números de 8 dígitos ainda saem."""
+    if not isinstance(locais_da_rede, Locais):
+        raise TypeError("proteger_para_ia exige os locais da rede (censo.locais_da_rede ou locais_da_escola)")
+    return proteger(texto, locais_da_rede)
+
+
+def proteger_para_ia_ou_falhar(texto: str, locais_da_rede: Locais) -> TextoProtegido:
+    resultado = proteger_para_ia(texto, locais_da_rede)
     if resultado.texto_protegido is None:
         raise TextoBloqueado(resultado.motivos_bloqueio)
     return resultado.texto_protegido

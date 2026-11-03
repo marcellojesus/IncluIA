@@ -14,13 +14,14 @@ from typing import Literal
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.features.acesso import censo
 from app.features.plano.servico import ErroPlano
 from app.features.plano.sugestoes import _Mascara
 from app.features.plano_municipal import base as base_rede
 from app.features.plano_municipal.modelos import SugestaoMunicipal
 from app.shared import ai_client
 from app.shared.contexto_ia import INSTRUCOES_CITACAO, FatosDaRede, gerar_resposta_fundamentada, montar_contexto_rede
-from app.shared.guardiao_lgpd import TextoBloqueado, juntar_protegidos, liberar_dados_publicos, proteger, proteger_ou_falhar
+from app.shared.guardiao_lgpd import TextoBloqueado, juntar_protegidos, liberar_dados_publicos, proteger_para_ia, proteger_para_ia_ou_falhar
 
 INSTRUCOES_MUNICIPAL = """Você apoia a secretaria municipal de educação a montar o Plano Estratégico Municipal de educação
 inclusiva a partir dos Planos de Ação que as escolas da rede enviaram e a secretaria aceitou. Trabalhe só a barreira em foco.
@@ -111,9 +112,11 @@ async def sugerir(sessao: Session, *, co_municipio: int, codigo: str, orientacao
         raise ErroPlano("Nenhum plano escolar aceito traz ação para esta barreira. Escreva a ação municipal diretamente.", 409)
 
     # Cada ação escolar passa de novo pelo Guardião; a que bloquear fica de fora (e vira lacuna).
+    # Nomes da rede e códigos INEP também saem (pendência 16).
+    locais = censo.locais_da_rede(co_municipio)
     protegidas, fora, mascaradas = [], 0, 0
     for item in barreira.itens:
-        resultado = proteger(_linha(item))
+        resultado = proteger_para_ia(_linha(item), locais)
         if resultado.texto_protegido is None:
             fora += 1
         else:
@@ -126,7 +129,7 @@ async def sugerir(sessao: Session, *, co_municipio: int, codigo: str, orientacao
     mensagens = [{"role": "user", "content": liberar_dados_publicos(pedido_municipal(codigo))}]
     if orientacao and orientacao.strip():
         try:
-            mensagens.append({"role": "user", "content": proteger_ou_falhar(orientacao.strip()[:1000])})
+            mensagens.append({"role": "user", "content": proteger_para_ia_ou_falhar(orientacao.strip()[:1000], locais)})
         except TextoBloqueado as erro:
             raise ErroPlano(str(erro)) from None
 

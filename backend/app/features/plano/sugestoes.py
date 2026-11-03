@@ -12,11 +12,12 @@ from typing import Literal
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.features.acesso import censo
 from app.features.plano.modelos import SugestaoPlano
 from app.features.plano.servico import ErroPlano, estado, item_da_base
 from app.shared.contexto_ia import INSTRUCOES_CITACAO, gerar_resposta_fundamentada
 from app.shared.contexto_ia.montador import RegistroDaEscola, montar_contexto
-from app.shared.guardiao_lgpd import TextoBloqueado, TextoProtegido, juntar_protegidos, liberar_dados_publicos, proteger, proteger_ou_falhar
+from app.shared.guardiao_lgpd import TextoBloqueado, TextoProtegido, juntar_protegidos, liberar_dados_publicos, proteger, proteger_para_ia, proteger_para_ia_ou_falhar
 
 INSTRUCOES_PLANO = """Você apoia a direção de uma escola pública municipal a montar o Plano de Ação Escolar a partir da
 Declaração de Obstáculos que a escola emitiu. Trabalhe só a barreira em foco e a posição que a escola registrou para ela.
@@ -106,7 +107,10 @@ async def _preparar(sessao: Session, co_entidade: int, codigo: str, instrucoes: 
     item = item_da_base(atual, codigo)
     if item.posicao not in _ROTULOS or not item.texto:
         raise ErroPlano("A escola não apresentou relato sobre esta barreira na Declaração: fica como lacuna, sem sugestão automática.", 409)
-    registro = proteger(f"Posição registrada na Declaração v{atual.base.versao} para {codigo} ({_ROTULOS[item.posicao]}): {item.texto}").texto_protegido
+    registro = proteger_para_ia(
+        f"Posição registrada na Declaração v{atual.base.versao} para {codigo} ({_ROTULOS[item.posicao]}): {item.texto}",
+        censo.locais_da_escola(co_entidade),  # nomes da rede não vão à IA (pendência 16)
+    ).texto_protegido
     if registro is None:
         raise ErroPlano("O texto da posição tem dado sensível; retifique a Declaração antes de pedir sugestões.", 409)
     try:
@@ -119,9 +123,9 @@ async def _preparar(sessao: Session, co_entidade: int, codigo: str, instrucoes: 
     return atual, sistema, contexto
 
 
-def _texto_do_diretor(texto: str) -> TextoProtegido:
+def _texto_do_diretor(texto: str, co_entidade: int) -> TextoProtegido:
     try:
-        return proteger_ou_falhar(texto.strip()[:1000])
+        return proteger_para_ia_ou_falhar(texto.strip()[:1000], censo.locais_da_escola(co_entidade))
     except TextoBloqueado as erro:
         raise ErroPlano(str(erro)) from None
 
@@ -153,7 +157,7 @@ async def sugerir(sessao: Session, *, co_entidade: int, codigo: str, orientacao:
     Levanta ErroPlano (barreira, lacuna, texto bloqueado) e RuntimeError (IA indisponível)."""
     mensagens = [{"role": "user", "content": liberar_dados_publicos(pedido_de_sugestoes(codigo))}]
     if orientacao and orientacao.strip():
-        mensagens.append({"role": "user", "content": _texto_do_diretor(orientacao)})
+        mensagens.append({"role": "user", "content": _texto_do_diretor(orientacao, co_entidade)})
     atual, sistema, contexto = await _preparar(sessao, co_entidade, codigo, [liberar_dados_publicos(INSTRUCOES_PLANO)])
     resposta, _modelo = await gerar_resposta_fundamentada(sistema, mensagens, RespostaPlano, contexto)
     novas, alterou = _gravar(sessao, co_entidade, codigo, atual.base.versao, resposta, limite=3, ajustada=False)
@@ -178,9 +182,9 @@ async def ajustar(sessao: Session, *, co_entidade: int, sugestao_id: str, pedido
         raise ErroPlano("Sugestão não encontrada.", 404)
     if not pedido or len(pedido.strip()) < 3:
         raise ErroPlano("Diga o que ajustar na sugestão.")
-    pedido_protegido = _texto_do_diretor(pedido)
+    pedido_protegido = _texto_do_diretor(pedido, co_entidade)
     # A proposta veio da IA e já foi mascarada ao ser gravada; passa de novo pelo Guardião antes de voltar à IA.
-    anterior = proteger(_proposta_anterior(sugestao.conteudo)).texto_protegido
+    anterior = proteger_para_ia(_proposta_anterior(sugestao.conteudo), censo.locais_da_escola(co_entidade)).texto_protegido
     if anterior is None:
         raise ErroPlano("A sugestão anterior não pode ser reenviada ao assistente. Peça uma nova proposta.", 409)
     mensagens = [

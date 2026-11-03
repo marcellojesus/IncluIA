@@ -9,8 +9,9 @@ normativa. Nem município, nem escolas, nem valores de custo vão à IA: o custo
 
 Revisão do AgLGPD (2026-10-27), aplicada:
 - o Guardião não mascara nome de escola ("EMEF Santa Rita") nem município composto, que ele trata
-  como nomes públicos; por isso os nomes do município e das escolas da rede, e códigos INEP, saem do
-  texto das ações antes do Guardião, e a resposta que trouxer um deles é recusada;
+  como nomes públicos; por isso os nomes do município, das escolas e dos bairros, e códigos INEP, saem
+  do texto das ações na camada de locais do Guardião (`proteger_para_ia`, desde 2026-11-03), e a
+  resposta que trouxer um deles é recusada (`contem_local`);
 - ação ligada a escola pequena numa barreira sensível (classe exclusiva ou poucas escolas), ou a
   escola cujo plano da base ou cuja Declaração foi retirado por motivo LGPD, vai só com a linha
   estruturada, sem o texto livre (mesma regra do Analítico);
@@ -44,8 +45,16 @@ from app.features.plano_municipal.modelos import NarrativaPlanoMunicipal, Versao
 from app.shared import ai_client
 from app.shared.contexto_ia import INSTRUCOES_CITACAO, gerar_resposta_fundamentada, montar_contexto_plano
 from app.shared.contexto_ia.barreiras import CLASSE_EXCLUSIVA, celula_pequena
-from app.shared.guardiao_lgpd import TextoBloqueado, juntar_protegidos, liberar_dados_publicos, proteger
-from app.shared.guardiao_lgpd.texto import normalizar
+from app.features.acesso import censo
+from app.shared.guardiao_lgpd import (
+    SEM_LOCAIS,
+    Locais,
+    TextoBloqueado,
+    contem_local,
+    juntar_protegidos,
+    liberar_dados_publicos,
+    proteger_para_ia,
+)
 
 INSTRUCOES_NARRATIVA = """Você apoia a secretaria municipal de educação a apresentar o Plano Estratégico Municipal de educação
 inclusiva a quem decide o orçamento (prefeitura, câmara, conselho de educação). Recebe a situação da rede, calculada pelo
@@ -71,20 +80,12 @@ Responda APENAS com um JSON válido, sem markdown, neste formato:
 
 PEDIDO_NARRATIVA = "Escreva a narrativa executiva do plano municipal a partir do contexto."
 
-MARCADOR_LOCAL = "[escola ou município da rede]"
-
 _REF_ACAO = re.compile(r"\[?\bA(\d{1,3})\b\]?")
 _NUMERO_PROIBIDO = re.compile(
     r"R\$|\d[\d.,]*\s*(?:%|por\s*cento|mil\b|milh|bilh|escolas?\b|alunos?\b|alunas?\b|estudantes?\b|matr[íi]culas?\b|"
     r"profissionais?\b|professor(?:es|as?)?\b|crian[çc]as?\b|turmas?\b|salas?\b|unidades?\b)",
     re.IGNORECASE,
 )
-_INEP = re.compile(r"\b\d{8}\b")
-_PREFIXO_ESCOLA = re.compile(
-    r"^(?:escola municipal(?: de (?:ensino fundamental|educacao infantil))?|centro municipal de educacao infantil|"
-    r"creche municipal|creche|escola|emeief|emeif|emef|emei|cmei|e\.?\s?m\.?(?:\s?e\.?\s?f\.?)?)\s+(?:(?:de|do|da|dos|das)\s+)?"
-)
-_TAMANHO_MINIMO_NOME = 6
 _SEM_CUSTO = {"", "a estimar"}
 
 
@@ -108,38 +109,6 @@ class NarrativaReprovada(ai_client.RespostaReprovada):
     """Ação inexistente, número ou nome de local no texto; a cadeia segue para o próximo provedor."""
 
 
-# --- Nomes da rede fora do texto (revisão do AgLGPD, B1) -----------------------------------------
-
-def nomes_da_rede(municipio: str, escolas: list[str]) -> list[str]:
-    """Nomes normalizados do município e das escolas, com e sem o prefixo ("EMEF Santa Rita" e
-    "santa rita"), do mais longo para o mais curto. Nome curto demais fica de fora (casaria com palavras comuns)."""
-    nomes = set()
-    for nome in [municipio, *escolas]:
-        completo = re.sub(r"\s+", " ", normalizar(nome or "")).strip()
-        for candidato in (completo, _PREFIXO_ESCOLA.sub("", completo)):
-            if len(candidato) >= _TAMANHO_MINIMO_NOME:
-                nomes.add(candidato)
-    return sorted(nomes, key=len, reverse=True)
-
-
-def _trechos_com_nome(texto: str, nomes: list[str]) -> list[tuple[int, int]]:
-    norm = normalizar(texto)
-    trechos = []
-    for nome in nomes:
-        trechos += [(m.start(), m.end()) for m in re.finditer(rf"(?<!\w){re.escape(nome)}(?!\w)", norm)]
-    return trechos
-
-
-def sem_nomes(texto: str, nomes: list[str]) -> str:
-    """Troca nomes da rede e códigos INEP por um marcador neutro. `normalizar` preserva o comprimento,
-    então as posições achadas no texto normalizado valem para o original."""
-    resultado = texto
-    for inicio, fim in sorted(_trechos_com_nome(texto, nomes), reverse=True):
-        if resultado[inicio:fim] != MARCADOR_LOCAL:
-            resultado = resultado[:inicio] + MARCADOR_LOCAL + resultado[fim:]
-    return _INEP.sub("[código]", resultado)
-
-
 # --- Validação da resposta --------------------------------------------------------------------
 
 def _textos(resposta: RespostaNarrativa) -> list[str]:
@@ -147,7 +116,7 @@ def _textos(resposta: RespostaNarrativa) -> list[str]:
             *(b.texto for b in resposta.estrategia), *resposta.incertezas, *resposta.lacunas]
 
 
-def conferir(resposta: RespostaNarrativa, total_acoes: int, nomes: list[str] = ()) -> None:
+def conferir(resposta: RespostaNarrativa, total_acoes: int, nomes: Locais = SEM_LOCAIS) -> None:
     """Referências [A<n>] só das ações da versão; nenhum número de custo, proporção ou contagem
     (SPM-RF-05); nenhum nome do município ou das escolas. A mensagem diz só o tipo do problema."""
     citadas = [int(n) for t in _textos(resposta) for n in _REF_ACAO.findall(t)]
@@ -157,7 +126,7 @@ def conferir(resposta: RespostaNarrativa, total_acoes: int, nomes: list[str] = (
     for texto in _textos(resposta):
         if _NUMERO_PROIBIDO.search(texto):
             raise NarrativaReprovada("número no texto")
-        if _trechos_com_nome(texto, list(nomes)) or _INEP.search(texto):
+        if contem_local(texto, nomes):
             raise NarrativaReprovada("nome de escola ou município no texto")
 
 
@@ -184,14 +153,15 @@ def _tem_custo(acao: dict) -> bool:
 
 @dataclass(frozen=True)
 class Restricoes:
-    nomes: list[str]
+    nomes: Locais
+    """Nomes da rede, para a camada de locais do Guardião (pendência 16)."""
     pequenas: frozenset[int]
     """Escolas com 1 a 4 matrículas da educação especial."""
     retiradas: frozenset[int]
     """Escolas com plano da base ou última Declaração retirados por motivo LGPD."""
 
 
-def _restricoes(sessao: Session, versao: VersaoPlanoMunicipal, municipio: str) -> Restricoes:
+def _restricoes(sessao: Session, versao: VersaoPlanoMunicipal) -> Restricoes:
     linhas = base_rede._escolas_municipais(versao.co_municipio)
     retiradas = {
         co for co, d in base_analitica._ultimas(sessao, Declaracao, versao.co_municipio).items() if d.retirada_motivo in MOTIVOS_LGPD
@@ -201,7 +171,7 @@ def _restricoes(sessao: Session, versao: VersaoPlanoMunicipal, municipio: str) -
         if plano is not None and plano.retirada_motivo in MOTIVOS_LGPD:
             retiradas.add(p["co_entidade"])
     return Restricoes(
-        nomes=nomes_da_rede(municipio, [linha["no_entidade"] for linha in linhas]),
+        nomes=censo.locais_da_rede(versao.co_municipio),
         pequenas=frozenset(linha["co_entidade"] for linha in linhas if celula_pequena(linha)), retiradas=frozenset(retiradas),
     )
 
@@ -231,10 +201,10 @@ def _linha(n: int, acao: dict, total_escolas: int, restricoes: Restricoes) -> st
     partes = [
         f"[A{n}]",
         # Texto livre retido: só a linha estruturada (revisão do AgLGPD, B2 e R1).
-        "Ação localizada da secretaria (texto retido por proteção de dados)." if restrita else sem_nomes(acao["acao"], restricoes.nomes),
+        "Ação localizada da secretaria (texto retido por proteção de dados)." if restrita else acao["acao"],
         f"Barreiras: {', '.join(acao.get('codigos') or [])}. Horizonte {acao['horizonte']}; prioridade {acao.get('prioridade', 'media')}; {alcance}.",
-        acao.get("responsavel") and not restrita and f"Responsável: {sem_nomes(acao['responsavel'], restricoes.nomes)}.",
-        acao.get("prazo") and f"Prazo: {sem_nomes(acao['prazo'], restricoes.nomes)}.",
+        acao.get("responsavel") and not restrita and f"Responsável: {acao['responsavel']}.",
+        acao.get("prazo") and f"Prazo: {acao['prazo']}.",
         # O valor não vai: só se a secretaria registrou uma estimativa.
         "Custo: estimativa registrada pela secretaria." if _tem_custo(acao) else "Custo: a estimar.",
     ]
@@ -289,12 +259,13 @@ def _auditar(sessao: Session, autor_id: str, acao: str, versao: VersaoPlanoMunic
 async def gerar(sessao: Session, *, versao: VersaoPlanoMunicipal, autor_id: str) -> tuple[NarrativaPlanoMunicipal, bool]:
     """Levanta ErroPlano (contexto bloqueado) e RuntimeError (nenhum provedor respondeu)."""
     rede = base_analitica.montar(sessao, versao.co_municipio)
-    restricoes = _restricoes(sessao, versao, rede.municipio)
+    restricoes = _restricoes(sessao, versao)
 
     # Cada ação passa pelo Guardião; a que bloquear fica de fora e vira incerteza.
     protegidas, enviadas, fora, retidas, mascaradas = [], [], [], [], 0
     for n, acao in enumerate(versao.acoes, start=1):
-        resultado = proteger(_linha(n, acao, len(rede.escolas), restricoes))
+        # Nomes da rede e códigos INEP saem na camada de locais do Guardião (pendência 16).
+        resultado = proteger_para_ia(_linha(n, acao, len(rede.escolas), restricoes), restricoes.nomes)
         if resultado.texto_protegido is None:
             fora.append({"id": acao.get("id"), "motivo": "guardiao"})
             continue

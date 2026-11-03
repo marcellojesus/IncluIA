@@ -17,12 +17,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.features.acesso import censo
 from app.features.analitico import base as base_rede
 from app.features.analitico.modelos import SinteseAnalitica
 from app.features.plano.sugestoes import _Mascara
 from app.shared import ai_client
 from app.shared.contexto_ia.barreiras import CLASSE_EXCLUSIVA
-from app.shared.guardiao_lgpd import TextoBloqueado, delimitar, juntar_protegidos, liberar_dados_publicos, proteger
+from app.shared.guardiao_lgpd import TextoBloqueado, delimitar, juntar_protegidos, liberar_dados_publicos, proteger_para_ia
 
 RELATOS_POR_BARREIRA = 8
 """Resumos de relato enviados por barreira; as barreiras vão na ordem de alunos atingidos."""
@@ -132,6 +133,7 @@ def _vai_a_ia(b: base_rede.BarreiraNaRede, e: base_rede.Evidencia) -> bool:
 def _relatos(rede: base_rede.Rede):
     """Resumos das posições com referência [R<n>], já protegidos. Ficam de fora os que `_vai_a_ia` recusa
     e os que o Guardião bloqueia. Devolve também os (declaração, barreira) enviados, para a trilha."""
+    locais = censo.locais_da_rede(rede.co_municipio)  # nomes da rede não vão à IA (pendência 16)
     protegidos, referencias, enviados, fora, mascarados = [], {}, [], 0, 0
     for b in rede.barreiras:
         for e in [e for e in b.evidencias if e.posicao in _ROTULO_POSICAO and e.resumo][:RELATOS_POR_BARREIRA]:
@@ -139,7 +141,7 @@ def _relatos(rede: base_rede.Rede):
                 fora += 1
                 continue
             ref = f"R{len(referencias) + 1}"
-            resultado = proteger(f"[{ref}] {b.codigo}, {_ROTULO_POSICAO[e.posicao]}: {e.resumo}")
+            resultado = proteger_para_ia(f"[{ref}] {b.codigo}, {_ROTULO_POSICAO[e.posicao]}: {e.resumo}", locais)
             if resultado.texto_protegido is None:
                 fora += 1
                 continue

@@ -210,6 +210,26 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
   - **conferência central da saída** (`ai_client.conferir_saida`; PBD-119 e 030, LLM05 e LLM07): as camadas determinísticas rodam em todos os textos da resposta, e qualquer achado (documento, contato, saúde, turma ou idade de um estudante, instrução, delimitador ou o próprio preâmbulo) reprova a resposta inteira, que vale como falha do provedor. Antes, o campo com dado de saúde era descartado e o resto aproveitado; agora nada da resposta é aproveitado. Nome de pessoa continua tratado campo a campo ao gravar;
   - **evidências:** `tests/test_guardiao_seguranca_ia.py` e o conjunto sintético `tests/dados/guardiao_sintetico.json` (30 casos, inclusive 10 frases que devem passar intactas). O conjunto foi escrito pela equipe e mede regressão; a taxa real de detecção continua dependendo de relatos reais (pendência 1).
 
+- **Camada 5, locais (2026-11-03; pendência 16; duas revisões do AgLGPD no mesmo dia):**
+  - **o que faz:** `guardiao_lgpd/locais.py` troca por `[escola ou município da rede]` os nomes do município, das escolas de todas as redes do município e dos bairros de duas ou mais palavras. Também troca por `[código]` os números de 8 dígitos, com ou sem pontuação. É a forma do código INEP, mas a regra pega também CEP e protocolos do mesmo tamanho;
+  - **como compara:**
+    - palavra a palavra, sem acento;
+    - abreviações expandidas;
+    - títulos opcionais, inclusive no fim do nome, como no Censo de São Paulo;
+    - sem o código numérico inicial do Rio;
+    - com e sem o prefixo da escola ("ESC MUN", "CIEP", "UMEI" e outros);
+  - **nome fraco:** município curto ("Belém") ou palavra comum ("Independência") só casa com inicial maiúscula. Nome feito só de tipo de escola ("EDUCACAO INFANTIL") é ignorado;
+  - **obrigatória no caminho da IA:** todo texto de usuário que vai à IA passa por `proteger_para_ia`, que exige os locais da rede, vindos de `censo.locais_da_rede` ou `locais_da_escola`. Um teste de arquitetura recusa `proteger` sem locais nos módulos que chamam a IA. O cache vale por município e edição do Censo e não guarda resultado vazio;
+  - **onde vale:** conversa da Declaração (inclusive o histórico), sugestões e ajustes do plano escolar, sugestões do plano municipal, relatos do Analítico e ações da narrativa. A narrativa confere a saída com `contem_local`;
+  - **cobertura:** testes em `tests/test_guardiao_locais.py`, inclusive uma amostra de 3.000 nomes reais do Censo. Com os 6.324 nomes do Rio, a busca leva cerca de 2,5 ms por texto;
+  - **limites conhecidos:** sigla do município ("LRV"), nome pela metade ("em Lucas") e apelido da escola não são reconhecidos. A saída da IA só é conferida na narrativa; nas sugestões e no Analítico, a entrada já sai limpa;
+  - **linha de contexto da escola (AD-08, camada C1):**
+    - passou a "a escola em análise, rede municipal", sem o município;
+    - o score e os eixos vão só por faixa;
+    - as matrículas da educação especial vão por faixa ("de 5 a 9", "de 10 a 29", "30 ou mais");
+    - com o valor exato e o município, 68% das escolas municipais eram únicas, pelo score público da Fase 1;
+    - a base normativa é federal, então o município não ajudava a busca.
+
 ## 5. Decisões pendentes
 
 1. Escolher o modelo local de reconhecimento de nomes e validar a taxa de detecção do Guardião LGPD com exemplos reais de relatos (AD-05). **Parcialmente resolvida em 2026-10-23:** modelo spaCy `pt_core_news_sm` com lista local de nomes; falta validar a taxa com relatos reais.
@@ -234,6 +254,6 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
     - retenção das sínteses do Analítico: hoje ficam as 5 últimas por município (provisório); falta o prazo definitivo, o expurgo das que citam escola com Declaração retirada por motivo LGPD e o tratamento de `gerada_por` quando a conta for encerrada (ver pendência 14 e AD-07);
     - o Analítico já deixa fora da IA os relatos de Declarações retiradas por dado pessoal ou pedido de titular; o plano municipal ainda usa as ações dos planos aceitos mesmo quando o plano ou a Declaração da escola foi retirado por esses motivos. Decidir se essas ações saem da base da rede. A narrativa executiva já manda essas ações só pela linha estruturada, sem o texto.
 16. Narrativa executiva do plano municipal (revisão do AgLGPD de 2026-10-27):
-    - o Guardião trata como nome público, e não mascara, "EMEF Santa Rita" e municípios de nome composto. A narrativa troca os nomes do município e das escolas da rede (com e sem prefixo, sem diferenciar acento) e códigos INEP por um marcador antes do Guardião, e recusa resposta que traga um deles. As sugestões do plano escolar e do plano municipal e o Analítico ainda não aplicam essa troca aos textos escritos pelas escolas: avaliar a mesma função (`narrativa.sem_nomes`) nesses fluxos;
+    - **resolvida em 2026-11-03:** a troca de nomes virou a camada 5 do Guardião (`locais.py`, ver "Camada 5, locais" acima), obrigatória em todo texto que vai à IA. A linha de contexto da escola perdeu o município e passou a faixas (decisão do responsável). Ficam os limites conhecidos descritos lá;
     - retenção: uma narrativa por versão confirmada, substituída ao gerar de novo, com a trilha das gerações (ids das ações enviadas, retidas e excluídas, trechos usados, quantidade mascarada; sem texto) preservada. O prazo acompanha o da versão e segue pendente (pendência 4);
     - a edição do secretário passa pelo Guardião, mas não pela troca de nomes: a narrativa não é pública, e antes de exportá-la em PDF (RF-31) ou publicá-la a edição precisa dessa checagem.

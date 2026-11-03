@@ -248,3 +248,34 @@ def test_log_de_falha_nao_carrega_url_nem_resposta():
         Modelo.model_validate({"campo": "O Pedro é cego"})
     except Exception as erro_validacao:  # noqa: BLE001
         assert "Pedro" not in ai_client.descrever_falha(erro_validacao)
+
+
+# Funções que passam texto pelo Guardião só para gravar ou mostrar a resposta da IA, sem enviá-lo.
+_PROTEGER_FORA_DO_ENVIO = {"_mascarado", "__call__", "responsavel"}
+
+
+def test_texto_que_vai_a_ia_passa_pela_camada_de_locais():
+    """Revisão do AgLGPD de 2026-11-03, M4: nos módulos que chamam a IA, todo texto de usuário passa por
+    `proteger_para_ia`, que exige os locais da rede; `proteger` sem locais só onde nada vai à IA."""
+    for arquivo in _arquivos_do_app():
+        if GUARDIAO in arquivo.parents or arquivo.parent.name in ("contexto_ia", "diagnostico_ia") or arquivo.name == "ai_client.py":
+            continue
+        fonte = arquivo.read_text(encoding="utf-8")
+        if "gerar_resposta" not in fonte:
+            continue
+        arvore = ast.parse(fonte)
+        for funcao in [n for n in ast.walk(arvore) if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]:
+            if funcao.name in _PROTEGER_FORA_DO_ENVIO:
+                continue
+            for no in ast.walk(funcao):
+                if isinstance(no, ast.Call) and getattr(no.func, "id", getattr(no.func, "attr", None)) in ("proteger", "proteger_ou_falhar"):
+                    raise AssertionError(f"{arquivo}:{no.lineno} protege texto sem a camada de locais; use proteger_para_ia")
+
+
+def test_proteger_para_ia_exige_os_locais():
+    from app.shared.guardiao_lgpd import SEM_LOCAIS, proteger_para_ia
+
+    with pytest.raises(TypeError):
+        proteger_para_ia("Texto", ())
+    # Sem nomes da rede (escola fora do Censo), o código de 8 dígitos ainda sai.
+    assert "33055238" not in proteger_para_ia("Escola 33055238", SEM_LOCAIS).texto_mascarado

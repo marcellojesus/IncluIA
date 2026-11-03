@@ -198,7 +198,8 @@ def test_registro_de_outra_escola_e_recusado(base):
 def test_nome_e_codigo_da_escola_nao_vao_a_ia(base):
     texto = str(_montar(base).texto)
     assert "LUCELAINE" not in texto and str(ESCOLA_APAE) not in texto
-    assert "a escola em análise, Cabixi/RO" in texto
+    # Sem município desde 2026-11-03: com o score público, ele apontava a escola (revisão do AgLGPD, A1).
+    assert "a escola em análise, rede" in texto and "Cabixi" not in texto and "CABIXI" not in texto
 
 
 def test_celula_pequena_e_omitida(base):
@@ -231,6 +232,8 @@ def test_celula_pequena_nao_deixa_deduzir_a_taxa(base, co_entidade):
     assert not re.search(r"\b\d+ de \d+ matrículas", texto)
 
 
-def test_escola_grande_continua_com_os_numeros(base):
+def test_escola_grande_vai_so_com_faixas(base):
     texto = str(_montar(base).texto)  # 5 matrículas: no limiar, não é célula pequena
-    assert re.search(r"Score Escola Sem Barreiras: \d", texto) and "IV omitido" not in texto
+    assert "Score Escola Sem Barreiras: faixa" in texto and "IV omitido" not in texto
+    assert not re.search(r"Score Escola Sem Barreiras: \d", texto) and not re.search(r"Eixos: I \d", texto)
+    assert "Matrículas da educação especial: de 5 a 9" in texto

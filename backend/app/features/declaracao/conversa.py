@@ -11,12 +11,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
+from app.features.acesso import censo
 from app.features.declaracao.modelos import MensagemObstaculo
 from app.features.declaracao.servico import ErroDeclaracao, _barreira, estado
 from app.shared.banco_gestao import agora
 from app.shared.contexto_ia import gerar_resposta_fundamentada
 from app.shared.contexto_ia.montador import montar_contexto
-from app.shared.guardiao_lgpd import TextoBloqueado, juntar_protegidos, liberar_dados_publicos, proteger, proteger_ou_falhar
+from app.shared.guardiao_lgpd import TextoBloqueado, juntar_protegidos, liberar_dados_publicos, proteger, proteger_para_ia, proteger_para_ia_ou_falhar
 
 MAX_MENSAGENS_DO_DIRETOR = 8
 TAMANHO_MAXIMO_MENSAGEM = 2000
@@ -34,8 +35,9 @@ Como conduzir:
 - O texto formal começa com "A gestão escolar relata que", é factual e neutro, descreve fatos e tentativas da escola e
   não atribui culpa a pessoas nem a órgãos.
 - Use só o que a equipe contou; não invente datas, números, nomes ou fatos. Se faltar algo, pergunte.
-- Não inclua nomes de pessoas nem nada que identifique estudantes ou profissionais. Marcadores como [NOME] ou [TURMA]
-  são dados protegidos: não tente adivinhar o que escondem e não os repita no texto formal.
+- Não inclua nomes de pessoas nem nada que identifique estudantes ou profissionais. Marcadores como [NOME], [TURMA]
+  ou [escola ou município da rede] são dados protegidos: não tente adivinhar o que escondem e não os repita no texto
+  formal; no lugar do local, escreva "a escola" ou "o município".
 - Não cite leis, decretos ou artigos no texto formal; ele registra a situação da escola.
 - Você não registra nada: quem confirma é a equipe da escola.
 
@@ -103,6 +105,7 @@ async def conversar(sessao: Session, *, co_entidade: int, codigo: str, mensagem:
     """Levanta ErroDeclaracao (barreira, texto bloqueado ou limite) e RuntimeError (IA indisponível)."""
     _barreira(estado(sessao, co_entidade), codigo)
     historico = mensagens(sessao, co_entidade, codigo)
+    locais = censo.locais_da_escola(co_entidade)  # nomes da rede não vão à IA (pendência 16)
     do_diretor = sum(1 for m in historico if m.papel == "diretor")
 
     nova = None
@@ -112,7 +115,7 @@ async def conversar(sessao: Session, *, co_entidade: int, codigo: str, mensagem:
         if len(mensagem.strip()) > TAMANHO_MAXIMO_MENSAGEM:
             raise ErroDeclaracao(f"A mensagem passa de {TAMANHO_MAXIMO_MENSAGEM} caracteres. Divida em respostas menores.")
         try:
-            nova = proteger_ou_falhar(mensagem.strip())
+            nova = proteger_para_ia_ou_falhar(mensagem.strip(), locais)
         except TextoBloqueado as erro:
             raise ErroDeclaracao(str(erro)) from None
     elif not formalizar:
@@ -126,7 +129,7 @@ async def conversar(sessao: Session, *, co_entidade: int, codigo: str, mensagem:
     ultima_fala = None
     for m in historico:
         # Fala antiga que uma regra nova do guardião bloqueia vira marcador fixo, em vez de sumir.
-        protegida = proteger(m.texto).texto_protegido or liberar_dados_publicos(_FALA_REMOVIDA)
+        protegida = proteger_para_ia(m.texto, locais).texto_protegido or liberar_dados_publicos(_FALA_REMOVIDA)
         conversa.append({"role": "user" if m.papel == "diretor" else "assistant", "content": protegida})
         if m.papel == "diretor":
             ultima_fala = protegida

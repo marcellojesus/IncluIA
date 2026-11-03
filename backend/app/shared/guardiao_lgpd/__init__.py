@@ -9,13 +9,21 @@ from app.shared.guardiao_lgpd.guardiao import (
     liberar_dados_publicos,
     proteger,
     proteger_ou_falhar,
+    proteger_para_ia,
+    proteger_para_ia_ou_falhar,
     verificar_regras,
 )
+from app.shared.guardiao_lgpd.locais import MARCADOR_LOCAL, SEM_LOCAIS, Locais, contem_local, nomes_da_rede
 from app.shared.guardiao_lgpd.nomes import GuardiaoIndisponivel, carregar
 
 __all__ = [
     "FIM_REGISTROS",
     "INICIO_REGISTROS",
+    "Locais",
+    "MARCADOR_LOCAL",
+    "SEM_LOCAIS",
+    "contem_local",
+    "nomes_da_rede",
     "delimitar",
     "GuardiaoIndisponivel",
     "ResultadoGuardiao",
@@ -26,5 +34,7 @@ __all__ = [
     "liberar_dados_publicos",
     "proteger",
     "proteger_ou_falhar",
+    "proteger_para_ia",
+    "proteger_para_ia_ou_falhar",
     "verificar_regras",
 ]

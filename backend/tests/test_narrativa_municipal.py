@@ -2,6 +2,7 @@
 
 from app.features.plano_municipal import narrativa
 from app.shared import ai_client
+from app.shared.guardiao_lgpd import MARCADOR_LOCAL, SEM_LOCAIS
 from tests.test_declaracao import _provedor, ambiente  # noqa: F401 — fixture e auxiliares compartilhados
 from tests.test_plano import _emitir
 from tests.test_plano_municipal import URL, _plano_aceito, _sec
@@ -156,7 +157,7 @@ def test_nome_de_escola_e_municipio_no_texto_da_acao_nao_vai_a_ia(ambiente, monk
     enviado = str(recebidos[0])
     for proibido in (escola.nome, str(escola.co_entidade), "Niterói", "NITERÓI"):
         assert proibido not in enviado, proibido
-    assert narrativa.MARCADOR_LOCAL in enviado
+    assert MARCADOR_LOCAL in enviado
 
 
 def test_trilha_e_auditoria_da_geracao(ambiente, monkeypatch):
@@ -181,7 +182,7 @@ def test_trilha_e_auditoria_da_geracao(ambiente, monkeypatch):
 
 def test_texto_livre_retido_para_escola_pequena_ou_retirada_lgpd():
     """Revisão do AgLGPD (B2 e R1): mesma regra do Analítico; vai só a linha estruturada."""
-    restricoes = narrativa.Restricoes(nomes=[], pequenas=frozenset({1}), retiradas=frozenset({2}))
+    restricoes = narrativa.Restricoes(nomes=SEM_LOCAIS, pequenas=frozenset({1}), retiradas=frozenset({2}))
     acao = {"acao": "Texto que descreve a situação da escola.", "codigos": ["B-IV-01"], "horizonte": "LOA",
             "escolas": [{"co_entidade": 1, "cobertura": "parcial"}]}
     assert narrativa.motivo_restricao(acao, restricoes) == "escola_pequena"
@@ -192,12 +193,3 @@ def test_texto_livre_retido_para_escola_pequena_ou_retirada_lgpd():
     assert narrativa.motivo_restricao(retirada, restricoes) == "retirada_lgpd"
     comum = {**retirada, "escolas": [{"co_entidade": 3}, {"co_entidade": 4}, {"co_entidade": 5}]}
     assert narrativa.motivo_restricao(comum, restricoes) is None
-
-
-def test_nomes_da_rede_saem_com_e_sem_prefixo_e_sem_acento():
-    nomes = narrativa.nomes_da_rede("Lucas do Rio Verde", ["EMEF Santa Rita", "Escola Municipal de Ensino Fundamental São João Batista"])
-    texto = "Na Escola Santa Rita e na SAO JOÃO BATISTA, em Lucas do Rio Verde (código 51234567)."
-    limpo = narrativa.sem_nomes(texto, nomes)
-    for proibido in ("Santa Rita", "JOÃO BATISTA", "Lucas", "51234567"):
-        assert proibido not in limpo, proibido
-    assert narrativa.sem_nomes("Formação para a rede.", nomes) == "Formação para a rede."
