@@ -43,6 +43,23 @@ class SituacaoDeclaracao(_Camel):
     publicada_em: datetime | None = None
 
 
+class SituacaoPlano(_Camel):
+    estado: Literal["sem_declaracao", "rascunho", "aguardando_analise", "aceito", "ajustes_solicitados", "reprovado"]
+    """Estado da última versão submetida; "rascunho" se nenhuma foi enviada."""
+    versao: int | None = None
+    acoes_no_rascunho: int = 0
+    declaracao_base: int | None = None
+    desatualizado: bool = False
+    """O plano usa uma Declaração anterior à última emitida (RN-PAE-00)."""
+    comentario: str | None = None
+    """Comentário da secretaria sobre a última versão (já passou pelo Guardião ao ser gravado)."""
+    decidida_em: datetime | None = None
+    versao_aceita: int | None = None
+    """Última versão aceita pela secretaria (pode ser anterior à última enviada)."""
+    versao_publicada: int | None = None
+    """Versão publicada e não retirada; só aparece ao público com a Declaração publicada."""
+
+
 class DashboardEscola(_Camel):
     co_entidade: int
     nome: str
@@ -59,20 +76,3 @@ class DashboardEscola(_Camel):
     metodologia_versao: str
     declaracao: SituacaoDeclaracao
     plano: SituacaoPlano | None = None
-
-
-class SituacaoPlano(_Camel):
-    estado: Literal["sem_declaracao", "rascunho", "aguardando_analise", "aceito", "ajustes_solicitados", "reprovado"]
-    """Estado da última versão submetida; "rascunho" se nenhuma foi enviada."""
-    versao: int | None = None
-    acoes_no_rascunho: int = 0
-    declaracao_base: int | None = None
-    desatualizado: bool = False
-    """O plano usa uma Declaração anterior à última emitida (RN-PAE-00)."""
-    comentario: str | None = None
-    """Comentário da secretaria sobre a última versão (já passou pelo Guardião ao ser gravado)."""
-    decidida_em: datetime | None = None
-    versao_aceita: int | None = None
-    """Última versão aceita pela secretaria (pode ser anterior à última enviada)."""
-    versao_publicada: int | None = None
-    """Versão publicada e não retirada; só aparece ao público com a Declaração publicada."""
