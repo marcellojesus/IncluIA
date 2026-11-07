@@ -48,25 +48,40 @@ def _conta(sessao, email: str) -> Conta:
 
 def _evento_antigo(acao: str, dias: int) -> None:
     """A auditoria só aceita a data do servidor; o teste tira o gatilho só para gravar o evento antigo."""
+    inserir = text("INSERT INTO auditoria (id, acao, alvo_tipo, alvo_id, resultado, criado_em) VALUES (:id, :acao, 'conta', 'x', 'ok', :em)")
     with banco_gestao.engine().begin() as conexao:
+        if conexao.dialect.name == "postgresql":
+            conexao.execute(text("ALTER TABLE auditoria DISABLE TRIGGER auditoria_protegida"))
+            conexao.execute(inserir, {"id": acao, "acao": acao, "em": agora() - dias * DIAS})
+            conexao.execute(text("ALTER TABLE auditoria ENABLE TRIGGER auditoria_protegida"))
+            return
         gatilho = conexao.execute(text("SELECT sql FROM sqlite_master WHERE name = 'auditoria_data_do_servidor'")).scalar_one()
         conexao.execute(text("DROP TRIGGER auditoria_data_do_servidor"))
-        conexao.execute(
-            text("INSERT INTO auditoria (id, acao, alvo_tipo, alvo_id, resultado, criado_em) VALUES (:id, :acao, 'conta', 'x', 'ok', :em)"),
-            {"id": acao, "acao": acao, "em": (agora() - dias * DIAS).strftime("%Y-%m-%d %H:%M:%S.%f")},
-        )
+        conexao.execute(inserir, {"id": acao, "acao": acao, "em": (agora() - dias * DIAS).strftime("%Y-%m-%d %H:%M:%S.%f")})
         conexao.execute(text(gatilho))
 
 
 def test_auditoria_nao_muda_e_so_sai_depois_de_5_anos(ambiente):
     _evento_antigo("teste_antigo", 1830)
     _evento_antigo("teste_recente", 1800)
+    forjar = ("INSERT INTO auditoria (id, acao, alvo_tipo, alvo_id, resultado, criado_em) "
+              "VALUES ('f', 'forjado', 'conta', 'x', 'ok', '2020-01-01 00:00:00.000000')")
     with banco_gestao.engine().connect() as conexao:
-        for comando in ("UPDATE auditoria SET detalhe = 'alterado'", "DELETE FROM auditoria WHERE acao = 'teste_recente'",
-                        "INSERT INTO auditoria (id, acao, alvo_tipo, alvo_id, resultado, criado_em) "
-                        "VALUES ('f', 'forjado', 'conta', 'x', 'ok', '2020-01-01 00:00:00.000000')"):
+        postgres = conexao.dialect.name == "postgresql"
+        comandos = ["UPDATE auditoria SET detalhe = 'alterado'", "DELETE FROM auditoria WHERE acao = 'teste_recente'"]
+        if postgres:
+            comandos.append("TRUNCATE auditoria")
+        else:
+            comandos.append(forjar)  # no SQLite, data que não é a do servidor é recusada
+        for comando in comandos:
             with pytest.raises(DatabaseError, match="auditoria"):
                 conexao.execute(text(comando))
+            conexao.rollback()
+        if postgres:
+            # No PostgreSQL, o gatilho troca a data forjada pela do servidor.
+            conexao.execute(text(forjar))
+            gravada = conexao.execute(text("SELECT criado_em FROM auditoria WHERE id = 'f'")).scalar_one()
+            assert abs((gravada - agora()).total_seconds()) < 3600
             conexao.rollback()
     sessao = _sessao()
     sessao.add(EventoAuditoria(acao="teste_agora", alvo_tipo="conta", alvo_id="x", resultado="ok"))  # a data do servidor entra

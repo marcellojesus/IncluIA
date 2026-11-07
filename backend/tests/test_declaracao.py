@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
+from tests import banco as banco_teste
 from app.features.acesso import servico as acesso
 from app.features.declaracao.modelos import DeclaracaoItem, MensagemObstaculo, Posicao
 from app.main import app
@@ -16,8 +17,7 @@ ESCOLA, OUTRA_ESCOLA = 33055238, 33056323
 
 @pytest.fixture
 def ambiente(tmp_path, monkeypatch):
-    banco_gestao.configurar(f"sqlite:///{(tmp_path / 'gestao.db').as_posix()}")
-    banco_gestao.migrar()
+    banco_teste.preparar(tmp_path)
     codigos: dict[str, str] = {}
     monkeypatch.setattr(envio, "enviar_codigo", lambda email, codigo, escola=None: codigos.__setitem__(email, codigo))
     cliente = TestClient(app)

@@ -29,6 +29,12 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 - **A verificar antes de escolher o provedor** (Neon, Supabase, Render Postgres ou outro): limite de armazenamento, política de pausa por inatividade, expiração do banco gratuito e disponibilidade de backup. Esses limites mudam com frequência e devem ser conferidos na data da escolha.
 - **Backup:** como planos gratuitos costumam ter backup limitado, prever exportação periódica (por exemplo, `pg_dump` agendado) para armazenamento privado.
 - **Decisão de 2026-10-23 (desenvolvimento local):** o código usa SQLAlchemy 2 com migrações Alembic, portável entre SQLite e PostgreSQL. Localmente o banco é `data/gestao_ativa.db`, fora do Git; no deploy basta apontar `GESTAO_DATABASE_URL` para o PostgreSQL. As migrações rodam na subida do servidor. Em 2026-10-27, as barreiras por escola ainda não são gravadas no artefato do Censo (são calculadas na hora) e a narrativa pública fica em `cache_diagnosticos`, dentro do `incluia.db` (ver AD-04 e pendência 12). As tabelas novas de contas, vínculos e auditoria nascem nesse banco, e não no `incluia.db` versionado (encaminha a pendência 12).
+- **Decisão de 2026-11-07 (provedor):** **Neon**, plano gratuito, região **AWS São Paulo** (`aws-sa-east-1`), PostgreSQL 18. Comparação feita na data: Neon com 1 GB por projeto, sem expiração e com compute que desliga após 5 minutos parado e religa na consulta seguinte; Supabase com 500 MB e pausa após 7 dias sem uso (reativação manual); Render Postgres expira em 30 dias e é apagado 14 dias depois, sem backup. O banco da Gestão Ativa tinha 0,5 MB com os dados de teste. Os dados ficam no Brasil, o que evita transferência internacional para o banco (o Brevo e os provedores de IA continuam fora).
+  - Branches do Neon: `production` (o banco do deploy, em `GESTAO_DATABASE_URL` no Render) e `testes` (descartável: a suíte apaga e recria o esquema a cada teste; só vale passada no terminal como `GESTAO_TESTE_DATABASE_URL`, nunca pelo `.env`).
+  - **Decisão do responsável (2026-11-07):** o desenvolvimento local continua em SQLite; o que roda no SQLite precisa rodar no PostgreSQL sem retrabalho. Garantias: o job `backend-postgres` da CI em todo push, o esquema só por migrações Alembic portáveis e o deploy do Render só depois da CI.
+  - Driver psycopg 3; `banco_gestao.normalizar_url` aceita a URL do Neon como vem (`postgresql://...?sslmode=require`).
+  - A CI roda a suíte inteira também contra PostgreSQL 18 (job `backend-postgres`), e a suíte passou contra a branch `testes` do Neon em 2026-11-07. Os gatilhos da auditoria imutável (RN-RET-03) têm versão própria para PostgreSQL.
+  - **Backup (decisão do responsável em 2026-11-07):** `pg_dump` manual feito pelo responsável, guardado fora do repositório, em local privado. A automação (dump diário cifrado num workflow agendado) fica para depois do piloto. A restauração por ponto no tempo do plano gratuito do Neon cobre só uma janela curta.
 
 ### AD-02 — Autenticação e autorização próprias no backend
 
@@ -250,7 +256,7 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 ## 5. Decisões pendentes
 
 1. Escolher o modelo local de reconhecimento de nomes e validar a taxa de detecção do Guardião LGPD com exemplos reais de relatos (AD-05). **Parcialmente resolvida em 2026-10-23:** modelo spaCy `pt_core_news_sm` com lista local de nomes; falta validar a taxa com relatos reais.
-2. Escolher o provedor de PostgreSQL após verificar os limites (AD-01).
+2. Escolher o provedor de PostgreSQL após verificar os limites (AD-01). **Resolvida em 2026-11-07:** Neon, região São Paulo; backup por dump manual.
 3. Escolher o provedor de e-mail e o remetente (AD-02). **Resolvida em 2026-11-07:** Brevo pela API HTTP, com remetente verificado até haver domínio próprio (depois da apresentação do piloto).
 4. Prazo de retenção de conversas com IA e de rascunhos (AD-03). **Resolvida em 2026-11-03** pelos prazos de [retencao.md](business-rules/retencao.md) (AD-07), a validar pelo jurídico.
 5. Procedimento para contas e conversas da Fase 1 (AD-07). **Parcialmente resolvida em 2026-10-27:** apagadas do banco local; falta a limpeza do histórico do Git.

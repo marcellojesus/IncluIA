@@ -30,10 +30,21 @@ _engine: Engine | None = None
 _fabrica: sessionmaker[Session] | None = None
 
 
+def normalizar_url(url: str) -> str:
+    """A URL do Neon (e da maioria dos provedores) vem como `postgresql://` ou `postgres://`; o
+    SQLAlchemy usaria o psycopg2 nesse caso, mas o driver do projeto é o psycopg 3."""
+    for prefixo in ("postgres://", "postgresql://"):
+        if url.startswith(prefixo):
+            return "postgresql+psycopg://" + url[len(prefixo):]
+    return url
+
+
 def configurar(url: str | None = None) -> Engine:
     """Cria o engine (na subida do app ou nos testes, com um banco temporário)."""
     global _engine, _fabrica
-    url = url or os.environ.get("GESTAO_DATABASE_URL", URL_PADRAO)
+    if _engine is not None:
+        _engine.dispose()  # devolve as conexões do engine anterior (testes trocam de banco)
+    url = normalizar_url(url or os.environ.get("GESTAO_DATABASE_URL") or URL_PADRAO)
     argumentos = {"connect_args": {"check_same_thread": False}} if url.startswith("sqlite") else {"pool_pre_ping": True}
     _engine = create_engine(url, **argumentos)
     if url.startswith("sqlite"):

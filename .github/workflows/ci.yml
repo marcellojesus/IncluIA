@@ -38,6 +38,40 @@ jobs:
       - name: Testes
         run: python -m pytest -q
 
+  # Mesma suíte contra PostgreSQL (AD-01: produção no Neon). Cada teste apaga e recria o esquema
+  # `public` do banco de serviço (backend/tests/banco.py); o banco só existe dentro do job.
+  backend-postgres:
+    name: Backend (Python 3.11 + PostgreSQL 18)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: teste
+          POSTGRES_PASSWORD: teste
+          POSTGRES_DB: gestao_teste
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U teste" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      GESTAO_TESTE_DATABASE_URL: postgresql://teste:teste@localhost:5432/gestao_teste
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: backend/requirements*.txt
+      - name: Instalar dependências
+        run: pip install -r requirements-dev.txt
+      - name: Testes
+        run: python -m pytest -q
+
   frontend:
     name: Frontend (tipos e lint)
     runs-on: ubuntu-latest

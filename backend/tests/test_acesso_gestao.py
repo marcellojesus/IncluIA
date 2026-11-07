@@ -11,6 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 
+from tests import banco as banco_teste
 from app.features.acesso import servico
 from app.features.acesso.modelos import CodigoUsoUnico, Conta, EventoAuditoria, Vinculo
 from app.main import app
@@ -26,8 +27,7 @@ _ENVIAR_ORIGINAL = envio.enviar_codigo
 
 @pytest.fixture
 def ambiente(tmp_path, monkeypatch):
-    banco_gestao.configurar(f"sqlite:///{(tmp_path / 'gestao.db').as_posix()}")
-    banco_gestao.migrar()
+    banco_teste.preparar(tmp_path)
     codigos: dict[str, str] = {}
     monkeypatch.setattr(envio, "enviar_codigo", lambda email, codigo, escola=None: codigos.__setitem__(email, codigo))
 
@@ -473,8 +473,7 @@ def test_limpeza_apaga_pedido_nunca_confirmado(ambiente):
 def test_caixa_de_teste_mostra_codigo_so_em_dev_e_so_localmente(tmp_path, monkeypatch):
     from app.shared import email as modulo_email
 
-    banco_gestao.configurar(f"sqlite:///{(tmp_path / 'gestao.db').as_posix()}")
-    banco_gestao.migrar()
+    banco_teste.preparar(tmp_path)
     sessao = next(banco_gestao.obter_sessao())
     servico.criar_admin(sessao, nome="Admin Teste", email="admin@teste.gov.br")
     sessao.close()
