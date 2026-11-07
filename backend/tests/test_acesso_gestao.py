@@ -6,6 +6,7 @@ Banco temporário criado pelas migrações Alembic; o e-mail é substituído por
 import re
 from datetime import timedelta
 
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import select
@@ -20,6 +21,7 @@ NITEROI, RIO = 3303302, 3304557
 ESCOLA_NITEROI, OUTRA_ESCOLA_NITEROI = 33055238, 33056323
 ESCOLA_ESTADUAL_NITEROI = 33055300
 ESCOLA_RIO = 33062358
+_ENVIAR_ORIGINAL = envio.enviar_codigo
 
 
 @pytest.fixture
@@ -345,8 +347,74 @@ def test_erros_do_dia_bloqueiam_a_entrada(ambiente):
 
 def test_limite_por_ip(ambiente):
     cliente, _ = ambiente
-    respostas = [cliente.post("/gestao/acesso/codigo", json={"email": f"x{i}@exemplo.gov.br"}).status_code for i in range(31)]
-    assert respostas[:30] == [202] * 30 and respostas[30] == 429
+    respostas = [cliente.post("/gestao/acesso/entrar", json={"email": f"x{i}@exemplo.gov.br", "codigo": "000000"}).status_code for i in range(31)]
+    assert 429 not in respostas[:30] and respostas[30] == 429
+
+
+def test_limite_por_ip_nas_rotas_que_enviam(ambiente):
+    """Rotas que mandam e-mail têm limite próprio, mais estrito (revisão do AgLGPD de 2026-11-07, A2)."""
+    cliente, _ = ambiente
+    respostas = [cliente.post("/gestao/acesso/codigo", json={"email": f"x{i}@exemplo.gov.br"}).status_code for i in range(10)]
+    respostas.append(_solicitar(cliente, email="outra@escola.gov.br").status_code)
+    assert respostas[:10] == [202] * 10 and respostas[10] == 429
+
+
+@pytest.fixture
+def brevo_falhando(ambiente, monkeypatch):
+    """Envio real pelo Brevo, com o provedor recusando tudo (cota esgotada, chave revogada)."""
+    monkeypatch.setattr(envio, "enviar_codigo", _ENVIAR_ORIGINAL)
+    monkeypatch.setenv("EMAIL_MODO", "brevo")
+    monkeypatch.setenv("BREVO_API_KEY", "chave-de-teste")
+    monkeypatch.setenv("EMAIL_REMETENTE", "nao-responda@exemplo.org")
+    chamadas = []
+
+    def recusar(url, **kwargs):
+        chamadas.append(kwargs["json"]["to"])
+        return httpx.Response(429, request=httpx.Request("POST", url))
+
+    monkeypatch.setattr(envio._httpx, "post", recusar)
+    return ambiente[0], chamadas
+
+
+
+def test_falha_do_provedor_nao_distingue_conta_existente(brevo_falhando):
+    """Com o provedor falhando, conta existente e inexistente recebem a mesma resposta (A1)."""
+    cliente, chamadas = brevo_falhando
+    for conta in ("sec@niteroi.gov.br", "sec@rio.gov.br"):
+        _envelhecer_codigos(conta)
+    existente = cliente.post("/gestao/acesso/codigo", json={"email": "sec@niteroi.gov.br"})
+    inexistente = cliente.post("/gestao/acesso/codigo", json={"email": "ninguem@niteroi.gov.br"})
+    pedido = _solicitar(cliente)
+    envio.aguardar_envios()
+    assert existente.status_code == inexistente.status_code == pedido.status_code == 202
+    assert existente.json() == inexistente.json() == pedido.json()
+    assert len(chamadas) == 2  # o provedor foi chamado (e falhou) para a conta existente e o pedido
+
+
+def test_teto_diario_global_nao_envia_e_responde_igual(ambiente, monkeypatch, caplog):
+    cliente, codigos = ambiente
+    for conta in ("sec@niteroi.gov.br", "sec@rio.gov.br"):
+        _envelhecer_codigos(conta)
+    monkeypatch.setattr(servico.seguranca, "TETO_DIARIO_ANONIMO", 3)  # 2 códigos do provisionamento + 1
+    assert cliente.post("/gestao/acesso/codigo", json={"email": "sec@rio.gov.br"}).status_code == 202
+    assert "sec@rio.gov.br" in codigos  # abaixo do teto, envia
+    codigos.clear()
+    with caplog.at_level("WARNING", logger="acesso"):
+        resposta = cliente.post("/gestao/acesso/codigo", json={"email": "sec@niteroi.gov.br"})
+        pedido = _solicitar(cliente)
+    assert resposta.status_code == pedido.status_code == 202
+    assert codigos == {}  # nada saiu
+    assert "Teto diário" in caplog.text and "niteroi" not in caplog.text
+
+
+def test_provisionamento_ignora_o_teto_e_mostra_a_falha(brevo_falhando, monkeypatch):
+    """O administrador está autenticado: o envio é na hora e a falha aparece (503)."""
+    monkeypatch.setattr(servico.seguranca, "TETO_DIARIO_ANONIMO", 0)
+    sessao = next(banco_gestao.obter_sessao())
+    admin = sessao.scalar(select(Conta).where(Conta.papel == "admin"))
+    with pytest.raises(envio.EnvioIndisponivel):
+        servico.provisionar_secretario(sessao, admin=admin, nome="Sec Nova", email="sec@nova.gov.br", co_municipio=RIO, categoria="oficio", metodo="Ofício, teste")
+    sessao.close()
 
 
 @pytest.mark.parametrize(

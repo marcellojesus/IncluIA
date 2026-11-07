@@ -106,6 +106,7 @@ A `Tabela_Gestor_Escolar_2025.csv` local contém o código da escola e campos ag
 - **Limite por IP:** 30 requisições a cada 10 minutos nas rotas anônimas (em memória, por processo); acima disso, 429.
 - **Sessão:** token JWT de 8 horas, com audiência e segredo próprios da Gestão Ativa, guardado só na aba do navegador. O estado da conta e do vínculo é relido a cada requisição, e o token da Fase 1 é recusado (RF-12).
 - **Segredos:** `GESTAO_SEGREDO_TOKEN` e `GESTAO_SEGREDO_CODIGO`, com no mínimo 32 bytes fora do ambiente de desenvolvimento. Sem eles, ou sem provedor de e-mail, só a Gestão Ativa responde 503 e o site público continua no ar.
+- **Envio do código (decisão de 2026-11-07, AD-02):** pelo Brevo, via API HTTP (`EMAIL_MODO=brevo`, com `BREVO_API_KEY` e `EMAIL_REMETENTE`). A mensagem é só texto: código, validade de 10 minutos, aviso para não compartilhar e, no pedido de acesso, o nome da escola. Nas rotas anônimas, o envio roda em segundo plano e a resposta é sempre a mesma, mesmo se o provedor falhar; só o provisionamento de secretário mostra a falha (503). Teto de 250 códigos por dia nas rotas anônimas e 10 envios por IP a cada 10 minutos. O log guarda só o código HTTP ou o tipo do erro.
 - **Perfis:** além de diretor e secretário (RF-01), existe o perfil **administrador**, criado só pela linha de comando (`python -m app.features.acesso.cli criar-admin`), que provisiona secretários e pode retirar publicações.
 - **Aprovação do diretor (RF-05; decisões de 2026-10-23):**
   - só escolas da rede municipal são aceitas;
@@ -127,4 +128,4 @@ A `Tabela_Gestor_Escolar_2025.csv` local contém o código da escola e campos ag
   - evento próprio de "troca de vínculo" (hoje é revogação mais novo pedido);
   - tela de consulta da auditoria (o prazo de retenção foi definido em 2026-11-03: 5 anos, [retencao.md](../business-rules/retencao.md));
   - convite de diretor pelo secretário (o secretário só revisa pedidos);
-  - provedor de e-mail real para produção (pendência 3 da AD-02).
+  - domínio próprio para o remetente (o envio pelo Brevo foi feito em 2026-11-07, AD-02; até haver domínio, o e-mail pode cair em spam).

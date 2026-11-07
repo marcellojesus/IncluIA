@@ -44,6 +44,10 @@ def problemas_da_gestao() -> list[str]:
     modo = os.environ.get("EMAIL_MODO", "")
     if modo == "console" and not em_desenvolvimento():
         problemas.append("EMAIL_MODO=console só é aceito com AMBIENTE=dev")
+    elif modo == "brevo":
+        for nome in ("BREVO_API_KEY", "EMAIL_REMETENTE"):
+            if not os.environ.get(nome):
+                problemas.append(f"EMAIL_MODO=brevo sem {nome}")
     elif modo != "console":
-        problemas.append("nenhum provedor de e-mail configurado (EMAIL_MODO)")
+        problemas.append("nenhum provedor de e-mail configurado (EMAIL_MODO=brevo)")
     return problemas

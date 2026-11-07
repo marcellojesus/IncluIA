@@ -50,6 +50,9 @@ class Limitador:
 
 
 limitar_por_ip = Limitador(limite=30, janela_segundos=600)
+limitar_envio_por_ip = Limitador(limite=10, janela_segundos=600)
+"""Rotas anônimas que mandam e-mail: protege a cota diária do provedor (revisão do AgLGPD de
+2026-11-07, A2). Atrás do proxy do Render, o IP vem do X-Forwarded-For (`--proxy-headers`)."""
 limitar_rota_publica = Limitador(limite=120, janela_segundos=600)
 limitar_pdf = Limitador(limite=40, janela_segundos=600)
 """Por conta, não por IP: download em laço de uma conta comprometida (revisão do AgLGPD, M3)."""
@@ -62,5 +65,6 @@ JANELA_SEGUNDOS = limitar_por_ip.janela
 def zerar_limites() -> None:
     """Para os testes."""
     limitar_por_ip.zerar()
+    limitar_envio_por_ip.zerar()
     limitar_rota_publica.zerar()
     limitar_pdf.zerar()

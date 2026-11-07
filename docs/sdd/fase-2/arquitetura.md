@@ -35,6 +35,15 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 - Evoluir a autenticação JWT atual do FastAPI para: papéis (diretor, secretário, administrador), tabela de vínculos (usuário × escola ou rede, com estado pendente, aprovado, revogado) e código de uso único por e-mail.
 - **Autorização sempre no servidor:** toda rota da Gestão Ativa filtra pelo vínculo aprovado; mudar código na URL ou na requisição não amplia o escopo (RN-DMS-06).
 - **Envio de e-mail:** provedor transacional com plano gratuito, a escolher (verificar cota diária e exigência de domínio próprio para remetente).
+  - **Decisão de 2026-11-07:** **Brevo**, pela API HTTP (`EMAIL_MODO=brevo`, `BREVO_API_KEY`, `EMAIL_REMETENTE`), em `backend/app/shared/email.py` com `httpx`, sem SDK. Motivos: o plano gratuito do Render bloqueia SMTP (portas 25, 465 e 587) desde 2025-09; o Brevo dá 300 e-mails por dia no plano gratuito e aceita um remetente verificado sem domínio próprio. O projeto não terá domínio até a apresentação do piloto (um `*.vercel.app` não permite SPF nem DKIM), então a entrega pode cair em spam até lá; com o domínio, muda só `EMAIL_REMETENTE` e a autenticação do domínio no Brevo.
+  - **Minimização:** ao Brevo vão só o e-mail do destinatário, o remetente, o assunto e um texto simples com o código e, no pedido de acesso, o nome público da escola. Sem HTML (sem pixel de abertura nem link rastreado), sem nome da pessoa, sem tags. O código vale 10 minutos e é de uso único, então a cópia que fica no registro do Brevo perde o valor logo.
+  - **Falha fechado:** sem chave ou sem remetente, a Gestão Ativa responde 503. O log registra só o código HTTP ou o tipo do erro.
+  - **Revisão do AgLGPD de 2026-11-07, aplicada:**
+    - nas rotas anônimas (`/acesso/codigo` e `/acesso/diretor`), o envio pelo Brevo roda numa fila de fundo, fora da requisição: a resposta é sempre 202, no mesmo tempo, exista a conta ou não e com o provedor no ar ou não. Só o provisionamento de secretário pelo administrador envia na hora e mostra a falha (503);
+    - teto diário global de 250 códigos pedidos pelas rotas anônimas (abaixo da cota de 300 do Brevo, com margem para o provisionamento); acima dele, nada sai e a resposta é a mesma;
+    - limite próprio de 10 envios por IP a cada 10 minutos nas duas rotas que enviam, além do limite geral; no Render, o uvicorn roda com `--proxy-headers` para ler o IP real;
+    - o e-mail não é canal para texto livre: `enviar_codigo` aceita só código de 6 dígitos e nome de escola curto, de uma linha (o do Censo); a única requisição sai para a URL fixa do Brevo, e só o serviço de acesso chama o envio. `test_arquitetura_ia.py` permite rede só em `ai_client.py` e `email.py`, e trava essas regras.
+  - **LGPD:** o Brevo passa a ser operador, com transferência internacional (art. 33). O controle contratual (DPA do provedor) e a menção na política de privacidade ficam com o responsável (matriz PBD, PBD-098).
 - **Tela de administração mínima:** aprovar, rejeitar e revogar vínculos, com registro de quem aprovou, quando e como (RF-06).
 - **Alternativa considerada:** usar o serviço de autenticação do provedor de banco (por exemplo, Supabase Auth). Reduz trabalho com código e e-mail, mas a regra de vínculo continua sendo própria e o produto fica mais acoplado ao provedor. Pode ser reavaliado se AD-01 escolher esse provedor.
 - **Autocadastro aberto da Fase 1:** desativado (ver AD-07).
@@ -242,7 +251,7 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 
 1. Escolher o modelo local de reconhecimento de nomes e validar a taxa de detecção do Guardião LGPD com exemplos reais de relatos (AD-05). **Parcialmente resolvida em 2026-10-23:** modelo spaCy `pt_core_news_sm` com lista local de nomes; falta validar a taxa com relatos reais.
 2. Escolher o provedor de PostgreSQL após verificar os limites (AD-01).
-3. Escolher o provedor de e-mail e o remetente (AD-02).
+3. Escolher o provedor de e-mail e o remetente (AD-02). **Resolvida em 2026-11-07:** Brevo pela API HTTP, com remetente verificado até haver domínio próprio (depois da apresentação do piloto).
 4. Prazo de retenção de conversas com IA e de rascunhos (AD-03). **Resolvida em 2026-11-03** pelos prazos de [retencao.md](business-rules/retencao.md) (AD-07), a validar pelo jurídico.
 5. Procedimento para contas e conversas da Fase 1 (AD-07). **Parcialmente resolvida em 2026-10-27:** apagadas do banco local; falta a limpeza do histórico do Git.
 6. Escala do piloto (quantas escolas e redes), que define se as cotas gratuitas bastam.

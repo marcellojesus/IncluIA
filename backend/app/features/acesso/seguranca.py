@@ -24,6 +24,10 @@ INTERVALO_REENVIO = timedelta(seconds=60)
 MAX_CODIGOS_POR_HORA = 5
 MAX_CODIGOS_POR_DIA = 10
 MAX_ERROS_POR_DIA = 20
+TETO_DIARIO_ANONIMO = 250
+"""Códigos pedidos pelas rotas anônimas em 24 h, somando todos os e-mails (revisão do AgLGPD de
+2026-11-07, A2). Fica abaixo da cota grátis do Brevo (300/dia) para sobrar margem ao
+provisionamento de secretários; acima dele, nada é enviado e a resposta é a mesma."""
 
 _AUDIENCIA = "gestao-ativa"
 _VALIDADE_TOKEN = timedelta(hours=8)

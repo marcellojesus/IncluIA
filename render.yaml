@@ -8,7 +8,9 @@ services:
     plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    # --proxy-headers: o IP do cliente vem do X-Forwarded-For do proxy do Render, que é a única
+    # entrada do serviço; sem isso, os limites por IP valeriam para todos juntos.
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers --forwarded-allow-ips "*"
     healthCheckPath: /health
     envVars:
       - key: PYTHON_VERSION
@@ -26,7 +28,13 @@ services:
         generateValue: true
       - key: GESTAO_SEGREDO_CODIGO
         generateValue: true
+      # E-mail pela API do Brevo (o plano gratuito do Render bloqueia SMTP). EMAIL_REMETENTE é o
+      # remetente verificado no Brevo.
       - key: EMAIL_MODO
+        value: brevo
+      - key: BREVO_API_KEY
+        sync: false
+      - key: EMAIL_REMETENTE
         sync: false
       - key: GESTAO_DATABASE_URL
         sync: false

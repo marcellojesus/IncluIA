@@ -24,7 +24,8 @@ GUARDIAO = APP / "shared" / "guardiao_lgpd"
 # Bibliotecas de rede: só o ai_client.py pode importar. Um módulo novo que precise de rede (por
 # exemplo, envio de e-mail, AD-02) entra aqui depois de revisão do AgLGPD.
 _REDE = {"httpx", "requests", "aiohttp", "urllib", "urllib3", "http", "socket"}
-_PODEM_USAR_REDE = {AI_CLIENT}
+# shared/email.py: envio dos códigos de acesso pelo Brevo (AD-02, revisão do AgLGPD de 2026-11-07).
+_PODEM_USAR_REDE = {AI_CLIENT, APP / "shared" / "email.py"}
 
 # SDKs de provedores de IA: proibidos em todo o app (contornariam o ai_client.py).
 _SDKS_DE_IA = {
@@ -279,3 +280,67 @@ def test_proteger_para_ia_exige_os_locais():
         proteger_para_ia("Texto", ())
     # Sem nomes da rede (escola fora do Censo), o código de 8 dígitos ainda sai.
     assert "33055238" not in proteger_para_ia("Escola 33055238", SEM_LOCAIS).texto_mascarado
+
+
+# --- shared/email.py: segunda saída de rede (AD-02, revisão do AgLGPD de 2026-11-07, M2) --------
+
+EMAIL_PY = APP / "shared" / "email.py"
+_SERVICO_ACESSO = APP / "features" / "acesso" / "servico.py"
+_PRIVADOS_DO_EMAIL = {"_httpx", "_enviar_brevo", "httpx"}
+
+
+def _aliases_do_email(arvore: ast.AST) -> set[str]:
+    """Nomes pelos quais o arquivo se refere ao módulo app.shared.email."""
+    aliases = set()
+    for no in ast.walk(arvore):
+        if isinstance(no, ast.ImportFrom) and no.module == "app.shared":
+            aliases |= {a.asname or a.name for a in no.names if a.name == "email"}
+        elif isinstance(no, ast.Import):
+            aliases |= {a.asname or a.name for a in no.names if a.name == "app.shared.email"}
+    return aliases
+
+
+def test_so_o_servico_de_acesso_envia_e_ninguem_alcanca_a_rede_do_email():
+    for arquivo in _arquivos_do_app():
+        if arquivo == EMAIL_PY:
+            continue
+        arvore = ast.parse(arquivo.read_text(encoding="utf-8"))
+        aliases = _aliases_do_email(arvore)
+        for no in ast.walk(arvore):
+            if isinstance(no, ast.ImportFrom) and no.module == "app.shared.email":
+                nomes = {a.name for a in no.names}
+                assert not nomes & _PRIVADOS_DO_EMAIL, f"{arquivo} importa {nomes & _PRIVADOS_DO_EMAIL}"
+                if arquivo != _SERVICO_ACESSO:
+                    assert not nomes & {"enviar_codigo", "despachar_codigo"}, f"{arquivo} envia e-mail fora do serviço de acesso"
+            if isinstance(no, ast.Attribute) and isinstance(no.value, ast.Name) and no.value.id in aliases:
+                assert no.attr not in _PRIVADOS_DO_EMAIL, f"{arquivo} usa email.{no.attr}"
+                if arquivo != _SERVICO_ACESSO:
+                    assert no.attr not in {"enviar_codigo", "despachar_codigo"}, f"{arquivo} envia e-mail fora do serviço de acesso"
+
+
+def test_email_so_faz_requisicao_para_a_url_fixa_do_brevo():
+    from app.shared import email
+
+    assert email.BREVO_URL == "https://api.brevo.com/v3/smtp/email"
+    arvore = ast.parse(EMAIL_PY.read_text(encoding="utf-8"))
+    urls = [n.value for n in ast.walk(arvore) if isinstance(n, ast.Constant) and isinstance(n.value, str) and "://" in n.value]
+    assert urls == [email.BREVO_URL]
+    chamadas_de_rede = [
+        n for n in ast.walk(arvore)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Attribute) and isinstance(n.func.value, ast.Name) and n.func.value.id == "_httpx"
+    ]
+    assert len(chamadas_de_rede) == 1
+    [chamada] = chamadas_de_rede
+    assert chamada.func.attr == "post" and isinstance(chamada.args[0], ast.Name) and chamada.args[0].id == "BREVO_URL"
+    # A única requisição fica em _enviar_brevo, alcançada só por enviar_codigo.
+    funcoes = {n.name: n for n in arvore.body if isinstance(n, ast.FunctionDef)}
+    assert chamada in list(ast.walk(funcoes["_enviar_brevo"]))
+    chamam_brevo = {nome for nome, f in funcoes.items() for n in ast.walk(f) if isinstance(n, ast.Name) and n.id == "_enviar_brevo"}
+    assert chamam_brevo == {"enviar_codigo"}
+
+
+def test_escola_do_email_vem_do_censo():
+    """No pedido de acesso, o nome da escola no e-mail é o do Censo, nunca texto do formulário."""
+    fonte = _SERVICO_ACESSO.read_text(encoding="utf-8")
+    assert "enviar_codigo(sessao, email, vinculo, escola.nome if vinculo else None)" in fonte
+    assert "escola = censo.escola(co_entidade)" in fonte

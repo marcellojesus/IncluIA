@@ -6,6 +6,7 @@ texto livre. Correções da revisão do AgLGPD de 2026-10-23: confirmação por 
 do código, limites diários, pedidos não confirmados escondidos e apagados, textos mascarados.
 """
 
+import logging
 import re
 from dataclasses import dataclass
 from datetime import timedelta, timezone
@@ -21,6 +22,7 @@ from app.shared.guardiao_lgpd import proteger
 from app.shared.guardiao_lgpd.contexto_escolar import tem_dado_sensivel
 
 _EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+logger = logging.getLogger("acesso")
 
 # Categorias fechadas por ação: é o que a auditoria guarda (revisão do AgLGPD, I4).
 CATEGORIAS = {
@@ -107,8 +109,22 @@ def _bloqueado_por_erros(sessao: Session, email: str) -> bool:
     return erros >= seguranca.MAX_ERROS_POR_DIA
 
 
-def enviar_codigo(sessao: Session, email: str, vinculo: Vinculo | None = None, escola: str | None = None) -> None:
-    """Gera e envia um código, respeitando intervalo de reenvio e limites por hora e por dia (RF-04)."""
+def _teto_diario_atingido(sessao: Session) -> bool:
+    total = sessao.scalar(select(func.count()).select_from(CodigoUsoUnico).where(CodigoUsoUnico.criado_em >= agora() - timedelta(days=1)))
+    return total >= seguranca.TETO_DIARIO_ANONIMO
+
+
+def enviar_codigo(
+    sessao: Session, email: str, vinculo: Vinculo | None = None, escola: str | None = None, *, autenticado: bool = False,
+) -> None:
+    """Gera e envia um código, respeitando intervalo de reenvio e limites por hora e por dia (RF-04).
+
+    Fluxo anônimo (padrão): teto diário global e envio fora da requisição, para a resposta não
+    revelar se a conta existe nem se o provedor falhou. Fluxo autenticado (administrador): envia
+    na hora e deixa a falha aparecer (revisão do AgLGPD de 2026-11-07, A1 e A2)."""
+    if not autenticado and _teto_diario_atingido(sessao):
+        logger.warning("Teto diário de e-mails das rotas anônimas atingido")
+        return
     do_dia = _codigos_desde(sessao, email, timedelta(days=1))
     da_hora = [c for c in do_dia if _utc(c.criado_em) >= agora() - timedelta(hours=1)]
     if len(do_dia) >= seguranca.MAX_CODIGOS_POR_DIA or len(da_hora) >= seguranca.MAX_CODIGOS_POR_HORA:
@@ -124,7 +140,10 @@ def enviar_codigo(sessao: Session, email: str, vinculo: Vinculo | None = None, e
         codigo_hash=seguranca.hash_codigo(email, codigo), expira_em=agora() + seguranca.VALIDADE_CODIGO,
     ))
     sessao.flush()
-    envio.enviar_codigo(email, codigo, escola)
+    if autenticado:
+        envio.enviar_codigo(email, codigo, escola)
+    else:
+        envio.despachar_codigo(email, codigo, escola)
 
 
 def _consumir_codigo(sessao: Session, email: str, codigo: str) -> CodigoUsoUnico | None:
@@ -331,7 +350,7 @@ def provisionar_secretario(
     sessao.add(vinculo)
     sessao.flush()
     auditar(sessao, ator_id=admin.id, acao="secretario_provisionado", alvo=vinculo, detalhe=categoria)
-    enviar_codigo(sessao, email)
+    enviar_codigo(sessao, email, autenticado=True)
     sessao.commit()
     return conta
 

@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.features.acesso import censo, servico
 from app.features.acesso.dependencias import SessaoGestao, exigir_admin, exigir_qualquer_perfil, exigir_secretario
-from app.features.acesso.protecao import exigir_configuracao, limitar_por_ip
+from app.features.acesso.protecao import exigir_configuracao, limitar_envio_por_ip, limitar_por_ip
 from app.features.acesso.schemas import (
     Decisao,
     Entrada,
@@ -28,6 +28,7 @@ from app.shared.email import EnvioIndisponivel
 
 router = APIRouter(prefix="/gestao", tags=["gestao-acesso"], dependencies=[Depends(exigir_configuracao)])
 _anonima = [Depends(limitar_por_ip)]
+_anonima_com_envio = [Depends(limitar_por_ip), Depends(limitar_envio_por_ip)]
 
 
 def _executar(funcao, *args, **kwargs):
@@ -39,13 +40,13 @@ def _executar(funcao, *args, **kwargs):
         raise HTTPException(503, "Não foi possível enviar o código agora. Tente de novo em instantes.") from None
 
 
-@router.post("/acesso/diretor", response_model=Mensagem, status_code=202, dependencies=_anonima)
+@router.post("/acesso/diretor", response_model=Mensagem, status_code=202, dependencies=_anonima_com_envio)
 def solicitar_acesso_diretor(corpo: SolicitacaoDiretor, sessao: Session = Depends(obter_sessao)) -> Mensagem:
     _executar(servico.solicitar_acesso_diretor, sessao, nome=corpo.nome, email=corpo.email, co_entidade=corpo.co_entidade)
     return Mensagem(mensagem=servico.MENSAGEM_CODIGO_ENVIADO)
 
 
-@router.post("/acesso/codigo", response_model=Mensagem, status_code=202, dependencies=_anonima)
+@router.post("/acesso/codigo", response_model=Mensagem, status_code=202, dependencies=_anonima_com_envio)
 def pedir_codigo(corpo: PedidoCodigo, sessao: Session = Depends(obter_sessao)) -> Mensagem:
     _executar(servico.pedir_codigo_de_entrada, sessao, corpo.email)
     return Mensagem(mensagem=servico.MENSAGEM_CODIGO_ENVIADO)

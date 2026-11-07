@@ -1,6 +1,6 @@
 """Caixa de e-mails de teste (desenvolvimento local).
 
-Mostra os códigos que seriam enviados por e-mail enquanto não há provedor (AD-02, pendência 3).
+Mostra os códigos que seriam enviados por e-mail quando `EMAIL_MODO=console` (AD-02).
 Responde 404 — como se a rota não existisse — fora de `AMBIENTE=dev` ou para quem não acessa da
 própria máquina: com o backend aberto na rede, os códigos não ficam expostos.
 """
