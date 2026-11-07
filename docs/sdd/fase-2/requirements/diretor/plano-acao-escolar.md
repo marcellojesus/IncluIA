@@ -89,9 +89,8 @@ Fontes e permissões dos documentos de contexto; prazo/horizonte e taxonomia or�
 Da revisão do AgLGPD (2026-10-25):
 - **Retenção:**
   - as sugestões descartadas guardam o conteúdo completo, e as versões enviadas são imutáveis (RN-PAE-04);
-  - falta definir em quantos dias o conteúdo das sugestões descartadas é apagado;
-  - falta um procedimento administrativo auditado para retificar um item congelado, caso o Guardião tenha deixado passar algum dado;
-  - falta a anonimização de `autor_id` e `submetida_por` quando a conta for encerrada (AD-07).
+  - **definido em 2026-11-03** ([retencao.md](../../business-rules/retencao.md)): o conteúdo da sugestão descartada, substituída ou esquecida sai em 30 dias (RN-RET-01); a conta encerrada é pseudonimizada, e `autor_id` e `submetida_por` passam a mostrar "Conta encerrada" (RN-RET-04); a versão retirada por dado pessoal ou pedido de titular tem o texto apagado em 30 dias (RN-RET-05);
+  - falta um procedimento administrativo auditado para retificar um item congelado, caso o Guardião tenha deixado passar algum dado.
 - **Auditoria:**
   - hoje só o envio gera evento;
   - falta registrar pedir sugestão, aceitar, editar e remover, guardando só identificador e tipo;

@@ -212,7 +212,8 @@ async def gerar(sessao: Session, *, co_municipio: int, secretario_id: str) -> tu
     sintese = SinteseAnalitica(
         co_municipio=co_municipio, gerada_por=secretario_id, assinatura=rede.assinatura, modelo=modelo,
         # `enviados` é a trilha do que foi à IA (sem o texto), para responder a um titular.
-        conteudo={"achados": achados, "limitacoes": limitacoes, "fora": fora, "enviados": enviados},
+        # A edição do Censo marca quando a síntese deixa de valer (RN-RET-07).
+        conteudo={"achados": achados, "limitacoes": limitacoes, "fora": fora, "enviados": enviados, "censo_versao": rede.censo_versao},
     )
     sessao.add(sintese)
     sessao.flush()

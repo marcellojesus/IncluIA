@@ -368,7 +368,9 @@ def limpar(sessao: Session) -> dict[str, int]:
     tem_vinculo = select(Vinculo.id).where(Vinculo.conta_id == Conta.id).exists()
     contas = sessao.execute(
         delete(Conta).where(
-            Conta.papel == "diretor", Conta.email_confirmado_em.is_(None), Conta.criado_em < corte_pedido, ~tem_vinculo
+            Conta.papel == "diretor", Conta.email_confirmado_em.is_(None), Conta.criado_em < corte_pedido, ~tem_vinculo,
+            # A conta pseudonimizada tem histórico (auditoria, versões): fica (retenção, RN-RET-04).
+            Conta.anonimizada_em.is_(None),
         ).execution_options(synchronize_session=False)
     ).rowcount
     sessao.commit()

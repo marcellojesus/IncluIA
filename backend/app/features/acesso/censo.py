@@ -63,6 +63,15 @@ def municipio(co_municipio: int) -> MunicipioCenso | None:
     return MunicipioCenso(*linha) if linha else None
 
 
+def edicao_do_municipio(co_municipio: int) -> str | None:
+    """Edição do Censo mais nova do município no artefato (retenção das sínteses, RN-RET-07)."""
+    conn = get_connection()
+    try:
+        return conn.execute("SELECT MAX(censo_versao) FROM escolas WHERE co_municipio = ?", (co_municipio,)).fetchone()[0]
+    finally:
+        conn.close()
+
+
 _LOCAIS: dict[tuple[int, str, bool], Locais] = {}
 
 

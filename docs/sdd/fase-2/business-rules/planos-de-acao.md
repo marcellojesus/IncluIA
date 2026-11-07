@@ -20,3 +20,5 @@ Este arquivo é somente o mapa das regras; cada funcionalidade mantém suas regr
 As regras de cadastro, verificação e escopo de acesso ficam em [Acesso à Gestão Ativa](acesso-gestao-ativa.md). O acesso continua separado por papel e unidade escolar/rede.
 
 Os **Documentos em PDF** só saem de versões congeladas, seguem o mesmo acesso da tela e não usam IA. Ver [regras](documentos-pdf.md).
+
+A **Retenção e eliminação** define por quanto tempo cada dado fica e o que acontece depois (AD-07). Ver [regras](retencao.md).

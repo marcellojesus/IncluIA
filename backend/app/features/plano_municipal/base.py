@@ -13,7 +13,9 @@ from sqlalchemy.orm import Session
 
 from app.database import get_connection
 from app.features.acesso import censo
+from app.features.declaracao.modelos import Declaracao
 from app.features.plano.modelos import VersaoPlano
+from app.features.plano.publicacao import MOTIVOS_LGPD
 from app.shared.contexto_ia import base_normativa
 from app.shared.contexto_ia.barreiras import identificar
 
@@ -76,10 +78,18 @@ def _escolas_municipais(co_municipio: int) -> list:
 
 
 def _ultimas_aceitas(sessao: Session, co_municipio: int) -> dict[int, VersaoPlano]:
+    """Último plano aceito de cada escola. Fica de fora o plano retirado por dado pessoal ou pedido de
+    titular, ou feito sobre Declaração retirada por esses motivos: o texto dele vai ser apagado
+    (RN-RET-05) e não pode seguir para a base da rede (revisão do AgLGPD de 2026-11-03, M1)."""
+    retiradas = set(sessao.execute(
+        select(Declaracao.co_entidade, Declaracao.versao).where(Declaracao.co_municipio == co_municipio, Declaracao.retirada_motivo.in_(MOTIVOS_LGPD))
+    ).tuples())
     aceitas: dict[int, VersaoPlano] = {}
     for v in sessao.scalars(
         select(VersaoPlano).where(VersaoPlano.co_municipio == co_municipio, VersaoPlano.estado == "aceito").order_by(VersaoPlano.versao)
     ):
+        if v.retirada_motivo in MOTIVOS_LGPD or v.texto_apagado_em or (v.co_entidade, v.declaracao_versao) in retiradas:
+            continue
         aceitas[v.co_entidade] = v
     return aceitas
 

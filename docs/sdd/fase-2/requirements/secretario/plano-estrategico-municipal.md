@@ -55,7 +55,7 @@ Permitir ao secretário compor um plano municipal a partir de padrões da rede, 
   - testes de isolamento entre municípios.
 - **Pendente (decisão):**
   - auditoria de aceitar, descartar, editar e remover no rascunho (hoje só a confirmação gera evento);
-  - retenção das sugestões municipais aceitas ou descartadas;
+  - retenção das sugestões municipais: a descartada perde o conteúdo em 30 dias e a aceita segue a versão ([retencao.md](../../business-rules/retencao.md), definido em 2026-11-03);
   - um texto para as escolas, escrito pelo secretário, se a justificativa precisar chegar aos diretores.
 - **Ainda não implementado:**
   - acompanhamento de execução (RN-SPM-05);
@@ -83,7 +83,8 @@ Permitir ao secretário compor um plano municipal a partir de padrões da rede, 
   - só o secretário do município gera, lê e edita; o diretor e a área pública não veem a narrativa.
 - **Edição (SPM-RF-06):** o secretário edita cada seção; o texto passa pelo Guardião e a tela marca "Revisada pela secretaria". Desde 2026-11-03 a edição passa também pela checagem de números e de nomes da rede da resposta da IA (`narrativa.problema`) e não é salva se tiver algum (RN-PDF-09).
 - **PDF:** a narrativa tem PDF próprio, para quem decide o orçamento (PDF-RF-07).
-- **Pendente:** retenção definitiva; fonte de custo (decisões 12 e 13 do PRD).
+- **Retenção:** versões e narrativas ficam enquanto durar o programa ([retencao.md](../../business-rules/retencao.md), RN-RET-06).
+- **Pendente:** fonte de custo (decisões 12 e 13 do PRD).
 
 ## Decisões pendentes
 

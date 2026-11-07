@@ -33,6 +33,8 @@ class Conta(Base):
     email_confirmado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=agora)
     atualizado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=agora, onupdate=agora)
+    anonimizada_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    """Nome e e-mail apagados pela retenção (RN-RET-04); documentos e auditoria mostram "Conta encerrada"."""
 
     vinculos: Mapped[list["Vinculo"]] = relationship(
         back_populates="conta", foreign_keys="Vinculo.conta_id", order_by="Vinculo.criado_em"

@@ -96,6 +96,8 @@ class VersaoPlano(Base):
     retirada_por: Mapped[str | None] = mapped_column(ForeignKey("contas.id", name="fk_versoes_plano_retirada_por"))
     retirada_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     retirada_motivo: Mapped[str | None] = mapped_column(String(30))
+    texto_apagado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    """Retirada por dado pessoal ou pedido de titular: o texto livre é apagado 30 dias depois (RN-RET-05)."""
 
     itens: Mapped[list["ItemVersaoPlano"]] = relationship(back_populates="versao_plano", order_by="ItemVersaoPlano.ordem")
     apontamentos: Mapped[list["ApontamentoPlano"]] = relationship(order_by="ApontamentoPlano.criado_em")

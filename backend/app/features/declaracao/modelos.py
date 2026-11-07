@@ -60,6 +60,8 @@ class Declaracao(Base):
     """Publicação retirada (pelo diretor ou pela administração, inclusive a pedido de titular). A
     versão emitida continua guardada (AD-03); só deixa de aparecer na página pública."""
     retirada_motivo: Mapped[str | None] = mapped_column(String(30))
+    texto_apagado_em: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    """Retirada por dado pessoal ou pedido de titular: o texto livre é apagado 30 dias depois (RN-RET-05)."""
 
     itens: Mapped[list["DeclaracaoItem"]] = relationship(back_populates="declaracao", order_by="DeclaracaoItem.ordem")
 

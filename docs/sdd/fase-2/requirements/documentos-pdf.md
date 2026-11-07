@@ -108,7 +108,6 @@ Cada rota usa a mesma dependência de acesso da rota que já mostra a versão em
 - Identidade visual definitiva (logotipo e cores do programa e do município).
 - PDF da versão publicada na página pública, só com o texto público aprovado.
 - PDF em formato PDF/UA (marcado para acessibilidade), que a `fpdf2` não gera por completo.
-- Retenção da auditoria de downloads (AD-07).
 - Uma página pública para conferir o código não pode revelar conteúdo nem a existência de versão não publicada. Ela deve exigir entrada na plataforma ou responder só sobre versões publicadas, sempre com limite de frequência.
 
 ## Notas de implementação da narrativa executiva (2026-11-03)

@@ -75,7 +75,7 @@ Não armazenar código INEP como prova de identidade, senha em texto puro, códi
 
 - Autorização aplicada e testada no servidor, não apenas por ocultação de páginas na interface.
 - Senhas e tokens protegidos conforme os padrões de segurança adotados pelo produto; códigos de confirmação têm validade curta, uso único e armazenamento seguro.
-- Auditoria acessível apenas a operadores autorizados, com retenção definida antes da implementação.
+- Auditoria acessível apenas a operadores autorizados. Retenção de 5 anos, sem alteração ([retencao.md](../business-rules/retencao.md), RN-RET-03).
 - Interface de aprovação acessível e com estados explícitos de pendente, aprovada, rejeitada, suspensa e revogada.
 
 ## Decisões pendentes
@@ -125,6 +125,6 @@ A `Tabela_Gestor_Escolar_2025.csv` local contém o código da escola e campos ag
   - telefone como canal;
   - suspensão e revogação de secretário (RF-09, RN-06 e RN-12 valem hoje só para o diretor);
   - evento próprio de "troca de vínculo" (hoje é revogação mais novo pedido);
-  - tela de consulta da auditoria e prazo de retenção da auditoria;
+  - tela de consulta da auditoria (o prazo de retenção foi definido em 2026-11-03: 5 anos, [retencao.md](../business-rules/retencao.md));
   - convite de diretor pelo secretário (o secretário só revisa pedidos);
   - provedor de e-mail real para produção (pendência 3 da AD-02).

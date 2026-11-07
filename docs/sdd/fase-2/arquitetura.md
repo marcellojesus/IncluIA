@@ -111,6 +111,14 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 - O autocadastro aberto e o chat público do Diagnóstico IA são encerrados.
 - Contas existentes: aviso aos usuários e exclusão ou anonimização após prazo definido; conversas armazenadas seguem a mesma regra. Observação: no ambiente atual de produção, o banco é recriado a cada deploy, o que limita o volume real de contas e conversas persistidas — confirmar antes de definir o procedimento.
 - **Feito em 2026-10-27:** login, autocadastro, rotas `/auth/*` e chat saíram do código; `/login` redireciona para `/gestao/entrar`. As tabelas `usuarios` (3 contas) e `chat_*` (21 mensagens) foram apagadas de `data/incluia.db`. **Pendente:** elas continuam nos commits antigos publicados no repositório; apagar de lá exige reescrever o histórico, junto com a limpeza da chave do Gemini (decisão do responsável: depois do desenvolvimento local).
+- **Retenção da Gestão Ativa (2026-11-03):** o responsável escolheu os prazos de cada categoria de dado, registrados em [retencao.md](business-rules/retencao.md) (RN-RET-01 a 08) e ainda a validar pelo jurídico e pelo encarregado de dados:
+  - rascunhos e sugestões da IA não usadas, 30 dias; pedido recusado, 30 dias;
+  - auditoria, 5 anos, sem alteração: gatilhos no banco (migração `7d1e0c5a9b42`) impedem alterar e apagar antes do prazo;
+  - conta encerrada pseudonimizada em 6 meses (30 dias se nunca aprovada); versões e auditoria mostram "Conta encerrada". O identificador fica ligado à escola e ao período: não é anonimização;
+  - texto de versão retirada por dado pessoal ou pedido de titular apagado em 30 dias, com as cópias da escola (outras versões, planos sobre a Declaração, rascunhos, conversas, sugestões), única exceção à imutabilidade do AD-03;
+  - versões enquanto durar o programa, com revisão anual; síntese do Analítico em 1 ano ou antes.
+
+  Uma rotina única (`app/features/retencao`) roda na subida e pelo comando `limpar`, com cada regra gravada em separado. No deploy faltam: agendá-la diariamente, tratar backups e usar no PostgreSQL um papel da aplicação sem posse da tabela de auditoria. Revisão do AgLGPD aplicada no mesmo dia: a rotina não quebra mais na segunda execução, o apagamento alcança as cópias da escola, a base municipal deixa de usar plano retirado, e a auditoria só aceita a data do servidor e bloqueia `TRUNCATE`.
 
 ### AD-08 — Recuperação de contexto para a IA (RAG em camadas)
 
@@ -235,7 +243,7 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
 1. Escolher o modelo local de reconhecimento de nomes e validar a taxa de detecção do Guardião LGPD com exemplos reais de relatos (AD-05). **Parcialmente resolvida em 2026-10-23:** modelo spaCy `pt_core_news_sm` com lista local de nomes; falta validar a taxa com relatos reais.
 2. Escolher o provedor de PostgreSQL após verificar os limites (AD-01).
 3. Escolher o provedor de e-mail e o remetente (AD-02).
-4. Prazo de retenção de conversas com IA e de rascunhos (AD-03).
+4. Prazo de retenção de conversas com IA e de rascunhos (AD-03). **Resolvida em 2026-11-03** pelos prazos de [retencao.md](business-rules/retencao.md) (AD-07), a validar pelo jurídico.
 5. Procedimento para contas e conversas da Fase 1 (AD-07). **Parcialmente resolvida em 2026-10-27:** apagadas do banco local; falta a limpeza do histórico do Git.
 6. Escala do piloto (quantas escolas e redes), que define se as cotas gratuitas bastam.
 7. Provedor e modelo de embeddings (multilíngue, com plano gratuito), e se haverá modelo local (AD-08). **Escolha inicial em 2026-10-23:** `gemini-embedding-001` (768 dimensões); confirmar com o conjunto de avaliação ampliado.
@@ -249,10 +257,10 @@ O ponto que impede reaproveitar a persistência atual está em `docs/deploy.md`:
     - provedor de e-mail com envio em segundo plano, para que a resposta tenha o mesmo tempo com ou sem conta (enumeração por tempo);
     - revogação de sessão no servidor (versão da sessão na conta, incrementada ao sair), contra token roubado de conta ativa;
     - limite por IP em armazenamento compartilhado se houver mais de uma instância;
-    - prazos de retenção de contas rejeitadas ou revogadas, textos de decisão e auditoria, e garantia de que a auditoria não é alterada nem apagada (complementa a pendência 4).
+    - **resolvido em 2026-11-03:** prazos de retenção de contas rejeitadas ou revogadas, textos de decisão e auditoria, e a auditoria protegida contra alteração e exclusão por gatilhos no banco ([retencao.md](business-rules/retencao.md)).
 15. Analítico de Barreiras e plano municipal (revisão do AgLGPD de 2026-10-27):
-    - retenção das sínteses do Analítico: hoje ficam as 5 últimas por município (provisório); falta o prazo definitivo, o expurgo das que citam escola com Declaração retirada por motivo LGPD e o tratamento de `gerada_por` quando a conta for encerrada (ver pendência 14 e AD-07);
-    - o Analítico já deixa fora da IA os relatos de Declarações retiradas por dado pessoal ou pedido de titular; o plano municipal ainda usa as ações dos planos aceitos mesmo quando o plano ou a Declaração da escola foi retirado por esses motivos. Decidir se essas ações saem da base da rede. A narrativa executiva já manda essas ações só pela linha estruturada, sem o texto.
+    - **resolvido em 2026-11-03:** a síntese do Analítico sai em 1 ano, na edição nova do Censo ou quando usou relato de Declaração retirada por motivo LGPD; `gerada_por` aponta para a conta, que é pseudonimizada quando encerrada (RN-RET-04 e 07);
+    - o Analítico já deixa fora da IA os relatos de Declarações retiradas por dado pessoal ou pedido de titular; **resolvido em 2026-11-03:** o plano municipal também deixa fora da base da rede o plano retirado por esses motivos ou feito sobre Declaração retirada por eles (RN-RET-05). Versões municipais já confirmadas não mudam e precisam de revisão humana. A narrativa executiva já manda essas ações só pela linha estruturada, sem o texto.
 16. Narrativa executiva do plano municipal (revisão do AgLGPD de 2026-10-27):
     - **resolvida em 2026-11-03:** a troca de nomes virou a camada 5 do Guardião (`locais.py`, ver "Camada 5, locais" acima), obrigatória em todo texto que vai à IA. A linha de contexto da escola perdeu o município e passou a faixas (decisão do responsável). Ficam os limites conhecidos descritos lá;
     - retenção: uma narrativa por versão confirmada, substituída ao gerar de novo, com a trilha das gerações (ids das ações enviadas, retidas e excluídas, trechos usados, quantidade mascarada; sem texto) preservada. O prazo acompanha o da versão e segue pendente (pendência 4);

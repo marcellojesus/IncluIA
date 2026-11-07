@@ -39,11 +39,11 @@ Ajudar o secretário a identificar padrões e dificuldades da rede por meio de u
   - ficam fora da IA os relatos de Declarações retiradas por dado pessoal ou pedido de titular, e os de escola com menos de 5 matrículas quando a barreira é de classe exclusiva ou está em menos de 3 escolas da rede; todos entram na contagem de "fora";
   - a síntese guarda a trilha do que foi enviado (Declaração e barreira, sem texto);
   - sem registro novo, um pedido dentro de 1 hora devolve a síntese guardada, sem chamar a IA;
-  - ficam guardadas as 5 últimas sínteses por município (retenção provisória, pendência 15 da arquitetura);
+  - ficam guardadas as 5 últimas sínteses por município, cada uma por até 1 ano, até a edição nova do Censo ou até a retirada por LGPD de um relato usado ([retencao.md](../../business-rules/retencao.md), RN-RET-07);
   - bloqueio do Guardião ao juntar os relatos responde 409, sem chamar a IA;
   - relato mascarado na entrada também gera o aviso ao secretário;
   - na tela, contagem de alunos abaixo de 5 aparece como "menos de 5".
 
 ## Decisões pendentes
 
-Modelo e métricas de avaliação da análise da IA; retenção das sínteses guardadas; frequência mínima de relatos para a IA afirmar um padrão.
+Modelo e métricas de avaliação da análise da IA; frequência mínima de relatos para a IA afirmar um padrão.

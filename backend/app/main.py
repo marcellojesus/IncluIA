@@ -32,8 +32,7 @@ from app.features.plano_municipal.router import router_diretor as acoes_municipa
 from app.features.plano.router_secretario import router as plano_secretario_router  # noqa: E402
 from app.features.dashboard_municipal.router import router as dashboard_municipal_router  # noqa: E402
 from app.features.analitico.router import router as analitico_router  # noqa: E402
-from app.features.acesso import servico as acesso_servico  # noqa: E402
-from app.features.declaracao.conversa import limpar_conversas_paradas  # noqa: E402
+from app.features import retencao  # noqa: E402
 from app.shared import banco_gestao  # noqa: E402
 from app.shared.ambiente import problemas_da_gestao  # noqa: E402
 from app.shared.guardiao_lgpd import GuardiaoIndisponivel  # noqa: E402
@@ -49,8 +48,11 @@ async def lifespan(app: FastAPI):
     # fechado); o motivo fica só aqui no log, nunca na resposta. O site público segue no ar.
     for problema in problemas_da_gestao():
         logging.getLogger("gestao_ativa").error("Gestão Ativa indisponível: %s", problema)
-    acesso_servico.limpar(next(banco_gestao.obter_sessao()))
-    limpar_conversas_paradas(next(banco_gestao.obter_sessao()))
+    # Prazos de retenção (AD-07): na subida e pela linha de comando `limpar`. Falha não impede a subida.
+    try:
+        retencao.aplicar(next(banco_gestao.obter_sessao()))
+    except Exception as erro:  # noqa: BLE001
+        logging.getLogger("retencao").error("Retenção não aplicada na subida (%s)", type(erro).__name__)
     # Carrega o modelo de nomes do Guardião LGPD na subida, para a primeira conversa não esperar.
     # Se falhar, o servidor sobe mesmo assim e as chamadas à IA falham fechadas (AD-05).
     try:

@@ -14,8 +14,8 @@ import argparse
 from dotenv import load_dotenv
 
 from app.features.acesso import servico
+from app.features import retencao
 from app.features.acesso.modelos import Conta
-from app.features.declaracao.conversa import limpar_conversas_paradas
 from app.shared import banco_gestao
 from app.shared.ambiente import em_desenvolvimento
 
@@ -56,8 +56,7 @@ def demo() -> None:
 
 
 def limpar() -> None:
-    removidos = servico.limpar(_sessao())
-    removidos["conversas_paradas"] = limpar_conversas_paradas(_sessao())
+    removidos = retencao.aplicar(_sessao())
     print("Retenção aplicada: " + ", ".join(f"{quantidade} {tipo.replace('_', ' ')}" for tipo, quantidade in removidos.items()))
 
 
@@ -69,7 +68,7 @@ def main() -> None:
     admin.add_argument("--nome", required=True)
     admin.add_argument("--email", required=True)
     sub.add_parser("demo")
-    sub.add_parser("limpar", help="apaga códigos antigos e pedidos nunca confirmados")
+    sub.add_parser("limpar", help="aplica os prazos de retenção (AD-07)")
     args = parser.parse_args()
     try:
         if args.comando == "criar-admin":
