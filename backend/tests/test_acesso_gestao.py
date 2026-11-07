@@ -491,3 +491,52 @@ def test_caixa_de_teste_mostra_codigo_so_em_dev_e_so_localmente(tmp_path, monkey
     assert local.get("/gestao/dev/emails").status_code == 404
     assert modulo_email.caixa_de_teste() == []
     banco_gestao.configurar()
+
+
+# --- Pedido cujo código se perdeu (achado no teste real de 2026-11-07) --------------------------
+
+def test_pedido_nao_confirmado_avisa_e_pode_ter_o_codigo_reenviado(ambiente):
+    """Quem perdeu o código do pedido e entrou com um código comum não fica achando que está em
+    validação: o pedido nunca chegou à secretaria. Pedir de novo reenvia o código do pedido."""
+    cliente, codigos = ambiente
+    email = "diretora@escola.gov.br"
+    _solicitar(cliente)
+    codigos.pop(email)  # o código do pedido se perdeu
+    _envelhecer_codigos(email)
+    resposta = _entrar(cliente, codigos, email)  # entra com um código comum
+    assert resposta["situacao"] == "aguardando_aprovacao"
+    assert resposta["mensagem"] == servico.MENSAGEM_PEDIDO_NAO_CONFIRMADO
+    auth = _sessao_secretario(cliente, codigos)
+    assert cliente.get("/gestao/secretario/vinculos", headers=auth).json() == []
+
+    _envelhecer_codigos(email)
+    assert _solicitar(cliente).status_code == 202  # mesma escola: reenvia o código do pedido
+    resposta = cliente.post("/gestao/acesso/entrar", json={"email": email, "codigo": codigos[email]}).json()
+    assert resposta["mensagem"] != servico.MENSAGEM_PEDIDO_NAO_CONFIRMADO
+    [pedido] = cliente.get("/gestao/secretario/vinculos", headers=auth).json()
+    assert pedido["coEntidade"] == ESCOLA_NITEROI
+
+
+def test_pedido_nao_confirmado_pode_trocar_de_escola(ambiente):
+    cliente, codigos = ambiente
+    email = "diretora@escola.gov.br"
+    _solicitar(cliente)
+    _envelhecer_codigos(email)
+    _solicitar(cliente, escola=OUTRA_ESCOLA_NITEROI)
+    cliente.post("/gestao/acesso/entrar", json={"email": email, "codigo": codigos[email]})
+    auth = _sessao_secretario(cliente, codigos)
+    [pedido] = cliente.get("/gestao/secretario/vinculos", headers=auth).json()
+    assert pedido["coEntidade"] == OUTRA_ESCOLA_NITEROI
+
+
+def test_pedido_ja_confirmado_nao_e_trocado_por_novo(ambiente):
+    """Depois de confirmado, o pedido está com a secretaria: pedir de novo não muda a escola."""
+    cliente, codigos = ambiente
+    email = "diretora@escola.gov.br"
+    _solicitar(cliente)
+    cliente.post("/gestao/acesso/entrar", json={"email": email, "codigo": codigos[email]})
+    _envelhecer_codigos(email)
+    _solicitar(cliente, escola=OUTRA_ESCOLA_NITEROI)
+    auth = _sessao_secretario(cliente, codigos)
+    [pedido] = cliente.get("/gestao/secretario/vinculos", headers=auth).json()
+    assert pedido["coEntidade"] == ESCOLA_NITEROI

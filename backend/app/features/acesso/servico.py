@@ -193,7 +193,18 @@ def solicitar_acesso_diretor(sessao: Session, *, nome: str, email: str, co_entid
         sessao.flush()
         auditar(sessao, ator_id=None, acao="conta_criada", alvo=conta, resultado="nao_autenticado")
     vinculo = None
-    if conta.papel == "diretor" and conta.vinculo_vigente() is None:
+    vigente = conta.vinculo_vigente() if conta.papel == "diretor" else None
+    if vigente is not None and vigente.estado == "pendente" and vigente.confirmado_em is None:
+        # Pedido ainda não confirmado (código perdido ou expirado): a secretaria nunca o viu.
+        # Mesma escola: reenvia o código deste pedido. Outra escola: o pedido antigo é trocado
+        # pelo novo, como a retenção faria em 72 h.
+        if vigente.co_entidade == escola.co_entidade:
+            vinculo = vigente
+        else:
+            sessao.delete(vigente)
+            sessao.flush()
+            sessao.refresh(conta)
+    if vinculo is None and conta.papel == "diretor" and conta.vinculo_vigente() is None:
         vinculo = Vinculo(conta_id=conta.id, co_entidade=escola.co_entidade, co_municipio=escola.co_municipio)
         sessao.add(vinculo)
         sessao.flush()
@@ -220,6 +231,13 @@ _MENSAGENS_SITUACAO = {
     "suspenso": "Seu acesso está suspenso pela secretaria municipal. Procure a secretaria para regularizar.",
     "revogado": "Seu acesso foi revogado. Para voltar, é preciso uma nova solicitação e uma nova aprovação.",
 }
+
+
+MENSAGEM_PEDIDO_NAO_CONFIRMADO = (
+    "E-mail confirmado, mas o seu pedido de acesso ainda não foi confirmado e não chegou à secretaria. "
+    "Peça acesso de novo em “Participar”, com a mesma escola: você vai receber o e-mail "
+    "“Confirme seu pedido de acesso” com um código novo."
+)
 
 
 def pedir_codigo_de_entrada(sessao: Session, email: str) -> None:
@@ -261,6 +279,9 @@ def entrar(sessao: Session, *, email: str, codigo: str) -> ResultadoEntrada:
     sessao.commit()
     if estado == "ativo":
         return ResultadoEntrada("ativo", seguranca.criar_token(conta.id))
+    if estado == "aguardando_aprovacao" and vigente is not None and vigente.confirmado_em is None:
+        # Só o dono do e-mail chega aqui (usou o código): pode saber que o pedido não seguiu.
+        return ResultadoEntrada(estado, mensagem=MENSAGEM_PEDIDO_NAO_CONFIRMADO)
     return ResultadoEntrada(estado, mensagem=_MENSAGENS_SITUACAO[estado])
 
 
