@@ -2,10 +2,13 @@
 
 Stack de deploy (ver `arquitetura.md` §Infraestrutura): **GitHub** (código) → **Render** (backend FastAPI) → **Vercel** (frontend Next.js).
 
-**URLs da v1.0 em produção**:
-- Backend: https://incluia-api.onrender.com
+**URLs em produção** (atualizado em 2026-11-08, Fase 2):
+- Backend: https://incluia-api-c9ws.onrender.com (Blueprint `escola-sem-barreiras` no Render, branch `main`)
+- Banco da Gestão Ativa: Neon PostgreSQL, branch `production` (AD-01), URL com pooler em `GESTAO_DATABASE_URL`
 - Frontend (original): https://inclu-ia.vercel.app
-- Frontend (Escola Sem Barreiras, novo — confirmar URL exata após o deploy na Vercel): https://escola-sem-barreiras.vercel.app
+- Frontend (Escola Sem Barreiras): https://escola-sem-barreiras.vercel.app, com `NEXT_PUBLIC_API_URL` apontando para o backend acima (tipo **Config** na Vercel: o prefixo `NEXT_PUBLIC_` vai para o navegador, não é segredo)
+
+**Autor dos commits e a Vercel**: no plano Hobby, a Vercel bloqueia o deploy quando o e-mail do autor do commit não pertence à conta do GitHub dona do projeto. Os commits deste repositório usam o e-mail cadastrado no GitHub (`git config user.email` local do repositório).
 
 **Dois frontends, um só backend**: os dois projetos Vercel acima são deploys independentes do mesmo código (`frontend/`), apontando para o mesmo backend no Render — não há dado nem lógica duplicada, só duas URLs diferentes servindo a mesma aplicação. Ambas precisam estar na lista `INCLUIA_CORS_ORIGINS` do `render.yaml` (ver passo 4) para que as chamadas de API feitas direto do navegador funcionem nos dois domínios.
 
