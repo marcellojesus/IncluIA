@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/shared/components/Modal";
 
 import { PDF, getDeclaracoesRede, getVersaoDaRede } from "../api";
-import { dataCurta } from "../rotulos";
+import { dataCurta, rotulosAtuais } from "../rotulos";
 import type { DeclaracoesDaRede, VersaoDeclaracao } from "../types";
 import { BotaoPdf } from "./BotaoPdf";
 import { ListaPorEixo } from "./ModaisDeclaracao";
@@ -39,7 +39,7 @@ export function DeclaracoesRede() {
     <div>
       <div className="grid gap-3 sm:grid-cols-3">
         <Cartao className="p-4">
-          <div className="text-[12px] text-gray-500">Escolas municipais</div>
+          <div className="text-[12px] text-gray-500">{rotulosAtuais().escolas.replace(/^e/, "E")}</div>
           <div className="text-2xl font-extrabold text-gov-blue-dark">{rede.escolasMunicipais}</div>
         </Cartao>
         <Cartao className="p-4">

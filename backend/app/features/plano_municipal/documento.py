@@ -49,6 +49,7 @@ def _nome_escola(nomes: dict[int, str], co_entidade: int) -> str:
 def documento(versao: VersaoPlanoMunicipal) -> Documento:
     municipio = censo.municipio(versao.co_municipio)
     sujeito = f"{municipio.nome}/{municipio.uf}" if municipio else f"Município {versao.co_municipio}"
+    rotulos = censo.rotulos_da_rede(versao.co_municipio)
     planos_base = (versao.base or {}).get("planos") or []
     atendidas = {e["co_entidade"] for a in versao.acoes for e in a.get("escolas") or []}
     nomes = {co: e.nome for co, e in censo.escolas(atendidas | {p["co_entidade"] for p in planos_base}).items()}
@@ -76,13 +77,13 @@ def documento(versao: VersaoPlanoMunicipal) -> Documento:
 
     return Documento(
         tipo="Plano Estratégico Municipal",
-        sujeito=f"Rede municipal de {sujeito}",
+        sujeito=f"{rotulos.rede} de {sujeito}",
         versao=versao.versao,
         identificacao=[
             # Só o papel, não o nome (RN-PDF-06; decisão de 2026-11-03).
-            Campo("Confirmado em", f"{data_hora(versao.confirmada_em)}, pela Secretaria Municipal de Educação"),
+            Campo("Confirmado em", f"{data_hora(versao.confirmada_em)}, pela {rotulos.secretaria}"),
             Campo("Ações", str(len(versao.acoes))),
-            Campo("Escolas atendidas", f"{len(atendidas)} de {len(_escolas_municipais(versao.co_municipio))} escolas municipais"),
+            Campo("Escolas atendidas", f"{len(atendidas)} de {len(_escolas_municipais(versao.co_municipio))} {rotulos.escolas}"),
         ],
         secoes=[
             Secao("Ações da rede", blocos=blocos, vazio="Nenhuma ação nesta versão."),
@@ -104,10 +105,10 @@ def documento(versao: VersaoPlanoMunicipal) -> Documento:
     )
 
 
-MARCA_NARRATIVA = (
-    "Documento da Secretaria Municipal de Educação para apoio à decisão orçamentária. "
-    "Não contém dado pessoal nem nome de escola."
-)
+def marca_narrativa(secretaria: str) -> str:
+    return f"Documento da {secretaria} para apoio à decisão orçamentária. Não contém dado pessoal nem nome de escola."
+
+
 
 RESSALVAS_NARRATIVA = [
     "Texto escrito pelo assistente de IA a partir da versão confirmada do plano; os números são calculados pelo sistema.",
@@ -151,6 +152,7 @@ def documento_narrativa(sessao: Session, versao: VersaoPlanoMunicipal, registro:
 
     municipio = censo.municipio(versao.co_municipio)
     sujeito = f"{municipio.nome}/{municipio.uf}" if municipio else f"Município {versao.co_municipio}"
+    rotulos = censo.rotulos_da_rede(versao.co_municipio)
     n = narrativa_ia.numeros(versao, len(_escolas_municipais(versao.co_municipio)))
     barreiras = _barreiras()
     restricoes = narrativa_ia._restricoes(sessao, versao)
@@ -159,17 +161,17 @@ def documento_narrativa(sessao: Session, versao: VersaoPlanoMunicipal, registro:
 
     return Documento(
         tipo="Narrativa executiva do Plano Estratégico Municipal",
-        sujeito=f"Rede municipal de {sujeito}",
+        sujeito=f"{rotulos.rede} de {sujeito}",
         versao=versao.versao,
         identificacao=[
-            Campo("Plano confirmado em", f"{data_hora(versao.confirmada_em)}, pela Secretaria Municipal de Educação"),
+            Campo("Plano confirmado em", f"{data_hora(versao.confirmada_em)}, pela {rotulos.secretaria}"),
             Campo("Texto", "Revisado pela secretaria" if registro.editada else "Escrito pelo assistente de IA, sem revisão da secretaria"),
         ],
         secoes=[
             Secao("Números do plano (calculados pelo sistema)", campos=[
                 Campo("Ações municipais", str(n.acoes)),
                 Campo("Barreiras enfrentadas", str(n.barreiras)),
-                Campo("Escolas municipais atendidas", f"{_poucas(n.escolas_atendidas)} de {n.escolas_municipais}"),
+                Campo(f"{rotulos.escolas.capitalize()} atendidas", f"{_poucas(n.escolas_atendidas)} de {n.escolas_municipais}"),
                 Campo("Ações na LOA · no PPA", f"{n.loa} · {n.ppa}"),
                 Campo("Ações de prioridade alta", str(n.prioridade_alta)),
                 Campo("Ações com custo estimado pela secretaria", f"{n.com_custo_estimado} de {n.acoes}"),
@@ -205,5 +207,5 @@ def documento_narrativa(sessao: Session, versao: VersaoPlanoMunicipal, registro:
         },
         nome_arquivo=f"narrativa-executiva_{versao.co_municipio}_v{versao.versao}.pdf",
         alvo=("narrativa_plano_municipal", registro.id),
-        marca=MARCA_NARRATIVA,
+        marca=marca_narrativa(rotulos.secretaria),
     )

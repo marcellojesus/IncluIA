@@ -10,7 +10,7 @@ import { Aviso, Botao, Cartao, Selo } from "./ui";
 const ETAPAS = [
   { titulo: "1 · Barreiras", texto: "O Censo Escolar indica as barreiras de cada escola, com regra pública e versionada." },
   { titulo: "2 · Declaração", texto: "O diretor registra a posição da escola sobre cada barreira e emite a Declaração de Obstáculos." },
-  { titulo: "3 · Planos", texto: "A escola propõe ações; a secretaria analisa e organiza o plano da rede municipal." },
+  { titulo: "3 · Planos", texto: "A escola propõe ações; a secretaria analisa e organiza o plano da rede." },
 ];
 
 export function ParticiparGestao() {
@@ -39,7 +39,7 @@ export function ParticiparGestao() {
           <Selo tom="azul">Diretor de escola</Selo>
           <h2 className="mt-2 text-lg font-extrabold text-gov-blue-dark">Acesso com vínculo validado</h2>
           <p className="mt-1 text-[13px] text-gray-600">
-            Informe o código INEP da escola. O acesso é liberado após a validação do vínculo pela secretaria municipal.
+            Informe o código INEP da escola. O acesso é liberado após a validação do vínculo pela secretaria de educação.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             <Botao onClick={() => setSolicitando(true)}>Solicitar acesso</Botao>
@@ -49,7 +49,7 @@ export function ParticiparGestao() {
           </div>
         </Cartao>
         <Cartao className="p-5">
-          <Selo tom="teal">Secretário municipal</Selo>
+          <Selo tom="teal">Secretaria de educação</Selo>
           <h2 className="mt-2 text-lg font-extrabold text-gov-blue-dark">Acesso por convite</h2>
           <p className="mt-1 text-[13px] text-gray-600">
             Secretarias municipais são habilitadas pela equipe da Escola Sem Barreiras, após confirmação por canal institucional.

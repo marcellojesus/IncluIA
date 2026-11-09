@@ -6,6 +6,36 @@ from app.database import get_connection
 from app.shared.guardiao_lgpd import SEM_LOCAIS, Locais, nomes_da_rede
 
 REDE_DO_PILOTO = "Municipal"  # decisão de 2026-10-23: piloto só com a rede municipal
+# O Distrito Federal não tem municípios nem rede municipal: Brasília (5300108) é o único código IBGE
+# do DF, e as escolas da Secretaria de Educação do DF aparecem no Censo com a dependência "Estadual".
+# Decisão de 2026-11-09: no DF, a rede da Gestão Ativa é a rede distrital (federais e privadas fora).
+REDE_DISTRITAL = "Estadual"
+CO_UF_DF = 53
+
+
+def eh_distrito_federal(co_municipio: int) -> bool:
+    return co_municipio // 100_000 == CO_UF_DF
+
+
+def rede_da_gestao(co_municipio: int) -> str:
+    """Rede pública local atendida pela Gestão Ativa no município: a municipal ou, no DF, a distrital."""
+    return REDE_DISTRITAL if eh_distrito_federal(co_municipio) else REDE_DO_PILOTO
+
+
+@dataclass(frozen=True)
+class RotulosRede:
+    rede: str  # "Rede municipal"
+    escolas: str  # "escolas municipais"
+    secretaria: str  # "Secretaria Municipal de Educação"
+
+
+_ROTULOS_MUNICIPAIS = RotulosRede("Rede municipal", "escolas municipais", "Secretaria Municipal de Educação")
+_ROTULOS_DF = RotulosRede("Rede distrital", "escolas distritais", "Secretaria de Estado de Educação do Distrito Federal")
+
+
+def rotulos_da_rede(co_municipio: int) -> RotulosRede:
+    """Como os documentos nomeiam a rede e a secretaria (PDFs)."""
+    return _ROTULOS_DF if eh_distrito_federal(co_municipio) else _ROTULOS_MUNICIPAIS
 
 
 @dataclass(frozen=True)

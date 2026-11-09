@@ -67,7 +67,7 @@ export function SolicitarAcesso({ onFechar }: { onFechar: () => void }) {
           passos={[
             { titulo: "Solicitação registrada", texto: `Escola INEP ${inep}.`, feito: true },
             { titulo: "E-mail confirmado", texto: "Prova o controle do canal, não o cargo.", feito: true },
-            { titulo: "Vínculo em validação", texto: "A secretaria municipal confere os registros funcionais.", feito: false },
+            { titulo: "Vínculo em validação", texto: "A secretaria de educação confere os registros funcionais.", feito: false },
             { titulo: "Acesso liberado", texto: "Somente após a aprovação. Depois, entre com seu e-mail.", feito: false },
           ]}
         />
@@ -130,7 +130,7 @@ export function SolicitarAcesso({ onFechar }: { onFechar: () => void }) {
           rotulo="Código INEP da escola"
           inputMode="numeric"
           maxLength={8}
-          ajuda="8 dígitos. Neste piloto, só escolas da rede municipal."
+          ajuda="8 dígitos. Neste piloto, só escolas da rede municipal (no DF, da rede distrital)."
           value={inep}
           onChange={(e) => setInep(e.target.value.replace(/\D/g, ""))}
           required

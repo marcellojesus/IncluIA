@@ -92,7 +92,7 @@ def _escolas_municipais(co_municipio: int) -> list:
     conn = get_connection()
     try:
         return conn.execute(
-            "SELECT * FROM escolas WHERE co_municipio = ? AND rede = ? ORDER BY co_entidade", (co_municipio, censo.REDE_DO_PILOTO)
+            "SELECT * FROM escolas WHERE co_municipio = ? AND rede = ? ORDER BY co_entidade", (co_municipio, censo.rede_da_gestao(co_municipio))
         ).fetchall()
     finally:
         conn.close()

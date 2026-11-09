@@ -25,7 +25,7 @@ def _escolas_municipais(co_municipio: int) -> dict[int, str]:
     conn = get_connection()
     try:
         linhas = conn.execute(
-            "SELECT co_entidade, no_entidade FROM escolas WHERE co_municipio = ? AND rede = ?", (co_municipio, censo.REDE_DO_PILOTO)
+            "SELECT co_entidade, no_entidade FROM escolas WHERE co_municipio = ? AND rede = ?", (co_municipio, censo.rede_da_gestao(co_municipio))
         ).fetchall()
     finally:
         conn.close()

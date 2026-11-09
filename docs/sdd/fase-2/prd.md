@@ -208,7 +208,7 @@ Os critérios de aceite detalhados e as notas de implementação de cada requisi
 16. **Parcialmente resolvida em 2026-11-03:** no piloto o PDF é informativo, sem assinatura, com versão, datas, quem confirmou, código de conferência e ressalvas ([documentos em PDF](requirements/documentos-pdf.md)). Continuam pendentes a assinatura, a identidade visual e o valor formal depois da validação jurídica.
 17. Vocabulário e relação entre “barreira” identificada nos dados e “obstáculo” relatado pelo diretor. Em 2026-10-18 foi adotado “posição” como termo para o que o diretor registra sobre cada barreira (obstáculo relatado, divergência com o dado do Censo ou sem relato nesta versão).
 18. Cronograma de dois meses indicado na Narrativa V6, escopo incluído e disponibilidade para validação.
-19. **Resolvida em 2026-10-23:** o piloto atende só escolas da rede municipal.
+19. **Resolvida em 2026-10-23:** o piloto atende só escolas da rede municipal. **Complemento de 2026-11-09:** no Distrito Federal, que não tem rede municipal, o piloto atende a rede distrital (escolas “Estadual” do Censo em Brasília, 5300108).
 20. Definir se o secretário pode registrar resposta ou manifestação, pública ou privada, a uma Declaração que atribua obstáculos à rede.
 21. Definir o encaminhamento das divergências com o dado do Censo: se geram orientação para correção no próximo Educacenso (ligada à futura extensão Assistente de Preenchimento) e se aparecem para o secretário como indicador próprio.
 22. Definir se "sem relato nesta versão" exige justificativa curta e se aparece na versão publicada.

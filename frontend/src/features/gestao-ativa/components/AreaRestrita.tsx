@@ -11,6 +11,7 @@ import { Logo } from "@/shared/components/Logo";
 
 import { SemAcesso, getEu } from "../api";
 import { destinoDoPapel, useGestaoStore } from "../store";
+import { rotulosDaRede } from "../rotulos";
 import type { Eu, Papel } from "../types";
 
 const ROTULO_PAPEL: Record<Papel, string> = { diretor: "Diretor(a)", secretario: "Secretaria municipal", admin: "Administração" };
@@ -18,7 +19,7 @@ const ROTULO_PAPEL: Record<Papel, string> = { diretor: "Diretor(a)", secretario:
 function escopoTexto(eu: Eu): string {
   const { escola, coEntidade, municipio, uf } = eu.escopo;
   if (escola) return `${escola} · INEP ${coEntidade}`;
-  if (municipio) return `Rede municipal de ${municipio}/${uf}`;
+  if (municipio) return `${rotulosDaRede(uf).rede.replace(/^r/, "R")} de ${municipio}/${uf}`;
   return "Administração do produto";
 }
 
@@ -73,7 +74,7 @@ export function AreaRestrita({ papel, children }: { papel: Papel; children: (eu:
           {eu && (
             <div className="ml-auto flex items-center gap-3 text-[13px]">
               <span className="text-gray-600">
-                {ROTULO_PAPEL[eu.papel]} · <strong className="text-ink">{eu.nome}</strong>
+                {eu.papel === "secretario" ? rotulosDaRede(eu.escopo.uf).secretaria : ROTULO_PAPEL[eu.papel]} · <strong className="text-ink">{eu.nome}</strong>
               </span>
               <button onClick={handleSair} className="rounded-lg px-3 py-1.5 font-bold text-gov-blue hover:bg-gov-blue-lt">
                 Sair

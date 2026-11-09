@@ -214,7 +214,7 @@ export function DeclaracaoConsolidada({
   return (
     <Modal titulo="Declaração de Obstáculos" subtitulo={`${estado.escola} · ${comPosicao} de ${estado.barreiras.length} barreiras com posição`} onFechar={onFechar}>
       <Aviso>
-        Ao emitir, esta versão fica congelada com sua autoria e data, passa a ser visível à secretaria municipal e serve de base para o
+        Ao emitir, esta versão fica congelada com sua autoria e data, passa a ser visível à secretaria de educação e serve de base para o
         Plano de Ação. Os dados do Censo e o score não mudam.
       </Aviso>
       <div className="mt-4 max-h-[45vh] overflow-y-auto pr-1">
@@ -265,7 +265,7 @@ export function VersaoEmitida({ versao, onFechar, onPublicar }: { versao: Versao
       <Passos
         passos={[
           { titulo: "Emitida e congelada", texto: `Versão ${versao.versao}, com sua autoria e data. Mudanças futuras geram nova versão.`, feito: true },
-          { titulo: "Visível à secretaria da rede", texto: "A secretaria municipal passa a consultar esta versão.", feito: true },
+          { titulo: "Visível à secretaria da rede", texto: "A secretaria de educação passa a consultar esta versão.", feito: true },
           { titulo: "Base para o Plano de Ação", texto: "O Plano de Ação da escola usará esta versão como contexto.", feito: true },
         ]}
       />
@@ -396,7 +396,7 @@ export function RetirarPublicacao({ numero, onFechar, onRetirada }: { numero: nu
     <Modal titulo={`Retirar a Declaração v${numero} da página pública`} subtitulo="A versão emitida continua guardada" onFechar={onFechar}>
       <form onSubmit={retirar}>
         <p className="mb-3 text-[13px] text-gray-600">
-          A versão sai da página pública da escola na hora. Ela continua guardada e visível à secretaria municipal. Para voltar a publicar,
+          A versão sai da página pública da escola na hora. Ela continua guardada e visível à secretaria de educação. Para voltar a publicar,
           emita e publique uma nova versão.
         </p>
         <Selecao id="motivo-retirada" rotulo="Motivo" opcoes={MOTIVOS_RETIRADA} value={motivo} onChange={(e) => setMotivo(e.target.value)} required />

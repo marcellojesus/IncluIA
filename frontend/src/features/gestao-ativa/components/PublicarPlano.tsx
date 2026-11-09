@@ -82,7 +82,7 @@ export function PublicarPlano({ numero, onFechar, onMudou }: { numero: number; o
             <h2 id="titulo-versao-publica" className="text-[11px] font-extrabold uppercase tracking-wider text-accent">Como o público vai ler</h2>
             <div className="mt-2 space-y-2 rounded-lg border border-black/10 bg-white p-3">
               <p className="text-[12px] text-gray-500">
-                Versão {previa.versao}{previa.aceitoEm ? `, aceita pela secretaria municipal em ${dataCurta(previa.aceitoEm)}` : ""}. Custos e prazos são
+                Versão {previa.versao}{previa.aceitoEm ? `, aceita pela secretaria de educação em ${dataCurta(previa.aceitoEm)}` : ""}. Custos e prazos são
                 estimativas; o aceite não é garantia de orçamento nem de execução.
               </p>
               {barreiras.map((b) => (

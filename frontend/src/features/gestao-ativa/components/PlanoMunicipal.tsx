@@ -18,7 +18,7 @@ import {
   removerAcaoMunicipal,
   sugerirAcoesMunicipais,
 } from "../api";
-import { dataCurta } from "../rotulos";
+import { dataCurta, rotulosAtuais } from "../rotulos";
 import type { AcaoMunicipal, BarreiraDaRede, Cobertura, EscolaAtendida, EstadoPlanoMunicipal, NovaAcaoMunicipal, Prioridade, SugestaoMunicipal } from "../types";
 import { NarrativaExecutiva } from "./NarrativaExecutiva";
 import { Fontes } from "./PartesPlano";
@@ -416,7 +416,7 @@ function FormularioMunicipal({
   const [campos, setCampos] = useState({
     acao: inicial?.acao ?? "",
     justificativa: inicial?.justificativa ?? "",
-    responsavel: inicial?.responsavel ?? "secretaria municipal de educação",
+    responsavel: inicial?.responsavel ?? rotulosAtuais().secretariaMinuscula,
     prazo: inicial?.prazo ?? "",
     horizonte: inicial?.horizonte ?? "PPA",
     custoEstimado: inicial?.custoEstimado ?? "",

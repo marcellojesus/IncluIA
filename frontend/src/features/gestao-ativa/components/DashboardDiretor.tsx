@@ -145,7 +145,7 @@ export function DashboardDiretor() {
       <div className="mt-8">
         <Aviso>
           Os indicadores vêm do Censo Escolar {dados.censoVersao} e não mudam com os registros da escola. O que você registrar fica
-          visível à secretaria municipal só depois de emitido.
+          visível à secretaria de educação só depois de emitido.
         </Aviso>
       </div>
     </div>

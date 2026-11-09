@@ -45,7 +45,9 @@ def _identificacao(versao: VersaoPlano, ultima: int) -> list[Campo]:
     ]
     if versao.decidida_em:
         # Só o papel, não o nome: o PDF circula fora da plataforma e ainda não tem valor formal (decisão de 2026-11-03).
-        campos.append(Campo("Decidida em", f"{data_hora(versao.decidida_em)}, pela Secretaria Municipal de Educação"))
+        escola = censo.escola(versao.co_entidade)
+        secretaria = censo.rotulos_da_rede(escola.co_municipio).secretaria if escola else "secretaria de educação"
+        campos.append(Campo("Decidida em", f"{data_hora(versao.decidida_em)}, pela {secretaria}"))
     campos.append(Campo("Comentário da secretaria", versao.comentario, livre=True))
     if versao.publicada_em:
         situacao = (f"Publicação retirada em {data_hora(versao.retirada_em)}" if versao.retirada_em

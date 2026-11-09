@@ -183,8 +183,8 @@ def solicitar_acesso_diretor(sessao: Session, *, nome: str, email: str, co_entid
     escola = censo.escola(co_entidade)
     if escola is None:
         raise ErroAcesso("Código INEP não encontrado no Censo Escolar 2025.", 404)
-    if escola.rede != censo.REDE_DO_PILOTO:
-        raise ErroAcesso("Neste piloto, a Gestão Ativa atende só escolas da rede municipal.")
+    if escola.rede != censo.rede_da_gestao(escola.co_municipio):
+        raise ErroAcesso("Neste piloto, a Gestão Ativa atende só escolas da rede municipal (no Distrito Federal, da rede distrital).")
 
     conta = _conta_por_email(sessao, email)
     if conta is None:
@@ -226,9 +226,9 @@ class ResultadoEntrada:
 
 
 _MENSAGENS_SITUACAO = {
-    "aguardando_aprovacao": "E-mail confirmado. Seu vínculo está em validação pela secretaria municipal; a Gestão Ativa fica bloqueada até a aprovação.",
-    "rejeitado": "A secretaria não confirmou o vínculo com a escola. Se os dados estiverem errados, solicite de novo com o código INEP correto ou procure a secretaria municipal.",
-    "suspenso": "Seu acesso está suspenso pela secretaria municipal. Procure a secretaria para regularizar.",
+    "aguardando_aprovacao": "E-mail confirmado. Seu vínculo está em validação pela secretaria de educação; a Gestão Ativa fica bloqueada até a aprovação.",
+    "rejeitado": "A secretaria não confirmou o vínculo com a escola. Se os dados estiverem errados, solicite de novo com o código INEP correto ou procure a secretaria de educação.",
+    "suspenso": "Seu acesso está suspenso pela secretaria de educação. Procure a secretaria para regularizar.",
     "revogado": "Seu acesso foi revogado. Para voltar, é preciso uma nova solicitação e uma nova aprovação.",
 }
 

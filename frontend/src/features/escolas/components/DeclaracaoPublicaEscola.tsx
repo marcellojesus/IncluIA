@@ -76,7 +76,7 @@ function PlanoPublicoEscola({ plano, coEntidade }: { plano: PlanoPublico; coEnti
       </div>
       <p className="mt-1 text-[11px] text-gray-500">
         Versão {plano.versao}, baseada na Declaração v{plano.declaracaoVersao}
-        {plano.aceitoEm ? `, aceita pela secretaria municipal em ${data(plano.aceitoEm)}` : ""} e publicada em {data(plano.publicadoEm)}. O
+        {plano.aceitoEm ? `, aceita pela secretaria de educação em ${data(plano.aceitoEm)}` : ""} e publicada em {data(plano.publicadoEm)}. O
         aceite significa que o plano serve de base ao planejamento da rede; não é garantia de orçamento nem de execução. Custos e prazos
         são estimativas.
       </p>

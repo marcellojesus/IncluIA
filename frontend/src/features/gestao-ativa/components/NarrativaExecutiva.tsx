@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/shared/components/Modal";
 
 import { editarNarrativaMunicipal, gerarNarrativaMunicipal, getVersaoMunicipal, PDF } from "../api";
-import { dataCurta } from "../rotulos";
+import { dataCurta, rotulosAtuais } from "../rotulos";
 import type { EdicaoNarrativa, NarrativaExecutiva as Narrativa, VersaoPlanoMunicipal } from "../types";
 import { BotaoPdf } from "./BotaoPdf";
 import { Aviso, Botao, Cartao, CampoTexto, Erro, Selo } from "./ui";
@@ -129,7 +129,7 @@ function Numeros({ versao }: { versao: VersaoPlanoMunicipal }) {
   const itens: [string | number, string][] = [
     [n.acoes, "ações municipais"],
     [n.barreiras, "barreiras enfrentadas"],
-    [`${n.escolasAtendidas} de ${n.escolasMunicipais}`, "escolas municipais atendidas"],
+    [`${n.escolasAtendidas} de ${n.escolasMunicipais}`, `${rotulosAtuais().escolas} atendidas`],
     [`${n.loa} · ${n.ppa}`, "ações na LOA · no PPA"],
     [n.prioridadeAlta, "ações de prioridade alta"],
     [`${n.comCustoEstimado} de ${n.acoes}`, "ações com custo estimado pela secretaria"],

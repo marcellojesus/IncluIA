@@ -53,7 +53,7 @@ export function ProvisionarSecretario() {
             rotulo="Código IBGE do município"
             inputMode="numeric"
             maxLength={7}
-            ajuda="7 dígitos. O acesso fica limitado à rede municipal deste município."
+            ajuda="7 dígitos. O acesso fica limitado à rede municipal deste município. No DF, use 5300108 (Brasília): o acesso é à rede distrital."
             value={municipio}
             onChange={(e) => setMunicipio(e.target.value.replace(/\D/g, ""))}
             required

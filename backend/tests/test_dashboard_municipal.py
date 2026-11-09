@@ -17,7 +17,7 @@ def _escolas_da_rede(co_municipio):
     try:
         return conn.execute(
             "SELECT score, qt_mat_esp FROM escolas WHERE co_municipio = ? AND rede = ? AND score IS NOT NULL",
-            (co_municipio, censo.REDE_DO_PILOTO),
+            (co_municipio, censo.rede_da_gestao(co_municipio)),
         ).fetchall()
     finally:
         conn.close()

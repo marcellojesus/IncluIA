@@ -40,7 +40,7 @@ def _ler_censo(co_municipio: int) -> tuple[list, object]:
     try:
         escolas = conn.execute(
             "SELECT * FROM escolas WHERE co_municipio = ? AND rede = ? AND score IS NOT NULL ORDER BY co_entidade",
-            (co_municipio, censo.REDE_DO_PILOTO),
+            (co_municipio, censo.rede_da_gestao(co_municipio)),
         ).fetchall()
         municipio = conn.execute("SELECT score, qtd_escolas FROM municipios WHERE co_municipio = ?", (co_municipio,)).fetchone()
     finally:

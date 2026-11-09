@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { classificarFaixa, formatarScore } from "@/shared/lib/score";
 
 import { getDashboardMunicipal } from "../api";
-import { ESTADOS_VERSAO_PLANO, dataCurta } from "../rotulos";
+import { ESTADOS_VERSAO_PLANO, dataCurta, rotulosAtuais } from "../rotulos";
 import type { DashboardMunicipal as Dados, EscolaPrioritaria } from "../types";
 import { Aviso, Botao, Cartao, Selo } from "./ui";
 
@@ -31,6 +31,7 @@ function listaEixos(eixos: string[]) {
 
 export function DashboardMunicipal({ onAbrir }: { onAbrir: (destino: DestinoDashboard) => void }) {
   const [dados, setDados] = useState<Dados | null>(null);
+  const rotulos = rotulosAtuais();
   const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
@@ -47,9 +48,9 @@ export function DashboardMunicipal({ onAbrir }: { onAbrir: (destino: DestinoDash
     <div className="mx-auto max-w-6xl px-6 py-6">
       <section className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
         <div>
-          <h1 className="text-3xl font-extrabold text-gov-blue-dark">Situação da rede municipal</h1>
+          <h1 className="text-3xl font-extrabold text-gov-blue-dark">Situação da {rotulos.rede}</h1>
           <p className="mt-2 max-w-2xl text-[15px] text-gray-600">
-            Visão de gestão das {inteiro(cobertura.escolasMunicipais)} escolas municipais. Os dados públicos continuam na página pública; aqui
+            Visão de gestão das {inteiro(cobertura.escolasMunicipais)} {rotulos.escolas}. Os dados públicos continuam na página pública; aqui
             estão reunidas as prioridades da rede e o que as escolas já registraram.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -59,7 +60,7 @@ export function DashboardMunicipal({ onAbrir }: { onAbrir: (destino: DestinoDash
         </div>
         {dados.score !== null && dados.faixa && (
           <div className="rounded-lg bg-gov-blue-dark px-6 py-5 text-white">
-            <div className="text-[11px] font-bold uppercase tracking-wider text-white/60">Score da rede municipal · Censo {dados.censoVersao}</div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-white/60">Score da {rotulos.rede} · Censo {dados.censoVersao}</div>
             <div className="mt-1 flex items-baseline gap-3">
               <span className="text-5xl font-extrabold">{formatarScore(dados.score)}</span>
               <span className="rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white" style={{ backgroundColor: classificarFaixa(dados.score).cor }}>
@@ -82,7 +83,7 @@ export function DashboardMunicipal({ onAbrir }: { onAbrir: (destino: DestinoDash
 
       {cobertura.escolasMunicipais === 0 ? (
         <div className="mt-6">
-          <Aviso tom="atencao">O Censo {dados.censoVersao ?? ""} não registra escolas da rede municipal com score calculado neste município.</Aviso>
+          <Aviso tom="atencao">O Censo {dados.censoVersao ?? ""} não registra escolas da {rotulos.rede} com score calculado neste município.</Aviso>
         </div>
       ) : (
         <>

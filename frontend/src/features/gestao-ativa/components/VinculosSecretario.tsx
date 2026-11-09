@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { Modal } from "@/shared/components/Modal";
 
 import { decidirVinculo, listarVinculos } from "../api";
+import { rotulosDaRede } from "../rotulos";
 import type { AcaoVinculo, Eu, SolicitacaoVinculo } from "../types";
 import { AVISO_TEXTO_LIVRE, Aviso, Botao, Cartao, CampoTexto, Erro, MOTIVOS, Selecao, Selo } from "./ui";
 
@@ -77,7 +78,7 @@ export function VinculosSecretario({ eu, onMudou }: { eu: Eu; onMudou?: () => vo
   return (
     <div className="mx-auto max-w-6xl px-6 py-6">
       <p className="text-xs font-extrabold uppercase tracking-wider text-accent">
-        Secretaria municipal · {eu.escopo.municipio}/{eu.escopo.uf}
+        {rotulosDaRede(eu.escopo.uf).secretaria} · {eu.escopo.municipio}/{eu.escopo.uf}
       </p>
       <h1 className="mt-1 text-3xl font-extrabold text-gov-blue-dark">Vínculos de diretores</h1>
       <p className="mt-2 max-w-3xl text-[15px] text-gray-600">

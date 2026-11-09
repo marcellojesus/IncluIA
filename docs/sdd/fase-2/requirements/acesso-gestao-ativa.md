@@ -80,7 +80,7 @@ Não armazenar código INEP como prova de identidade, senha em texto puro, códi
 
 ## Decisões pendentes
 
-1. **Resolvida em 2026-10-23:** o piloto fica restrito às escolas da rede municipal.
+1. **Resolvida em 2026-10-23:** o piloto fica restrito às escolas da rede municipal. No DF, à rede distrital (2026-11-09).
 2. **Resolvida em 2026-10-23 para o piloto:** o secretário municipal aprova os diretores das escolas da própria rede. Continua pendente como delegar ou substituir essa autoridade.
 3. Definir fonte institucional mínima aceita para confirmar o vínculo, especialmente quando não houver diretório público ou ato de designação facilmente consultável.
 4. Definir se o secretário pode convidar diretamente diretores ou apenas revisar solicitações encaminhadas.
@@ -110,7 +110,7 @@ A `Tabela_Gestor_Escolar_2025.csv` local contém o código da escola e campos ag
 - **Envio do código (decisão de 2026-11-07, AD-02):** pelo Brevo, via API HTTP (`EMAIL_MODO=brevo`, com `BREVO_API_KEY` e `EMAIL_REMETENTE`). A mensagem é só texto: código, validade de 10 minutos, aviso para não compartilhar e, no pedido de acesso, o nome da escola. Nas rotas anônimas, o envio roda em segundo plano e a resposta é sempre a mesma, mesmo se o provedor falhar; só o provisionamento de secretário mostra a falha (503). Teto de 250 códigos por dia nas rotas anônimas e 10 envios por IP a cada 10 minutos. O log guarda só o código HTTP ou o tipo do erro.
 - **Perfis:** além de diretor e secretário (RF-01), existe o perfil **administrador**, criado só pela linha de comando (`python -m app.features.acesso.cli criar-admin`), que provisiona secretários e pode retirar publicações.
 - **Aprovação do diretor (RF-05; decisões de 2026-10-23):**
-  - só escolas da rede municipal são aceitas;
+  - só escolas da rede municipal são aceitas; no Distrito Federal, as da rede distrital (dependência “Estadual” no Censo; decisão de 2026-11-09);
   - quem aprova é o secretário do município da escola;
   - o pedido só aparece ao secretário depois que o candidato confirma o código daquele pedido;
   - quem decide não pode decidir o próprio vínculo;

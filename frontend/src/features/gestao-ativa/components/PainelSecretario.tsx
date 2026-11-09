@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { getFilaPlanos, listarVinculos } from "../api";
+import { rotulosDaRede } from "../rotulos";
 import type { Eu } from "../types";
 import { AnaliticoBarreiras } from "./AnaliticoBarreiras";
 import { DashboardMunicipal } from "./DashboardMunicipal";
@@ -62,7 +63,7 @@ export function PainelSecretario({ eu }: { eu: Eu }) {
     <div>
       <div className="mx-auto max-w-6xl px-6 pt-6">
         <p className="text-xs font-extrabold uppercase tracking-wider text-accent">
-          Secretaria municipal · {eu.escopo.municipio}/{eu.escopo.uf}
+          {rotulosDaRede(eu.escopo.uf).secretaria} · {eu.escopo.municipio}/{eu.escopo.uf}
         </p>
 
         {pendencias && total > 0 && (
@@ -164,7 +165,7 @@ export function PainelSecretario({ eu }: { eu: Eu }) {
         <div className="mx-auto max-w-6xl px-6 py-6">
           <h1 className="text-3xl font-extrabold text-gov-blue-dark">Declarações de Obstáculos</h1>
           <p className="mb-5 mt-2 max-w-3xl text-[15px] text-gray-600">
-            Versões emitidas pelas escolas da rede municipal. Rascunhos das escolas não aparecem aqui.
+            Versões emitidas pelas escolas da {rotulosDaRede(eu.escopo.uf).rede}. Rascunhos das escolas não aparecem aqui.
           </p>
           <DeclaracoesRede />
         </div>

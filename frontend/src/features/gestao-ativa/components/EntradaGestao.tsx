@@ -70,7 +70,7 @@ export function EntradaGestao() {
         <span className="w-fit rounded-full bg-white/10 px-3 py-1 text-[11px] font-extrabold tracking-wider">ÁREA RESTRITA</span>
         <h1 className="mt-4 text-4xl font-extrabold">Gestão Ativa</h1>
         <ul className="mt-6 space-y-3 text-[15px] text-white/80">
-          <li>Acesso vinculado à escola ou à rede municipal</li>
+          <li>Acesso vinculado à escola ou à rede de ensino</li>
           <li>Declarações e planos com histórico de versões</li>
           <li>Assistência por IA com revisão humana</li>
         </ul>

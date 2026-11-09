@@ -21,7 +21,7 @@ import {
   removerAcao,
   sugerirAcoes,
 } from "../api";
-import { ESTADOS_VERSAO_PLANO as ESTADOS_VERSAO, NOMES_EIXOS, POSICOES, dataCurta } from "../rotulos";
+import { ESTADOS_VERSAO_PLANO as ESTADOS_VERSAO, NOMES_EIXOS, POSICOES, dataCurta, rotulosAtuais } from "../rotulos";
 import type { AcaoPlano, Apontamento, CamposAcao, EstadoPlano, SugestaoPlano } from "../types";
 import { Detalhes, Fontes, SeloOrigem } from "./PartesPlano";
 import { PreviaPlano } from "./PreviaPlano";
@@ -597,7 +597,7 @@ function FormularioAcao({
             ajuda="Cargo ou órgão, nunca o nome da pessoa."
           />
           <datalist id="responsaveis-sugeridos">
-            {["direção da escola", "coordenação pedagógica", "professor(a) do AEE", "secretaria municipal de educação", "conselho escolar"].map((r) => (
+            {["direção da escola", "coordenação pedagógica", "professor(a) do AEE", rotulosAtuais().secretariaMinuscula, "conselho escolar"].map((r) => (
               <option key={r} value={r} />
             ))}
           </datalist>
