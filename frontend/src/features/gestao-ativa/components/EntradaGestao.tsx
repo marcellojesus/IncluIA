@@ -4,10 +4,11 @@
 // Conta sem acesso ativo (pendente, rejeitada, suspensa, revogada) recebe a explicação, nunca o token.
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { entrar, getEu, pedirCodigo } from "../api";
 import { destinoDoPapel, useGestaoStore } from "../store";
+import { useContaConectada } from "../useContaConectada";
 import type { SituacaoAcesso } from "../types";
 import { LinkCaixaTeste } from "./CaixaTeste";
 import { Aviso, Botao, Campo, Erro, Selo } from "./ui";
@@ -29,6 +30,11 @@ export function EntradaGestao() {
   const [situacao, setSituacao] = useState<{ tipo: Exclude<SituacaoAcesso, "ativo">; mensagem: string } | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  // Quem já está conectado nesta aba não precisa de outro código: segue para o próprio painel.
+  const conta = useContaConectada();
+  useEffect(() => {
+    if (conta) router.replace(destinoDoPapel(conta.papel));
+  }, [conta, router]);
 
   async function enviarEmail(e: React.FormEvent) {
     e.preventDefault();

@@ -14,7 +14,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <GeoFiltroBar />
       {/* min-h-0 é necessário: sem ele, o padrão de flexbox (min-height:auto) impede este
           div de encolher, e conteúdo mais alto que a tela fica cortado em vez de rolar. */}
-      <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+      <div id="conteudo-principal" className="min-h-0 flex-1 overflow-y-auto">{children}</div>
       <Footer />
     </div>
   );

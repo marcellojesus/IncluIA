@@ -4,6 +4,10 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { ANCORA_ACESSO } from "@/shared/components/AppHeader";
+
+import { destinoDoPapel, useGestaoStore } from "../store";
+import { useContaConectada } from "../useContaConectada";
 import { SolicitarAcesso } from "./SolicitarAcesso";
 import { Aviso, Botao, Cartao, Selo } from "./ui";
 
@@ -15,9 +19,25 @@ const ETAPAS = [
 
 export function ParticiparGestao() {
   const [solicitando, setSolicitando] = useState(false);
+  const conta = useContaConectada();
+  const sair = useGestaoStore((s) => s.sair);
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-8">
+      {conta && (
+        <div className="mb-6">
+          <Aviso>
+            Você já entrou na Gestão Ativa como <strong>{conta.nome}</strong>.{" "}
+            <Link href={destinoDoPapel(conta.papel)} className="font-bold text-gov-blue underline underline-offset-2">
+              Ir para o seu painel
+            </Link>{" "}
+            ·{" "}
+            <button onClick={sair} className="font-bold text-gov-blue underline underline-offset-2">
+              Sair
+            </button>
+          </Aviso>
+        </div>
+      )}
       <p className="text-xs font-extrabold uppercase tracking-wider text-accent">Participar</p>
       <h1 className="mt-1 text-3xl font-extrabold text-gov-blue-dark">Gestão Ativa</h1>
       <p className="mt-2 max-w-2xl text-[15px] text-gray-600">
@@ -34,7 +54,7 @@ export function ParticiparGestao() {
         ))}
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
+      <div id={ANCORA_ACESSO} tabIndex={-1} className="mt-6 grid scroll-mt-4 gap-4 outline-none transition-shadow md:grid-cols-2">
         <Cartao className="p-5">
           <Selo tom="azul">Diretor de escola</Selo>
           <h2 className="mt-2 text-lg font-extrabold text-gov-blue-dark">Acesso com vínculo validado</h2>
