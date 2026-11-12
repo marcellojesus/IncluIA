@@ -116,6 +116,8 @@ section.alt .card { background: var(--bg); }
 .num { padding: 18px 18px 18px 0; border-bottom: 1px solid var(--line); min-width: 0; }
 .num b { display: block; font-family: var(--f-display); font-size: clamp(1.7rem, 3.4vw, 2.4rem); font-weight: 800; color: var(--teal); font-variant-numeric: tabular-nums; line-height: 1.1; }
 .num span { font-size: .9rem; color: var(--muted); }
+.link-doc { display: inline-block; font-weight: 800; color: var(--teal); text-decoration: none; border-bottom: 2px solid currentColor; }
+.link-doc:hover { color: var(--coral); }
 .fonte { margin-top: 12px; font-size: .8rem; color: var(--muted); }
 
 /* citação */
@@ -282,9 +284,10 @@ section.alt .ad { background: var(--bg); }
     <a href="#fase1"><span>2</span>Fase 1</a>
     <a href="#fase2"><span>3</span>Fase 2</a>
     <a href="#perfis"><span>4</span>Perfis e funcionalidades</a>
-    <a href="#sociedade"><span>5</span>Potencial social</a>
-    <a href="#negocio"><span>6</span>Modelo de negócio</a>
-    <a href="#arquitetura"><span>7</span>Arquitetura</a>
+    <a href="#metodologias"><span>5</span>Metodologias</a>
+    <a href="#sociedade"><span>6</span>Potencial social</a>
+    <a href="#negocio"><span>7</span>Modelo de negócio</a>
+    <a href="#arquitetura"><span>8</span>Arquitetura</a>
   </div>
 </nav>
 
@@ -472,11 +475,73 @@ section.alt .ad { background: var(--bg); }
   </div>
 </section>
 
-<!-- ===================== 5. SOCIEDADE ===================== -->
-<section class="cap" id="sociedade">
+<!-- ===================== 5. METODOLOGIAS ===================== -->
+<section class="cap" id="metodologias">
   <div class="wrap">
     <div class="cap-head">
-      <p class="eyebrow">5 · Potencial para a sociedade</p>
+      <p class="eyebrow">5 · Metodologias</p>
+      <h2>Duas regras públicas: o score e as barreiras</h2>
+      <p class="lead">Tudo o que o produto afirma sobre uma escola sai de duas metodologias publicadas e versionadas. As duas são regras fixas sobre os microdados do Censo Escolar, sem uso de IA: a mesma base produz sempre o mesmo resultado, e qualquer pessoa pode conferir.</p>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <span class="tag">Fase 1 · versão 1.1 · outubro de 2026</span>
+        <h3>Metodologia do score</h3>
+        <p><b>O que mede:</b> a governança da inclusão escolar, numa nota de 0 a 10 por escola, município e estado. Mede a <b>disponibilidade</b> de recursos declarada no Censo, não a qualidade do uso.</p>
+        <p><b>Como calcula:</b> 11 variáveis do Censo, cada uma convertida para 0 a 1 e multiplicada pelo seu peso. A soma dos pesos é 100%; o resultado vezes 10 dá a nota.</p>
+        <ul class="lista-num">
+          <li><b>D1 · Suporte educacional (45%)</b>: oferta de AEE (30%) e taxa de matrícula em classe comum (15%).</li>
+          <li><b>D2 · Recursos humanos (25%)</b>: tradutor e intérprete de Libras (15%) e revisor de Braille (10%).</li>
+          <li><b>D3 · Acessibilidade física (30%)</b>: rampa (8%), banheiro acessível (7%), corrimão (6%), piso tátil (4%), sinalização visual (2%) e sonora (2%), elevador (1%).</li>
+        </ul>
+        <p><b>Município e estado:</b> média das escolas ponderada pelas matrículas da educação especial, para que uma escola com 3 alunos não pese como uma com 300. A nota cai em cinco faixas: crítico, insuficiente, em desenvolvimento, adequado e referência.</p>
+        <p><b>Cautelas declaradas:</b> o score só é comparável dentro da mesma edição do Censo; elevador penaliza prédios térreos (por isso pesa só 1%); municípios com poucas escolas variam mais. Ainda não é instrumento oficial de prestação de contas ao MEC.</p>
+        <p><b>Versão 1.1:</b> corrigiu, com o dicionário oficial do Censo 2025, a leitura de "classe especial exclusiva". 2.080 escolas que recebiam zero no eixo de classe comum passaram a usar a taxa real.</p>
+        <p><a class="link-doc" href="https://escola-sem-barreiras.vercel.app/metodologia" target="_blank" rel="noopener">Ler a metodologia do score completa →</a></p>
+      </div>
+
+      <div class="card">
+        <span class="tag coral">Fase 2 · versão 0.1 · proposta para validação</span>
+        <h3>Metodologia das barreiras</h3>
+        <p><b>O que é uma barreira:</b> um recurso de inclusão que, segundo o Censo, a escola não tem. Cada uma das 11 variáveis do score vira uma barreira possível, com código por eixo da PNEEI (B-I-01 a B-IV-01). Nenhuma variável nova foi criada.</p>
+        <p><b>Como identifica:</b> regra fixa sobre o dado da própria escola. Valor estimado (como a média municipal que o score usa para escola sem matrícula da educação especial) não gera barreira. A IA não identifica, remove nem ordena barreiras.</p>
+        <p><b>Como ordena:</b> pelos <b>pontos em jogo</b>, quanto o score somaria se o recurso passasse a constar no Censo:</p>
+        <p class="mono" style="font-size:.85rem">pontos = 10 × peso × (1 − valor da variável)</p>
+        <p>Sem AEE vale 3,0 pontos; sem Libras, 1,5; sem elevador, 0,1. No Censo 2025, as escolas em atividade têm em média 7,8 barreiras.</p>
+        <p><b>Na rede:</b> para a secretaria, cada barreira tem a recorrência (parte das escolas que a têm) e as matrículas afetadas. Com 90% ou mais das escolas, é sinalizada como de alta recorrência, um sinal de que a resposta é municipal.</p>
+        <p><b>Na Declaração:</b> a lista não pode ser editada. Para cada barreira o diretor registra uma posição (obstáculo, divergência com o Censo ou sem relato), e nada disso altera o dado do Censo nem o score.</p>
+        <p><a class="link-doc" href="https://escola-sem-barreiras.vercel.app/metodologia/barreiras" target="_blank" rel="noopener">Ler a metodologia das barreiras completa →</a></p>
+      </div>
+    </div>
+
+    <div class="tabela" style="margin-top:24px">
+      <table>
+        <thead><tr><th>Eixo da PNEEI</th><th>Variável do Censo</th><th>Peso no score</th><th>Barreira</th><th>Pontos em jogo</th></tr></thead>
+        <tbody>
+          <tr><td>I · AEE</td><td>Oferta de AEE</td><td>30%</td><td class="mono">B-I-01</td><td>3,0</td></tr>
+          <tr><td rowspan="7">II · Acessibilidade física</td><td>Rampas</td><td>8%</td><td class="mono">B-II-01</td><td>0,8</td></tr>
+          <tr><td>Banheiro acessível</td><td>7%</td><td class="mono">B-II-02</td><td>0,7</td></tr>
+          <tr><td>Corrimão e guarda-corpos</td><td>6%</td><td class="mono">B-II-03</td><td>0,6</td></tr>
+          <tr><td>Pisos táteis</td><td>4%</td><td class="mono">B-II-04</td><td>0,4</td></tr>
+          <tr><td>Sinalização visual</td><td>2%</td><td class="mono">B-II-05</td><td>0,2</td></tr>
+          <tr><td>Sinalização sonora</td><td>2%</td><td class="mono">B-II-06</td><td>0,2</td></tr>
+          <tr><td>Elevador</td><td>1%</td><td class="mono">B-II-07</td><td>0,1</td></tr>
+          <tr><td rowspan="2">III · Profissionais especializados</td><td>Tradutor e intérprete de Libras</td><td>15%</td><td class="mono">B-III-01</td><td>1,5</td></tr>
+          <tr><td>Revisor de texto em Braille</td><td>10%</td><td class="mono">B-III-02</td><td>1,0</td></tr>
+          <tr><td>IV · Classe comum</td><td>Matrículas da educação especial em classe comum</td><td>15%</td><td class="mono">B-IV-01</td><td>1,5 × (1 − taxa)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="fonte">As duas metodologias andam juntas: toda barreira explica pontos que a escola deixa de somar no score. A Declaração emitida guarda a edição do Censo e a versão da metodologia de barreiras usadas, para continuar legível quando qualquer uma delas mudar.</p>
+  </div>
+</section>
+
+<!-- ===================== 6. SOCIEDADE ===================== -->
+<section class="cap alt" id="sociedade">
+  <div class="wrap">
+    <div class="cap-head">
+      <p class="eyebrow">6 · Potencial para a sociedade</p>
       <h2>Quem ganha quando a barreira tem nome, dono e prazo</h2>
     </div>
     <div class="grid3">
@@ -491,10 +556,10 @@ section.alt .ad { background: var(--bg); }
 </section>
 
 <!-- ===================== 6. NEGÓCIO ===================== -->
-<section class="cap alt" id="negocio">
+<section class="cap" id="negocio">
   <div class="wrap">
     <div class="cap-head">
-      <p class="eyebrow">6 · Modelo de negócio</p>
+      <p class="eyebrow">7 · Modelo de negócio</p>
       <h2>Um bem público digital, com o MEC como horizonte</h2>
       <p class="lead">No longo prazo, o produto pode virar infraestrutura de acompanhamento da PNEEI mantida pelo MEC. Até lá, o piloto se concentra em três públicos que já ganham com ele hoje.</p>
     </div>
@@ -520,11 +585,11 @@ section.alt .ad { background: var(--bg); }
   </div>
 </section>
 
-<!-- ===================== 7. ARQUITETURA ===================== -->
-<section class="cap" id="arquitetura">
+<!-- ===================== 8. ARQUITETURA ===================== -->
+<section class="cap alt" id="arquitetura">
   <div class="wrap">
     <div class="cap-head">
-      <p class="eyebrow">7 · Arquitetura</p>
+      <p class="eyebrow">8 · Arquitetura</p>
       <h2>Como o produto é construído</h2>
       <p class="lead">A Fase 1 é um produto de leitura: o Censo processado em lote e servido sem escrita. A Fase 2 é um produto de escrita: declarações, planos, decisões, versões e auditoria, com usuários autenticados e permissão por escola ou rede. A arquitetura separa esses dois mundos e põe a IA atrás de várias travas.</p>
     </div>
@@ -543,9 +608,9 @@ section.alt .ad { background: var(--bg); }
       <a href="#arq-decisoes">Decisões</a>
     </nav>
 
-    <!-- 7.1 -->
+    <!-- 8.1 -->
     <div class="sub" id="arq-visao">
-      <h3><span class="num-sub">7.1</span>Visão geral</h3>
+      <h3><span class="num-sub">8.1</span>Visão geral</h3>
       <p class="lead">Dois desenhos: o primeiro mostra o sistema inteiro em produção, de quem usa até os serviços externos; o segundo abre a parte de dados e mostra como o RAG prepara o contexto de cada chamada à IA.</p>
 
       <h4 style="margin-top:22px">A · O sistema em produção</h4>
@@ -617,13 +682,14 @@ flowchart TB
   subgraph OFF["Preparação offline · uma vez por edição do Censo"]
     CSV["Microdados do Censo Escolar<br/>INEP/MEC"]
     LEG["Decreto 12.686/2025 + LBI<br/>texto oficial"]
-    MET["Metodologia de barreiras<br/>regra de cada barreira"]
+    MSC["Metodologia do score v1.1<br/>11 variáveis, pesos e faixas"]
+    MET["Metodologia de barreiras v0.1<br/>regra e texto de cada barreira"]
     ETL["ETL Python<br/>carga → score → agregação"]
     IDX["Indexação<br/>trechos + palavras-chave FTS5"]
     EMBO["Gemini Embeddings<br/>vetores dos trechos"]
   end
   subgraph BANCOS["Bancos"]
-    DB1[("incluia.db<br/>escolas, municípios, UFs")]
+    DB1[("incluia.db<br/>indicadores, score, eixos e faixas<br/>de escolas, municípios e UFs")]
     DB3[("base_normativa.db<br/>trechos, vetores, regras")]
     DB2[("Gestão Ativa · Neon<br/>declarações, posições, planos")]
   end
@@ -633,7 +699,8 @@ flowchart TB
     EMBQ["Gemini Embeddings<br/>vetor da pergunta"]
     BUS["Busca híbrida<br/>mapa da barreira + palavra-chave + vetor"]
     C1["C1 · fatos da escola<br/>SQL exato, em faixas"]
-    C2["C2 · regra da barreira"]
+    IDB["Identificação das barreiras<br/>regra fixa, sem IA"]
+    C2["C2 · barreiras da escola<br/>e a regra de cada uma"]
     C3["C3 · trechos normativos<br/>até 6"]
     C4["C4 · contexto privado<br/>posições e planos aceitos"]
     MON["Montador de contexto<br/>preâmbulo de segurança + corte de tokens"]
@@ -643,6 +710,7 @@ flowchart TB
   end
 
   CSV --> ETL --> DB1
+  MSC -->|"fórmula aplicada"| ETL
   LEG --> IDX --> DB3
   IDX --> EMBO --> DB3
   MET --> DB3
@@ -652,7 +720,9 @@ flowchart TB
   GU --> BUS
   DB3 --> BUS --> C3
   DB1 --> C1
-  DB3 --> C2
+  DB1 -->|"indicadores da escola"| IDB
+  DB3 -->|"regras"| IDB
+  IDB --> C2
   DB2 --> C4
   C1 --> MON
   C2 --> MON
@@ -674,9 +744,9 @@ flowchart TB
       </div>
     </div>
 
-    <!-- 7.2 -->
+    <!-- 8.2 -->
     <div class="sub" id="arq-dados">
-      <h3><span class="num-sub">7.2</span>Dados e ETL</h3>
+      <h3><span class="num-sub">8.2</span>Dados e ETL</h3>
       <p class="lead">O score não é calculado a cada requisição. Ele é um processo em lote, rodado uma vez por edição do Censo, e a API só lê o resultado.</p>
       <div class="tabela" style="margin-top:18px">
         <table>
@@ -734,9 +804,9 @@ flowchart TB
       </div>
     </div>
 
-    <!-- 7.3 -->
+    <!-- 8.3 -->
     <div class="sub" id="arq-backend">
-      <h3><span class="num-sub">7.3</span>Backend e API</h3>
+      <h3><span class="num-sub">8.3</span>Backend e API</h3>
       <p class="lead">FastAPI em Python 3.11, organizada por funcionalidade: cada pasta tem rotas, serviço, esquemas e regras.</p>
       <div class="tabela" style="margin-top:18px">
         <table>
@@ -768,9 +838,9 @@ flowchart TB
       </div>
     </div>
 
-    <!-- 7.4 -->
+    <!-- 8.4 -->
     <div class="sub" id="arq-acesso">
-      <h3><span class="num-sub">7.4</span>Acesso e segurança (AD-02)</h3>
+      <h3><span class="num-sub">8.4</span>Acesso e segurança (AD-02)</h3>
       <div class="grid2" style="align-items:start; gap:22px; margin-top:6px">
         <div class="card">
           <h4>Entrada sem senha</h4>
@@ -798,9 +868,9 @@ flowchart TB
       </div>
     </div>
 
-    <!-- 7.5 -->
+    <!-- 8.5 -->
     <div class="sub" id="arq-frontend">
-      <h3><span class="num-sub">7.5</span>Frontend</h3>
+      <h3><span class="num-sub">8.5</span>Frontend</h3>
       <div class="grid2" style="align-items:start; gap:22px; margin-top:6px">
         <div class="card">
           <h4>Duas molduras no App Router</h4>
@@ -815,9 +885,9 @@ flowchart TB
       </div>
     </div>
 
-    <!-- 7.6 -->
+    <!-- 8.6 -->
     <div class="sub" id="arq-ia">
-      <h3><span class="num-sub">7.6</span>Inteligência artificial</h3>
+      <h3><span class="num-sub">8.6</span>Inteligência artificial</h3>
       <p class="lead">Com IA gratuita não há treinamento nem ajuste fino. A precisão vem do contexto entregue em cada chamada, e a segurança, das travas antes e depois dela.</p>
       <div class="tabela" style="margin-top:18px">
         <table>
@@ -851,9 +921,9 @@ flowchart TB
       </div>
     </div>
 
-    <!-- 7.7 -->
+    <!-- 8.7 -->
     <div class="sub" id="arq-guardiao">
-      <h3><span class="num-sub">7.7</span>Guardião LGPD (AD-05)</h3>
+      <h3><span class="num-sub">8.7</span>Guardião LGPD (AD-05)</h3>
       <p class="lead">Os planos gratuitos de IA podem usar os dados enviados. Por isso a proteção fica do nosso lado e roda no próprio servidor: uma checagem feita por IA em nuvem mandaria o dado justamente para onde ele não pode ir.</p>
       <div class="camadas" style="margin-top:18px">
         <div class="camada"><span class="id">1</span><div><h4>Regras determinísticas</h4><p>CPF, RG, telefone, e-mail, data de nascimento, número de matrícula e similares.</p></div></div>
@@ -870,9 +940,9 @@ flowchart TB
       <p class="fonte">Também minimiza o contexto: nome e código INEP da escola não vão à IA, o score vai por faixa, e matrículas da educação especial abaixo de 5 são omitidas, porque somadas a um relato apontariam uma criança. Referências: Política de Privacidade por Concepção (PBD-001 a 130) e OWASP Top 10 para LLM. Risco residual aceito: nenhum filtro pega 100% dos casos; a revisão humana completa a proteção.</p>
     </div>
 
-    <!-- 7.8 -->
+    <!-- 8.8 -->
     <div class="sub" id="arq-rag">
-      <h3><span class="num-sub">7.8</span>RAG em camadas (AD-08)</h3>
+      <h3><span class="num-sub">8.8</span>RAG em camadas (AD-08)</h3>
       <p class="lead">Cada tipo de conhecimento é recuperado pela técnica mais exata para ele. Busca por similaridade só onde a pergunta é imprevisível.</p>
       <div class="tabela" style="margin-top:18px">
         <table>
@@ -919,9 +989,9 @@ flowchart TB
       <p class="fonte">Avaliação com <span class="mono">python -m etl.base_normativa.avaliar</span>, sobre 8 perguntas escritas pela equipe. Nenhum texto privado vira vetor: no Analítico não há busca, só resumos protegidos.</p>
     </div>
 
-    <!-- 7.9 -->
+    <!-- 8.9 -->
     <div class="sub" id="arq-infra">
-      <h3><span class="num-sub">7.9</span>Hospedagem e riscos do plano gratuito (AD-06)</h3>
+      <h3><span class="num-sub">8.9</span>Hospedagem e riscos do plano gratuito (AD-06)</h3>
       <div class="grid4" style="margin-top:6px">
         <div class="card"><span class="tag">Frontend</span><h4>Vercel</h4><p>escola-sem-barreiras.vercel.app. Deploy a cada push na branch principal.</p></div>
         <div class="card"><span class="tag">API</span><h4>Render</h4><p>Blueprint <span class="mono">render.yaml</span>, plano free. Migrações e rotina de retenção rodam na subida. Adormece após 15 min.</p></div>
@@ -944,9 +1014,9 @@ flowchart TB
       </div>
     </div>
 
-    <!-- 7.10 -->
+    <!-- 8.10 -->
     <div class="sub" id="arq-qualidade">
-      <h3><span class="num-sub">7.10</span>Qualidade</h3>
+      <h3><span class="num-sub">8.10</span>Qualidade</h3>
       <div class="grid3" style="margin-top:6px">
         <div class="card"><h4>455 testes automatizados</h4><p>A suíte do backend roda também sobre PostgreSQL 18, o mesmo banco usado em produção.</p></div>
         <div class="card"><h4>Integração contínua</h4><p>GitHub Actions a cada push: backend em Python 3.11 e 3.14, backend contra PostgreSQL, checagem de tipos e lint do frontend.</p></div>
@@ -954,9 +1024,9 @@ flowchart TB
       </div>
     </div>
 
-    <!-- 7.11 -->
+    <!-- 8.11 -->
     <div class="sub" id="arq-decisoes">
-      <h3><span class="num-sub">7.11</span>Decisões de arquitetura</h3>
+      <h3><span class="num-sub">8.11</span>Decisões de arquitetura</h3>
       <div class="tabela" style="margin-top:18px">
         <table>
           <thead><tr><th>Decisão</th><th>O que foi decidido</th><th>Por quê</th></tr></thead>
