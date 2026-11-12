@@ -1,0 +1,677 @@
+<!doctype html>
+<!-- Gerado a partir de FASE2/apresentacao_escola_sem_barreiras.html. Página avulsa de documentação,
+     sem link a partir do restante do sistema. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Escola Sem Barreiras</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: folha de rosto acadêmica + documento longo com navegação fixa por capítulos (as mesmas cores e fontes do produto). */
+:root {
+  --bg: #f4f1ea;          /* cream do produto */
+  --paper: #fffdf8;       /* cartões */
+  --ink: #26313d;         /* texto */
+  --muted: #5d6b67;
+  --line: #e2ddd1;
+  --teal: #0e7c6b;        /* primária */
+  --teal-dark: #12332e;   /* faixas escuras */
+  --teal-lt: #e7f3ef;
+  --coral: #e5533c;       /* acento: botão Gestão Ativa */
+  --coral-lt: #fbe7e2;
+  --green: #2f9e6b;
+  --orange: #e0952b;
+  --yellow: #e6b800;
+  --red: #d64545;
+  --on-dark: #f4f1ea;
+  --on-dark-muted: rgba(244,241,234,.72);
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Nunito Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1c1a; --paper: #162724; --ink: #e4ebe8; --muted: #9fb0ab; --line: #26403b;
+    --teal: #3fb39d; --teal-dark: #0a1513; --teal-lt: #193a34; --coral: #f07a64; --coral-lt: #3a2420;
+    --green: #4cc28b; --orange: #f0ac4e; --yellow: #f0cc3c; --red: #ec6b6b;
+    --on-dark: #f4f1ea; --on-dark-muted: rgba(244,241,234,.72);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1c1a; --paper: #162724; --ink: #e4ebe8; --muted: #9fb0ab; --line: #26403b;
+  --teal: #3fb39d; --teal-dark: #0a1513; --teal-lt: #193a34; --coral: #f07a64; --coral-lt: #3a2420;
+  --green: #4cc28b; --orange: #f0ac4e; --yellow: #f0cc3c; --red: #ec6b6b;
+  --on-dark: #f4f1ea; --on-dark-muted: rgba(244,241,234,.72);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 16px; line-height: 1.62;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--teal-dark); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3, h4 { font-family: var(--f-display); line-height: 1.15; text-wrap: balance; margin: 0; color: var(--ink); }
+h2 { font-size: clamp(1.8rem, 3.6vw, 2.6rem); font-weight: 800; letter-spacing: -.01em; }
+h3 { font-size: 1.25rem; font-weight: 700; }
+h4 { font-size: 1.02rem; font-weight: 700; }
+p { margin: 0; }
+a { color: var(--teal); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; border-radius: 4px; }
+.eyebrow { font-size: .74rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--coral); }
+.lead { font-size: 1.12rem; color: var(--muted); max-width: 68ch; }
+.prose { max-width: 70ch; display: grid; gap: 14px; }
+.mono { font-family: var(--f-mono); font-size: .86em; }
+.tag { display: inline-block; font-size: .72rem; font-weight: 800; letter-spacing: .04em; padding: 3px 10px; border-radius: 999px; background: var(--teal-lt); color: var(--teal); }
+.tag.coral { background: var(--coral-lt); color: var(--coral); }
+.confirmar { font-size: .7rem; font-weight: 800; padding: 1px 7px; border-radius: 4px; border: 1px dashed var(--orange); color: var(--orange); white-space: nowrap; }
+
+/* ---------- Folha de rosto ---------- */
+.capa { background: var(--teal-dark); color: var(--on-dark); position: relative; overflow: hidden; }
+.capa .faixa { height: 6px; background: linear-gradient(90deg, #2f9e6b 0 33%, #e6b800 33% 66%, #426b95 66%); }
+.capa .wrap { padding-block: 40px 48px; display: grid; gap: 36px; }
+.inst { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; font-size: .9rem; color: var(--on-dark-muted); }
+.inst strong { color: var(--on-dark); font-family: var(--f-display); font-size: 1.05rem; letter-spacing: .02em; }
+.capa-main { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 40px; align-items: end; }
+.marca { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.logo { width: 54px; height: 54px; border-radius: 14px; background: #0e7c6b; display: grid; place-items: center; flex: none; }
+.capa h1 { color: var(--on-dark); font-size: clamp(2.6rem, 7vw, 4.6rem); font-weight: 800; letter-spacing: -.025em; }
+.capa h1 em { font-style: normal; color: #f07a64; }
+.capa .sub { margin-top: 14px; font-size: 1.15rem; color: var(--on-dark-muted); max-width: 52ch; }
+.fases { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 10px; }
+.fase-pill { border: 1px solid rgba(244,241,234,.25); border-radius: 999px; padding: 6px 14px; font-size: .86rem; color: var(--on-dark-muted); }
+.fase-pill b { color: var(--on-dark); }
+.fase-pill.atual { border-color: #f07a64; background: rgba(229,83,60,.18); }
+.ficha { border-top: 1px solid rgba(244,241,234,.2); padding-top: 18px; display: grid; gap: 18px; }
+.ficha dt { font-size: .7rem; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #f07a64; }
+.ficha dd { margin: 4px 0 0; color: var(--on-dark); }
+.ficha dd small { display: block; color: var(--on-dark-muted); font-size: .85rem; }
+.autores { display: grid; gap: 12px; }
+.autor { display: flex; gap: 12px; align-items: center; }
+.ini { width: 40px; height: 40px; border-radius: 50%; background: rgba(244,241,234,.12); border: 1px solid rgba(244,241,234,.3); display: grid; place-items: center; font-family: var(--f-display); font-weight: 700; flex: none; color: var(--on-dark); }
+
+/* ---------- Navegação ---------- */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--paper); border-bottom: 1px solid var(--line); }
+.nav .wrap { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: thin; }
+.nav a { flex: none; padding: 13px 12px; font-size: .88rem; font-weight: 700; color: var(--muted); text-decoration: none; border-bottom: 3px solid transparent; white-space: nowrap; }
+.nav a:hover { color: var(--ink); }
+.nav a.ativo { color: var(--ink); border-bottom-color: var(--coral); }
+.nav a span { font-family: var(--f-mono); font-size: .74rem; color: var(--teal); margin-right: 5px; }
+
+/* ---------- Seções ---------- */
+section.cap { padding-block: 72px; border-bottom: 1px solid var(--line); scroll-margin-top: 52px; }
+section.cap.alt { background: var(--paper); }
+.cap-head { display: grid; gap: 12px; margin-bottom: 34px; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.card { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+section.alt .card { background: var(--bg); }
+.card p, .card li { color: var(--muted); font-size: .95rem; }
+.card ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; }
+
+/* números */
+.numeros { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 2px solid var(--ink); }
+.num { padding: 18px 18px 18px 0; border-bottom: 1px solid var(--line); min-width: 0; }
+.num b { display: block; font-family: var(--f-display); font-size: clamp(1.7rem, 3.4vw, 2.4rem); font-weight: 800; color: var(--teal); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.num span { font-size: .9rem; color: var(--muted); }
+.fonte { margin-top: 12px; font-size: .8rem; color: var(--muted); }
+
+/* citação */
+.citacao { border-left: 4px solid var(--coral); padding: 6px 0 6px 20px; font-family: var(--f-display); font-size: clamp(1.25rem, 2.4vw, 1.6rem); font-weight: 500; line-height: 1.35; max-width: 46ch; }
+.citacao small { display: block; margin-top: 8px; font-family: var(--f-body); font-size: .82rem; color: var(--muted); font-weight: 600; }
+
+/* escala do score */
+.escala { display: grid; grid-template-columns: 30fr 20fr 20fr 15fr 15fr; border-radius: 10px; overflow: hidden; font-size: .8rem; font-weight: 800; color: #fff; }
+.escala div { padding: 12px 10px; min-width: 0; }
+.escala small { display: block; font-weight: 600; opacity: .9; font-family: var(--f-mono); font-size: .72rem; }
+.pesos { display: grid; gap: 10px; }
+.peso { display: grid; grid-template-columns: minmax(0, 190px) minmax(0, 1fr) 46px; gap: 12px; align-items: center; font-size: .9rem; }
+.barra { height: 10px; background: var(--teal-lt); border-radius: 99px; overflow: hidden; }
+.barra i { display: block; height: 100%; background: var(--teal); border-radius: 99px; }
+.peso b { font-variant-numeric: tabular-nums; text-align: right; font-family: var(--f-mono); font-size: .85rem; }
+
+/* linha do tempo das fases */
+.trilha { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+.trilha > div { padding: 26px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.trilha .f1 { background: var(--paper); }
+.trilha .f2 { background: var(--teal-dark); color: var(--on-dark); }
+.trilha .f2 h3, .trilha .f2 h4 { color: var(--on-dark); }
+.trilha .f2 p, .trilha .f2 li { color: var(--on-dark-muted); }
+.trilha ul { margin: 0; padding-left: 18px; display: grid; gap: 5px; font-size: .95rem; }
+
+/* barreiras */
+.barreiras { display: flex; flex-wrap: wrap; gap: 8px; }
+.barreiras code { font-family: var(--f-mono); font-size: .8rem; padding: 4px 9px; border-radius: 6px; background: var(--paper); border: 1px solid var(--line); color: var(--ink); }
+
+/* perfis */
+.perfil { border-top: 5px solid var(--teal); }
+.perfil.coral { border-top-color: var(--coral); }
+.perfil.verde { border-top-color: var(--green); }
+.perfil.cinza { border-top-color: var(--muted); }
+.perfil .quem { font-size: .82rem; font-weight: 700; color: var(--muted); }
+
+/* fluxo numerado (é sequência real) */
+.passos { counter-reset: p; display: grid; gap: 0; border-left: 2px solid var(--line); margin-left: 14px; }
+.passo { position: relative; padding: 0 0 22px 30px; }
+.passo::before { counter-increment: p; content: counter(p); position: absolute; left: -15px; top: -2px; width: 28px; height: 28px; border-radius: 50%; background: var(--teal); color: #fff; font-weight: 800; font-size: .82rem; display: grid; place-items: center; }
+.passo.dir::before { background: var(--coral); }
+.passo h4 { margin-bottom: 3px; }
+.passo p { color: var(--muted); font-size: .95rem; max-width: 70ch; }
+.quem-faz { font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-left: 6px; color: var(--muted); }
+
+/* tabela */
+.tabela { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; min-width: 640px; }
+th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td b { color: var(--ink); }
+
+/* arquitetura */
+.diagrama { background: var(--paper); border: 1px solid var(--line); border-radius: 14px; padding: 18px; overflow-x: auto; }
+.diagrama svg { display: block; margin: 0 auto; }
+.camadas { display: grid; gap: 10px; }
+.camada { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 14px; align-items: start; background: var(--paper); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+section.alt .camada { background: var(--bg); }
+.camada .id { font-family: var(--f-mono); font-weight: 600; color: var(--teal); font-size: .95rem; }
+.camada p { color: var(--muted); font-size: .93rem; }
+.stack { display: flex; flex-wrap: wrap; gap: 6px; }
+.stack span { font-family: var(--f-mono); font-size: .76rem; padding: 3px 8px; border-radius: 6px; background: var(--teal-lt); color: var(--teal); }
+.ads { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.ad { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 10px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--paper); font-size: .92rem; }
+section.alt .ad { background: var(--bg); }
+.ad b { font-family: var(--f-mono); color: var(--coral); }
+.ad span { color: var(--muted); }
+
+.rodape { background: var(--teal-dark); color: var(--on-dark-muted); font-size: .88rem; }
+.rodape .wrap { padding-block: 32px; display: flex; flex-wrap: wrap; gap: 10px 28px; justify-content: space-between; }
+.rodape a { color: var(--on-dark); }
+
+@media (max-width: 900px) {
+  .capa-main, .grid3, .trilha { grid-template-columns: minmax(0, 1fr); }
+  .grid4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .numeros { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .grid2, .grid4, .ads, .numeros { grid-template-columns: minmax(0, 1fr); }
+  section.cap { padding-block: 52px; }
+  .escala { grid-template-columns: 1fr; }
+  .peso { grid-template-columns: minmax(0, 1fr) 46px; }
+  .peso .barra { grid-column: 1 / -1; grid-row: 2; }
+}
+</style>
+</head>
+<body>
+
+
+<!-- ===================== FOLHA DE ROSTO ===================== -->
+<header class="capa" id="inicio">
+  <div class="faixa" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="inst">
+      <strong>Universidade Federal do Tocantins · UFT</strong>
+      <span>Programa de Pós-Graduação em Governança e Transformação Digital (PPGGTD)</span>
+      <span>Mestrado</span>
+    </div>
+
+    <div class="capa-main">
+      <div>
+        <div class="marca">
+          <div class="logo" aria-hidden="true">
+            <svg width="30" height="34" viewBox="0 0 30 34"><path d="M3 32V15a12 12 0 0 1 24 0v17" fill="none" stroke="#fffdf8" stroke-width="5" stroke-linecap="round"/><circle cx="15" cy="15" r="3.2" fill="#e5533c"/><rect x="12" y="20" width="6" height="12" rx="3" fill="#e5533c"/></svg>
+          </div>
+          <span class="tag coral" style="background:rgba(229,83,60,.2);color:#f7b2a5">Controle social da educação inclusiva</span>
+        </div>
+        <h1>Escola Sem <em>Barreiras</em></h1>
+        <p class="sub">Uma plataforma que mostra, escola por escola, quanto a rede de ensino está preparada para receber alunos com deficiência. Na Fase 2, ela passa a ajudar diretores e secretarias a agir sobre o que os dados mostram.</p>
+        <div class="fases">
+          <span class="fase-pill"><b>Fase 1</b> · Tornar o invisível visível</span>
+          <span class="fase-pill atual"><b>Fase 2</b> · Gestão Ativa</span>
+        </div>
+      </div>
+
+      <dl class="ficha">
+        <div>
+          <dt>Discentes de Mestrado</dt>
+          <dd class="autores">
+            <div class="autor"><span class="ini">MJ</span><div>Marcello de Jesus Fernandes<small>Desenvolvedor</small></div></div>
+            <div class="autor"><span class="ini">CA</span><div>Cassiano Alves<small>Analista de requisitos e QA</small></div></div>
+          </dd>
+        </div>
+        <div>
+          <dt>Disciplinas</dt>
+          <dd>Fase 1<small>Ferramentas para Mudança e a Inovação em Serviços Públicos</small></dd>
+          <dd>Fase 2<small>Gerenciamento de Projeto Tecnológico</small></dd>
+        </div>
+        <div>
+          <dt>Docentes</dt>
+          <dd><small>Prof. David Nadler Prata · Profa. Marina Figueiredo Moreira · Prof. Paulo Henrique de Souza Bermejo · Prof. Gentil Veloso · Prof. Bruno Mortari</small></dd>
+        </div>
+        <div>
+          <dt>Versão</dt>
+          <dd><small>Primeira versão · novembro de 2026 · escola-sem-barreiras.vercel.app</small></dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</header>
+
+<nav class="nav" aria-label="Capítulos">
+  <div class="wrap">
+    <a href="#produto"><span>1</span>O produto</a>
+    <a href="#fase1"><span>2</span>Fase 1</a>
+    <a href="#fase2"><span>3</span>Fase 2</a>
+    <a href="#perfis"><span>4</span>Perfis e funcionalidades</a>
+    <a href="#sociedade"><span>5</span>Potencial social</a>
+    <a href="#negocio"><span>6</span>Modelo de negócio</a>
+    <a href="#arquitetura"><span>7</span>Arquitetura</a>
+  </div>
+</nav>
+
+<main>
+<!-- ===================== 1. PRODUTO ===================== -->
+<section class="cap" id="produto">
+  <div class="wrap">
+    <div class="cap-head">
+      <p class="eyebrow">1 · O produto</p>
+      <h2>Transparência sobre a inclusão, a partir de um dado que já existe</h2>
+    </div>
+    <div class="grid2" style="align-items:start; gap:40px">
+      <div class="prose">
+        <p>Todo ano, cada escola do país responde ao <b>Censo Escolar</b> do INEP. As respostas dizem se a escola tem Atendimento Educacional Especializado (AEE), intérprete de Libras, revisor de Braille, rampa, banheiro acessível, piso tátil. Esses dados são públicos, mas chegam como microdados em planilhas de centenas de colunas, que quase ninguém consegue ler.</p>
+        <p>O <b>Escola Sem Barreiras</b> transforma esses microdados em linguagem cidadã. Cada escola, município e estado recebe um <b>score de 0 a 10</b>, organizado pelos quatro eixos da <b>Política Nacional de Educação Especial Inclusiva (PNEEI, Decreto 12.686/2025)</b>. Famílias, imprensa, pesquisadores e a própria gestão pública podem acompanhar, comparar e cobrar.</p>
+        <p>É uma iniciativa da sociedade civil, sem vínculo governamental, com metodologia pública e versionada. O score mede o que o Censo declara. Ele não substitui a avaliação pedagógica da escola.</p>
+      </div>
+      <div>
+        <div class="numeros">
+          <div class="num"><b>2,45 mi</b><span>alunos com deficiência matriculados</span></div>
+          <div class="num"><b>98.310</b><span>escolas com esses alunos e sem AEE</span></div>
+          <div class="num"><b>25.336</b><span>escolas sem nenhum recurso de acessibilidade</span></div>
+          <div class="num"><b>1,9%</b><span>das escolas têm profissional de Libras</span></div>
+          <div class="num"><b>0,3%</b><span>têm revisor de Braille</span></div>
+          <div class="num"><b>180.540</b><span>escolas em atividade na base do produto</span></div>
+        </div>
+        <p class="fonte">Fonte: Microdados do Censo Escolar da Educação Básica (INEP/MEC), processados pelo ETL do projeto; contexto do problema na Narrativa da Fase 2.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 2. FASE 1 ===================== -->
+<section class="cap alt" id="fase1">
+  <div class="wrap">
+    <div class="cap-head">
+      <p class="eyebrow">2 · Fase 1 · Primeira disciplina</p>
+      <h2>Tornar o invisível visível</h2>
+      <p class="lead">A Fase 1 construiu a área pública: um painel aberto, sem cadastro, que mostra a situação de cada município e de cada escola.</p>
+    </div>
+
+    <div class="grid3">
+      <div class="card"><h3>Início do município</h3><p>Score geral, faixa, os quatro eixos da PNEEI e a posição do município no estado. A busca é por Região, UF e Município.</p></div>
+      <div class="card"><h3>Escolas</h3><p>Lista das escolas com filtros de "situação crítica" e "sem AEE". Cada escola tem uma ficha com os indicadores e as barreiras apontadas pelo Censo.</p></div>
+      <div class="card"><h3>Comparar</h3><p>Rankings de estados e de municípios, para ver onde a política avança e onde não avança.</p></div>
+      <div class="card"><h3>Diagnóstico IA</h3><p>Leitura do município em linguagem simples, escrita por IA a partir dos indicadores e marcada como texto gerado por IA.</p></div>
+      <div class="card"><h3>Dados abertos e metodologia</h3><p>Links para os microdados e a API, com a regra de cálculo publicada e versionada (score v1.1).</p></div>
+      <div class="card"><h3>Acessibilidade</h3><p>Alto contraste e ajuste do tamanho da fonte em todas as páginas.</p></div>
+    </div>
+
+    <div class="grid2" style="margin-top:40px; align-items:start; gap:40px">
+      <div class="card">
+        <h3>Como o score é calculado</h3>
+        <p>São 11 variáveis do Censo em três dimensões. A nota do município é a média das escolas ponderada pelo número de matrículas da educação especial.</p>
+        <div class="pesos" style="margin-top:8px">
+          <div class="peso"><span>D1 · Suporte educacional</span><span class="barra"><i style="width:45%"></i></span><b>45%</b></div>
+          <div class="peso"><span>D3 · Acessibilidade física</span><span class="barra"><i style="width:30%"></i></span><b>30%</b></div>
+          <div class="peso"><span>D2 · Recursos humanos</span><span class="barra"><i style="width:25%"></i></span><b>25%</b></div>
+        </div>
+        <p style="font-size:.85rem">D1: AEE e matrícula em classe comum. D2: Libras e Braille. D3: rampa, banheiro acessível, corrimão, piso tátil, sinalização visual e sonora, elevador.</p>
+      </div>
+      <div class="card">
+        <h3>Faixas de leitura</h3>
+        <div class="escala" role="img" aria-label="Escala de 0 a 10 em cinco faixas">
+          <div style="background:#E52207">Crítico<small>0 a 2,9</small></div>
+          <div style="background:#E05C00">Insuficiente<small>3,0 a 4,9</small></div>
+          <div style="background:#b39000">Em desenvolvimento<small>5,0 a 6,9</small></div>
+          <div style="background:#168821">Adequado<small>7,0 a 8,4</small></div>
+          <div style="background:#1351B4">Referência<small>8,5 a 10</small></div>
+        </div>
+        <p>Entre os estados, o score varia de 1,2 (Amazonas) a 4,4 (Distrito Federal). Nenhuma unidade da federação chega à faixa "em desenvolvimento".</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 3. FASE 2 ===================== -->
+<section class="cap" id="fase2">
+  <div class="wrap">
+    <div class="cap-head">
+      <p class="eyebrow">3 · Fase 2 · Segunda disciplina</p>
+      <h2>Gestão Ativa: do diagnóstico ao plano de ação</h2>
+    </div>
+
+    <div class="grid2" style="align-items:center; gap:40px; margin-bottom:40px">
+      <p class="citacao">"A Fase 1 gerou consciência, mas não gerou movimento. A principal dor não é falta de informação, é a falta de instrumento de ação."<small>Narrativa da Fase 2</small></p>
+      <div class="prose">
+        <p>A Fase 1 mostra que uma escola não tem AEE ou rampa. O diretor dessa escola já sabia. O que ele não tinha era um jeito formal de registrar o obstáculo, explicar o contexto e pedir uma resposta da secretaria.</p>
+        <p>A Fase 2 cria a <b>Gestão Ativa</b>, uma área restrita onde o diretor declara os obstáculos da escola e propõe ações. A secretaria analisa essas propostas e monta o plano da rede. Com isso, o sistema deixa de ser um espelho e vira um instrumento de gestão.</p>
+      </div>
+    </div>
+
+    <div class="trilha">
+      <div class="f1">
+        <span class="tag">Fase 1 · área pública</span>
+        <h3>Espelho</h3>
+        <ul>
+          <li>Mostra a situação a partir do Censo</li>
+          <li>Leitura pública, sem cadastro</li>
+          <li>Score, rankings, fichas de escola</li>
+          <li>Diagnóstico IA do município</li>
+        </ul>
+      </div>
+      <div class="f2">
+        <span class="tag coral" style="background:rgba(229,83,60,.2);color:#f7b2a5">Fase 2 · Gestão Ativa</span>
+        <h3>Instrumento de gestão</h3>
+        <ul>
+          <li>Acesso por papel, com vínculo validado</li>
+          <li>Declaração de Obstáculos por barreira</li>
+          <li>Plano de Ação da escola e Plano Estratégico Municipal</li>
+          <li>Publicação do que a escola decidir na área pública</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top:48px">O que construímos na Fase 2</h3>
+    <div class="grid3" style="margin-top:18px">
+      <div class="card"><span class="tag">Acesso</span><h4>Entrada sem senha</h4><p>Código de 6 dígitos por e-mail, válido por 10 minutos. O diretor pede acesso com o código INEP da escola e a secretaria do município aprova. Secretarias são habilitadas pela equipe, após confirmação por canal institucional.</p></div>
+      <div class="card"><span class="tag">Escola</span><h4>Declaração de Obstáculos</h4><p>Para cada barreira apontada pelo Censo, o diretor relata o obstáculo (com ajuda de uma conversa com IA), registra divergência com o dado ou declara que não há relato. Ao emitir, a versão é congelada.</p></div>
+      <div class="card"><span class="tag">Escola</span><h4>Plano de Ação</h4><p>A IA propõe ações e o diretor decide. Cada ação cita a barreira que a motivou e o horizonte LOA/PPA. Ao submeter, a versão vai para a fila da secretaria.</p></div>
+      <div class="card"><span class="tag">Rede</span><h4>Dashboard e análise</h4><p>O secretário vê os eixos do pior para o melhor, as escolas que mais pesam no score da rede e a fila de planos. Cada plano pode ser aceito, devolvido para ajustes ou reprovado, sempre com justificativa.</p></div>
+      <div class="card"><span class="tag">Rede</span><h4>Plano Estratégico Municipal</h4><p>Montado só a partir dos planos aceitos, com ações escolhidas uma a uma, e com uma narrativa executiva para o prefeito e a câmara. Planejamento e execução são estados separados.</p></div>
+      <div class="card"><span class="tag">Público</span><h4>Publicação e PDFs</h4><p>A escola decide o que publicar. A Declaração e o Plano aceito aparecem na ficha pública da escola. Declaração, Plano Escolar e Plano Municipal saem em PDF com código de conferência.</p></div>
+    </div>
+
+    <div class="grid2" style="margin-top:36px; align-items:start; gap:24px">
+      <div class="card">
+        <h4>As 11 barreiras do Censo usadas na Declaração</h4>
+        <div class="barreiras"><code>B-I-01</code><code>B-II-01</code><code>B-II-02</code><code>B-II-03</code><code>B-II-04</code><code>B-II-05</code><code>B-II-06</code><code>B-II-07</code><code>B-III-01</code><code>B-III-02</code><code>B-IV-01</code></div>
+        <p>O código indica o eixo da PNEEI (I a IV) e o número da barreira dentro dele. A regra de cada uma é pública. A Declaração não altera o score: o relato do diretor fica ao lado do dado do Censo, sem substituí-lo.</p>
+      </div>
+      <div class="card">
+        <h4>Fora do escopo, por decisão</h4>
+        <ul>
+          <li>Escrever no Educacenso (não há API)</li>
+          <li>Garantir orçamento ou execução das ações</li>
+          <li>IA alterando score ou estimando custo</li>
+          <li>Login gov.br (previsto para a Fase 3)</li>
+          <li>Assistente de preenchimento do Censo e série histórica 2023 a 2025 (trabalho futuro)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 4. PERFIS ===================== -->
+<section class="cap alt" id="perfis">
+  <div class="wrap">
+    <div class="cap-head">
+      <p class="eyebrow">4 · Perfis e funcionalidades</p>
+      <h2>Quatro perfis, cada um com o seu papel</h2>
+      <p class="lead">A área pública continua aberta a qualquer pessoa. A Gestão Ativa só mostra a cada perfil o que é do seu escopo: a sua escola ou a sua rede.</p>
+    </div>
+
+    <div class="grid4">
+      <div class="card perfil verde"><span class="quem">Área pública · sem cadastro</span><h3>Cidadão e família</h3><ul><li>Consulta o score do município e de cada escola</li><li>Vê as barreiras de uma escola específica</li><li>Lê a Declaração e o Plano que a escola publicou</li><li>Compara municípios e estados</li></ul></div>
+      <div class="card perfil coral"><span class="quem">Gestão Ativa · uma escola</span><h3>Diretor de escola</h3><ul><li>Pede acesso pelo código INEP</li><li>Declara os obstáculos de cada barreira</li><li>Monta e submete o Plano de Ação</li><li>Decide o que publicar e baixa os PDFs</li></ul></div>
+      <div class="card perfil"><span class="quem">Gestão Ativa · uma rede</span><h3>Secretaria de educação</h3><ul><li>Aprova os diretores da sua rede</li><li>Acompanha o dashboard e as declarações</li><li>Aceita, devolve ou reprova planos</li><li>Monta o Plano Estratégico Municipal</li></ul></div>
+      <div class="card perfil cinza"><span class="quem">Equipe do produto</span><h3>Administrador</h3><ul><li>Habilita secretarias após confirmação institucional</li><li>Retira publicações a pedido do titular</li><li>Não lê relatos nem planos</li></ul></div>
+    </div>
+
+    <h3 style="margin-top:48px; margin-bottom:20px">A conversa entre a escola e a secretaria</h3>
+    <div class="grid2" style="align-items:start; gap:40px">
+      <div class="passos">
+        <div class="passo"><h4>Secretaria habilitada <span class="quem-faz">admin</span></h4><p>A equipe confirma a secretaria por ofício ou canal institucional e cria o acesso.</p></div>
+        <div class="passo dir"><h4>Diretor pede acesso <span class="quem-faz">diretor</span></h4><p>Informa nome, e-mail e o código INEP. Confirma o e-mail com o código recebido.</p></div>
+        <div class="passo"><h4>Vínculo aprovado <span class="quem-faz">secretaria</span></h4><p>A secretaria confere que a pessoa dirige a escola e aprova, registrando como verificou.</p></div>
+        <div class="passo dir"><h4>Declaração de Obstáculos <span class="quem-faz">diretor</span></h4><p>Posição em cada barreira, com apoio da IA para redigir. Emitir congela a versão.</p></div>
+        <div class="passo dir"><h4>Plano de Ação submetido <span class="quem-faz">diretor</span></h4><p>Ações sugeridas pela IA, decididas pelo diretor, cada uma ligada a uma barreira.</p></div>
+        <div class="passo"><h4>Análise do plano <span class="quem-faz">secretaria</span></h4><p>Aceitar, pedir ajustes com comentário ou reprovar com justificativa. Um plano devolvido volta ao diretor como nova versão.</p></div>
+        <div class="passo"><h4>Plano Estratégico Municipal <span class="quem-faz">secretaria</span></h4><p>Reúne as ações aceitas da rede, com narrativa executiva para o prefeito e a câmara.</p></div>
+        <div class="passo dir" style="padding-bottom:0"><h4>Publicação <span class="quem-faz">diretor</span></h4><p>A escola publica a Declaração e o Plano aceito, que aparecem na ficha pública da escola.</p></div>
+      </div>
+      <div class="card" style="gap:14px">
+        <h4>Garantias que valem em todo o fluxo</h4>
+        <ul>
+          <li><b>Revisão humana.</b> A IA sugere textos e ações; quem decide é sempre uma pessoa, e o texto de IA é marcado como tal.</li>
+          <li><b>Versões imutáveis.</b> Declaração e Plano emitidos não mudam. Uma correção gera nova versão, com histórico.</li>
+          <li><b>Auditoria.</b> Toda decisão (aprovar vínculo, aceitar plano, publicar) fica registrada por 5 anos, sem possibilidade de edição.</li>
+          <li><b>Privacidade.</b> Antes de qualquer texto ir para a IA ou para a área pública, o Guardião LGPD procura nomes, documentos e situações que identifiquem alunos.</li>
+          <li><b>Escopo.</b> A secretaria de um município não vê nada de outra rede. O Distrito Federal, que não tem rede municipal, é atendido pela rede distrital.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 5. SOCIEDADE ===================== -->
+<section class="cap" id="sociedade">
+  <div class="wrap">
+    <div class="cap-head">
+      <p class="eyebrow">5 · Potencial para a sociedade</p>
+      <h2>Quem ganha quando a barreira tem nome, dono e prazo</h2>
+    </div>
+    <div class="grid3">
+      <div class="card"><h3>Famílias</h3><p>Uma mãe ou um pai de criança com deficiência pode ver, antes da matrícula, se a escola do bairro tem AEE, Libras ou acessibilidade física, e o que a escola se comprometeu a fazer.</p></div>
+      <div class="card"><h3>Escolas</h3><p>O diretor transforma uma carência que todos conhecem em evidência formal, com versão e data, endereçada à secretaria.</p></div>
+      <div class="card"><h3>Redes de ensino</h3><p>A secretaria enxerga a rede inteira por eixo e por número de alunos atingidos, e chega ao planejamento orçamentário (LOA/PPA) com prioridades justificadas.</p></div>
+      <div class="card"><h3>Controle social</h3><p>Conselhos, imprensa, Ministério Público e pesquisadores têm uma base comparável e pública para acompanhar a política nacional em cada município.</p></div>
+      <div class="card"><h3>Qualidade do dado</h3><p>Quando o diretor registra divergência com o Censo, aparecem erros de preenchimento que podem ser corrigidos no ano seguinte.</p></div>
+      <div class="card"><h3>Política pública</h3><p>A PNEEI teve adesão de 5.512 municípios até junho de 2026. O produto mostra se essa adesão vira estrutura nas escolas.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 6. NEGÓCIO ===================== -->
+<section class="cap alt" id="negocio">
+  <div class="wrap">
+    <div class="cap-head">
+      <p class="eyebrow">6 · Modelo de negócio</p>
+      <h2>Um bem público digital, com o MEC como horizonte</h2>
+      <p class="lead">No longo prazo, o produto pode virar infraestrutura de acompanhamento da PNEEI mantida pelo MEC. Até lá, o piloto se concentra em três públicos que já ganham com ele hoje.</p>
+    </div>
+
+    <div class="tabela">
+      <table>
+        <thead><tr><th>Público</th><th>Dor</th><th>O que recebe</th><th>Como entra</th></tr></thead>
+        <tbody>
+          <tr><td><b>Secretaria municipal de educação</b><br><span class="tag">cliente do piloto</span></td><td>Planejar a inclusão sem visão consolidada da rede e sem evidência para disputar orçamento.</td><td>Dashboard da rede, fila de planos das escolas, Plano Estratégico Municipal e narrativa executiva para o prefeito e a câmara.</td><td>Habilitada pela equipe, após confirmação institucional.</td></tr>
+          <tr><td><b>Diretor de escola</b><br><span class="tag">usuário direto</span></td><td>Conhece as barreiras, mas não tem instrumento formal para registrá-las e cobrar resposta.</td><td>Declaração de Obstáculos e Plano de Ação prontos, com apoio de IA e PDF.</td><td>Pede acesso com o código INEP; a secretaria aprova.</td></tr>
+          <tr><td><b>Cidadão e família</b><br><span class="tag">beneficiário</span></td><td>Escolher ou acompanhar a escola de um filho com necessidades específicas sem saber se ela está preparada.</td><td>Score, barreiras e compromissos publicados por escola, em linguagem simples.</td><td>Área pública aberta, sem cadastro.</td></tr>
+          <tr><td><b>MEC / INEP</b><br><span class="tag coral">horizonte</span></td><td>Acompanhar a execução da PNEEI em mais de 5 mil municípios.</td><td>Visão nacional da aderência e dados de divergência que melhoram o Censo.</td><td>Parceria institucional (fora do escopo atual).</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid3" style="margin-top:28px">
+      <div class="card"><h4>Custo atual</h4><p>Infraestrutura e IA em planos gratuitos (Render, Neon, Vercel, Brevo e provedores de IA). O custo cresce só com o uso, com troca de plano prevista se o piloto escalar.</p></div>
+      <div class="card"><h4>Riscos</h4><p>Adesão voluntária baixa, mudança no decreto e limites das APIs gratuitas de IA e e-mail.</p></div>
+      <div class="card"><h4>Oportunidades</h4><p>A PNEEI como alavanca para adesão, parceria com secretarias estaduais e publicação acadêmica.</p></div>
+    </div>
+    <p class="fonte">A tabela organiza o Canvas da Fase 2. O formato do contrato com o MEC ainda é proposta, sem modelo de preço definido.</p>
+  </div>
+</section>
+
+<!-- ===================== 7. ARQUITETURA ===================== -->
+<section class="cap" id="arquitetura">
+  <div class="wrap">
+    <div class="cap-head">
+      <p class="eyebrow">7 · Arquitetura</p>
+      <h2>Como o produto é construído</h2>
+      <p class="lead">Um frontend web, uma API e dois bancos com papéis diferentes: um, só de leitura, guarda o Censo processado; o outro guarda tudo o que as pessoas escrevem na Gestão Ativa.</p>
+    </div>
+
+    <div class="diagrama">
+<pre class="mermaid">
+flowchart LR
+  subgraph Fonte["Fonte de dados"]
+    CSV["Microdados Censo Escolar<br/>INEP/MEC (CSV)"]
+  end
+  subgraph ETL["ETL offline (Python + Pandas)"]
+    E1["Carga e filtro<br/>escolas em atividade"] --> E2["Score por escola<br/>11 variáveis"] --> E3["Agregação<br/>município e UF"]
+  end
+  subgraph Front["Frontend · Vercel"]
+    NX["Next.js 16 + React 19<br/>área pública + Gestão Ativa"]
+  end
+  subgraph API["Backend · Render"]
+    FA["FastAPI"]
+    GU["Guardião LGPD<br/>spaCy + regras"]
+    RAG["RAG híbrido<br/>BM25 + vetores"]
+    PDF["Gerador de PDF"]
+  end
+  subgraph Dados["Bancos"]
+    DB1[("incluia.db<br/>SQLite · só leitura")]
+    DB2[("Gestão Ativa<br/>PostgreSQL · Neon")]
+    DB3[("base_normativa.db<br/>Decreto + LBI")]
+  end
+  subgraph Ext["Serviços externos"]
+    IA["IA: Gemini → Groq → Mistral"]
+    MAIL["Brevo · e-mail do código"]
+  end
+  CSV --> E1
+  E3 --> DB1
+  NX -->|HTTPS / JSON| FA
+  FA --> DB1
+  FA --> DB2
+  FA --> GU --> IA
+  FA --> RAG --> DB3
+  FA --> PDF
+  FA --> MAIL
+</pre>
+    </div>
+
+    <div class="grid2" style="margin-top:36px; align-items:start; gap:24px">
+      <div class="card">
+        <span class="tag">Dados</span>
+        <h3>ETL e bancos</h3>
+        <p>O ETL lê os CSVs do Censo (separador ponto e vírgula, codificação cp1252), mantém só as escolas em atividade, calcula o score de cada escola e agrega por município e por estado, conferindo a agregação ao final. O resultado é o <span class="mono">incluia.db</span>, um SQLite de cerca de 30 MB versionado junto com o código e usado só para leitura.</p>
+        <p>A Gestão Ativa usa outro banco, com escrita: SQLite no desenvolvimento e <b>PostgreSQL no Neon</b> (região São Paulo) em produção, com 13 migrações Alembic. Versões emitidas e a trilha de auditoria são protegidas por gatilhos no próprio banco.</p>
+        <div class="stack"><span>Pandas</span><span>SQLite</span><span>PostgreSQL 18</span><span>SQLAlchemy 2</span><span>Alembic</span></div>
+      </div>
+      <div class="card">
+        <span class="tag">Backend e API</span>
+        <h3>FastAPI organizada por funcionalidade</h3>
+        <p>Cada funcionalidade é uma pasta com rotas, serviço e regras: mapa, indicadores do município, escolas, diagnóstico IA, acesso, diretor, declaração, plano, plano municipal, dashboard municipal, analítico e retenção. Rotas públicas não exigem login; as da Gestão Ativa exigem token, e o servidor confere conta e vínculo a cada requisição.</p>
+        <p>PDFs são gerados no servidor a partir da versão congelada, sem IA, com código de conferência.</p>
+        <div class="stack"><span>Python 3.11</span><span>FastAPI</span><span>uvicorn</span><span>PyJWT</span><span>fpdf2</span><span>httpx</span></div>
+      </div>
+      <div class="card">
+        <span class="tag">Frontend</span>
+        <h3>Next.js com área pública e área restrita</h3>
+        <p>O App Router separa as telas públicas (com cabeçalho, filtro Região → UF → Município e rodapé) das telas da Gestão Ativa, que têm moldura própria e conferem a sessão ao abrir. A sessão fica só na aba do navegador, porque computadores de escola costumam ser compartilhados.</p>
+        <div class="stack"><span>Next.js 16</span><span>React 19</span><span>TypeScript</span><span>Tailwind 4</span><span>zustand</span><span>recharts</span><span>Leaflet</span></div>
+      </div>
+      <div class="card">
+        <span class="tag">Hospedagem</span>
+        <h3>Tudo em planos gratuitos</h3>
+        <p>Frontend na <b>Vercel</b>, API no <b>Render</b>, banco no <b>Neon</b> e e-mail pelo <b>Brevo</b> (300 envios por dia; o sistema limita os códigos a 250 por dia). O plano gratuito do Render adormece a API após 15 minutos sem uso, e a primeira chamada depois disso demora até cerca de um minuto.</p>
+        <p>A integração contínua (GitHub Actions) roda 455 testes automatizados do backend em SQLite e em PostgreSQL, além da checagem de tipos e do lint do frontend.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:56px">Inteligência artificial</h3>
+    <p class="lead" style="margin-top:8px">A IA redige e sugere; nunca decide números, nunca altera o score e nunca publica sozinha.</p>
+    <div class="grid2" style="margin-top:20px; align-items:start; gap:24px">
+      <div class="card">
+        <h4>Onde a IA aparece</h4>
+        <ul>
+          <li><b>Diagnóstico IA do município</b>, público, guardado por edição do Censo.</li>
+          <li><b>Conversa por barreira</b> na Declaração: aprofunda o relato do diretor e redige um texto formal para revisão.</li>
+          <li><b>Sugestão de ações</b> no Plano de Ação, cada uma ligada à barreira de origem.</li>
+          <li><b>Síntese do analítico</b> e <b>narrativa executiva</b> para a secretaria.</li>
+        </ul>
+        <h4 style="margin-top:6px">Provedores em cadeia</h4>
+        <p>Chamadas diretas, sem SDK, com limite de 8 segundos por provedor: <span class="mono">gemini-3.5-flash</span>, depois Groq <span class="mono">gpt-oss-120b</span>, depois <span class="mono">mistral-small</span>. A resposta é validada contra um esquema antes de chegar à tela.</p>
+      </div>
+      <div class="card">
+        <h4>Guardião LGPD</h4>
+        <p>Roda dentro da API, sem serviço externo, antes de qualquer texto seguir para a IA ou para a área pública:</p>
+        <ul>
+          <li>regras para CPF, telefone, e-mail e documentos;</li>
+          <li>reconhecimento de nomes de pessoas com spaCy em português;</li>
+          <li>contexto escolar que identifica alguém ("o único aluno cego da turma");</li>
+          <li>instruções escondidas no texto (prompt injection);</li>
+          <li>nomes de lugares e códigos de 8 dígitos.</li>
+        </ul>
+        <p>Dados de saúde ou situação sensível bloqueiam o envio. O cliente de IA só aceita texto que já passou pelo Guardião.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top:44px">RAG em camadas</h3>
+    <p class="lead" style="margin-top:8px">Cada resposta da IA recebe só o contexto necessário, montado em quatro camadas, e só pode citar o que estava nele.</p>
+    <div class="camadas" style="margin-top:20px">
+      <div class="camada"><span class="id">C1</span><div><h4>Fatos da escola</h4><p>Indicadores e barreiras consultados por SQL no banco do Censo. Não há busca aproximada: o número vem do dado.</p></div></div>
+      <div class="camada"><span class="id">C2</span><div><h4>Regra da barreira</h4><p>A regra pública que fez a barreira aparecer para aquela escola.</p></div></div>
+      <div class="camada"><span class="id">C3</span><div><h4>Corpus normativo</h4><p>Decreto 12.686/2025 consolidado (101 trechos) e LBI arts. 27 a 30 (31 trechos), divididos por artigo, parágrafo e inciso. A busca combina palavras-chave (FTS5/BM25) e vetores (<span class="mono">gemini-embedding-001</span>, 768 dimensões), fundidos por RRF. Sem a API de embeddings, segue só por palavras-chave.</p></div></div>
+      <div class="camada"><span class="id">C4</span><div><h4>Registros privados</h4><p>O que a própria escola ou rede já escreveu na Gestão Ativa, sempre dentro do escopo de quem pergunta.</p></div></div>
+    </div>
+    <p class="fonte">Contexto limitado a 2.500 tokens (escola) ou 5.000 (rede), com até 6 trechos normativos. Um validador rejeita citações de trechos que não estavam no contexto. Na avaliação com 8 perguntas, a busca híbrida trouxe o trecho certo entre os 3 primeiros em 8 de 8 e em 1º lugar em 7 de 8.</p>
+
+    <h3 style="margin-top:44px; margin-bottom:18px">Decisões de arquitetura</h3>
+    <div class="ads">
+      <div class="ad"><b>AD-01</b><span>Dois bancos: Censo só leitura e Gestão Ativa com escrita (PostgreSQL no Neon).</span></div>
+      <div class="ad"><b>AD-02</b><span>Autenticação própria, sem senha: papéis, vínculos e código por e-mail (Brevo).</span></div>
+      <div class="ad"><b>AD-03</b><span>Versões imutáveis e trilha de auditoria.</span></div>
+      <div class="ad"><b>AD-04</b><span>Barreiras e narrativa pública vindas do ETL ou geradas sob demanda.</span></div>
+      <div class="ad"><b>AD-05</b><span>IA gratuita, sempre atrás do Guardião LGPD.</span></div>
+      <div class="ad"><b>AD-06</b><span>Hospedagem gratuita, com mitigação da API que adormece.</span></div>
+      <div class="ad"><b>AD-07</b><span>Fim das contas e do chat da Fase 1; prazos de retenção (30 dias, 6 meses, 5 anos).</span></div>
+      <div class="ad"><b>AD-08</b><span>RAG em camadas, com busca híbrida e validação de citações.</span></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="rodape">
+  <div class="wrap">
+    <span>Escola Sem Barreiras · PPGGTD/UFT · Marcello de Jesus Fernandes e Cassiano Alves</span>
+    <span>Produto: <a href="https://escola-sem-barreiras.vercel.app" target="_blank" rel="noopener">escola-sem-barreiras.vercel.app</a> · Dados: Censo Escolar (INEP/MEC)</span>
+  </div>
+</footer>
+
+<script>
+// Destaca na navegação o capítulo que está na tela.
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('.nav a'));
+  var porId = {};
+  links.forEach(function (a) { porId[a.getAttribute('href').slice(1)] = a; });
+  if (!('IntersectionObserver' in window)) return;
+  var obs = new IntersectionObserver(function (entradas) {
+    entradas.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      links.forEach(function (a) { a.classList.remove('ativo'); });
+      var a = porId[e.target.id];
+      if (a) { a.classList.add('ativo'); a.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+    });
+  }, { rootMargin: '-45% 0px -50% 0px' });
+  document.querySelectorAll('section.cap').forEach(function (s) { obs.observe(s); });
+})();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  // Fora do visualizador de Artifacts o mermaid não é nativo: carrega a biblioteca e segue o tema do sistema.
+  var escuro = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  mermaid.initialize({ startOnLoad: true, theme: escuro ? "dark" : "neutral", securityLevel: "strict" });
+</script>
+</body>
+</html>

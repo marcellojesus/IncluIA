@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
     root: raizDoMonorepo,
   },
   outputFileTracingRoot: raizDoMonorepo,
+  // /documentacao: página HTML avulsa em public/documentacao/, sem link a partir do sistema.
+  async rewrites() {
+    return [{ source: "/documentacao", destination: "/documentacao/index.html" }];
+  },
 };
 
 export default nextConfig;
