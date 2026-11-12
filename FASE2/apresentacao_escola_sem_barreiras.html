@@ -546,49 +546,126 @@ section.alt .ad { background: var(--bg); }
     <!-- 7.1 -->
     <div class="sub" id="arq-visao">
       <h3><span class="num-sub">7.1</span>Visão geral</h3>
+      <p class="lead">Dois desenhos: o primeiro mostra o sistema inteiro em produção, de quem usa até os serviços externos; o segundo abre a parte de dados e mostra como o RAG prepara o contexto de cada chamada à IA.</p>
+
+      <h4 style="margin-top:22px">A · O sistema em produção</h4>
+      <p>Toda conexão com serviço externo parte do backend. O navegador só fala com o frontend e com a API; as chaves de IA e de e-mail ficam no servidor e nunca chegam ao usuário.</p>
       <div class="diagrama">
 <pre class="mermaid">
 flowchart LR
-  subgraph Fonte["Fonte de dados"]
-    CSV["Microdados Censo Escolar<br/>INEP/MEC (CSV)"]
-    LEG["Decreto 12.686 + LBI<br/>(texto oficial)"]
+  subgraph U["Quem usa"]
+    CID["Cidadão e família<br/>sem login"]
+    GES["Diretor(a), Secretaria<br/>e Admin · com login"]
   end
-  subgraph ETL["ETL offline (Python)"]
-    E1["Carga → Score →<br/>Agregação → Persistência"]
-    E2["Base normativa:<br/>trechos + embeddings"]
-  end
-  subgraph Front["Frontend · Vercel"]
+  subgraph FE["Frontend · Vercel"]
     NX["Next.js 16 + React 19<br/>área pública + Gestão Ativa"]
   end
-  subgraph API["Backend · Render"]
-    FA["FastAPI<br/>rotas por funcionalidade"]
+  subgraph BE["Backend · Render"]
+    API["API REST FastAPI<br/>rotas públicas + rotas por papel"]
+    AC["Acesso: código por e-mail,<br/>sessão, papéis e vínculos"]
     GU["Guardião LGPD<br/>5 camadas locais"]
-    CTX["Montador de contexto<br/>RAG C1–C4"]
-    VAL["Validador de citações<br/>+ conferência da saída"]
-    PDF["PDF (fpdf2)"]
+    RAG["Montador de contexto<br/>RAG C1–C4"]
+    CLI["Cliente de IA<br/>cadeia com troca automática"]
+    VAL["Validação da saída<br/>esquema + citações + Guardião"]
+    PDF["Geração de PDF<br/>fpdf2, sem IA"]
   end
-  subgraph Dados["Bancos"]
-    DB1[("incluia.db<br/>SQLite · só leitura")]
+  subgraph BD["Dados"]
+    DB1[("incluia.db<br/>Censo + score · leitura")]
+    DB3[("base_normativa.db<br/>Decreto + LBI · leitura")]
     DB2[("Gestão Ativa<br/>PostgreSQL 18 · Neon")]
-    DB3[("base_normativa.db<br/>SQLite · só leitura")]
   end
-  subgraph Ext["Serviços externos"]
-    IA["Gemini → Groq → Mistral"]
-    MAIL["Brevo (código por e-mail)"]
+  subgraph IA["Provedores de IA · APIs externas"]
+    G1["Google Gemini<br/>gemini-3.5-flash"]
+    G2["Groq<br/>gpt-oss-120b"]
+    G3["Mistral<br/>mistral-small"]
+    EMB["Gemini Embeddings<br/>gemini-embedding-001"]
   end
-  CSV --> E1 --> DB1
-  LEG --> E2 --> DB3
-  NX -->|HTTPS / JSON| FA
-  FA --> DB1
-  FA --> DB2
-  FA --> PDF
-  FA --> MAIL
-  FA --> GU --> CTX --> IA
-  CTX --> DB1
-  CTX --> DB3
-  IA --> VAL --> FA
+  MAIL["Brevo<br/>API de e-mail"]
+  GH["GitHub · main<br/>testes automáticos"]
+
+  CID -->|"HTTPS"| NX
+  GES -->|"HTTPS"| NX
+  NX -->|"HTTPS · JSON + token"| API
+  API --> AC
+  AC -->|"código de acesso"| MAIL
+  AC --> DB2
+  API --> DB1
+  API --> DB2
+  API --> PDF
+  API -->|"texto do usuário"| GU
+  GU -->|"texto protegido"| RAG
+  RAG --> DB1
+  RAG --> DB3
+  RAG --> DB2
+  RAG -->|"vetor da pergunta"| EMB
+  RAG -->|"prompt montado"| CLI
+  CLI -->|"1ª opção"| G1
+  CLI -.->|"se falhar"| G2
+  CLI -.->|"se falhar"| G3
+  CLI --> VAL
+  VAL -->|"resposta aprovada"| API
+  GH -.->|"deploy"| NX
+  GH -.->|"deploy"| API
 </pre>
       </div>
+
+      <h4 style="margin-top:26px">B · Dados, RAG e IA</h4>
+      <p>Os números vêm sempre do ETL e do banco, nunca da IA. O RAG junta quatro camadas de contexto (C1 a C4), a IA redige sobre elas e a resposta só volta ao usuário depois de conferida.</p>
+      <div class="diagrama">
+<pre class="mermaid">
+flowchart TB
+  subgraph OFF["Preparação offline · uma vez por edição do Censo"]
+    CSV["Microdados do Censo Escolar<br/>INEP/MEC"]
+    LEG["Decreto 12.686/2025 + LBI<br/>texto oficial"]
+    MET["Metodologia de barreiras<br/>regra de cada barreira"]
+    ETL["ETL Python<br/>carga → score → agregação"]
+    IDX["Indexação<br/>trechos + palavras-chave FTS5"]
+    EMBO["Gemini Embeddings<br/>vetores dos trechos"]
+  end
+  subgraph BANCOS["Bancos"]
+    DB1[("incluia.db<br/>escolas, municípios, UFs")]
+    DB3[("base_normativa.db<br/>trechos, vetores, regras")]
+    DB2[("Gestão Ativa · Neon<br/>declarações, posições, planos")]
+  end
+  subgraph CALL["A cada pedido de sugestão"]
+    TXT["Fala do diretor ou pedido<br/>da secretaria"]
+    GU["Guardião LGPD<br/>mascara ou bloqueia"]
+    EMBQ["Gemini Embeddings<br/>vetor da pergunta"]
+    BUS["Busca híbrida<br/>mapa da barreira + palavra-chave + vetor"]
+    C1["C1 · fatos da escola<br/>SQL exato, em faixas"]
+    C2["C2 · regra da barreira"]
+    C3["C3 · trechos normativos<br/>até 6"]
+    C4["C4 · contexto privado<br/>posições e planos aceitos"]
+    MON["Montador de contexto<br/>preâmbulo de segurança + corte de tokens"]
+    LLM["IA: Gemini → Groq → Mistral"]
+    VAL["Validação<br/>esquema Pydantic, citações<br/>e Guardião na saída"]
+    OUT["Sugestão ao usuário<br/>revisão humana antes de gravar"]
+  end
+
+  CSV --> ETL --> DB1
+  LEG --> IDX --> DB3
+  IDX --> EMBO --> DB3
+  MET --> DB3
+
+  TXT --> GU
+  GU --> EMBQ --> BUS
+  GU --> BUS
+  DB3 --> BUS --> C3
+  DB1 --> C1
+  DB3 --> C2
+  DB2 --> C4
+  C1 --> MON
+  C2 --> MON
+  C3 --> MON
+  C4 --> MON
+  GU -->|"texto protegido"| MON
+  MON --> LLM --> VAL
+  VAL -->|"aprovada"| OUT
+  VAL -.->|"reprovada: tenta o próximo provedor"| LLM
+  OUT -->|"usuário confirma"| DB2
+</pre>
+      </div>
+
       <div class="grid4" style="margin-top:20px">
         <div class="card principio"><h4>A IA não decide números</h4><p>Score, faixas e barreiras são calculados de forma determinística pelo ETL. A IA só explica e sugere.</p></div>
         <div class="card principio"><h4>Leitura separada da escrita</h4><p>O Censo é um artefato só de leitura. O que as pessoas escrevem vai para outro banco, persistente.</p></div>
@@ -624,7 +701,7 @@ flowchart LR
         <div class="card">
           <span class="tag coral">Escrita</span>
           <h4>Banco da Gestão Ativa</h4>
-          <p>Contas, vínculos, posições, declarações, planos, decisões e auditoria. SQLAlchemy 2 com migrações Alembic portáveis: SQLite no desenvolvimento, PostgreSQL 18 no Neon em produção.</p>
+          <p>Contas, vínculos, posições, declarações, planos, decisões e auditoria. SQLAlchemy 2 com migrações Alembic, em PostgreSQL 18 no Neon.</p>
           <p>Liga-se ao Censo pelo código INEP da escola, pelo código IBGE do município, pela edição do Censo e pela versão da metodologia de barreiras.</p>
         </div>
         <div class="card">
@@ -666,7 +743,7 @@ flowchart LR
           <thead><tr><th>Grupo</th><th>Funcionalidades (backend/app/features)</th><th>Quem acessa</th></tr></thead>
           <tbody>
             <tr><td><b>Área pública</b></td><td><span class="mono">mapa</span>, <span class="mono">indicadores_municipio</span>, <span class="mono">escolas</span>, <span class="mono">diagnostico_ia</span> (narrativa pública), declaração e plano publicados</td><td>Qualquer pessoa, sem login</td></tr>
-            <tr><td><b>Acesso</b></td><td><span class="mono">acesso</span>: código por e-mail, pedido do diretor, vínculos, provisionamento de secretário, caixa de teste (só em desenvolvimento)</td><td>Rotas anônimas com limites + rotas por papel</td></tr>
+            <tr><td><b>Acesso</b></td><td><span class="mono">acesso</span>: código por e-mail, pedido do diretor, vínculos, provisionamento de secretário</td><td>Rotas anônimas com limites + rotas por papel</td></tr>
             <tr><td><b>Escola</b></td><td><span class="mono">diretor</span>, <span class="mono">declaracao</span> (posições, conversa com IA, emissão, publicação), <span class="mono">plano</span> (sugestões, submissão, PDF)</td><td>Diretor com vínculo aprovado</td></tr>
             <tr><td><b>Rede</b></td><td><span class="mono">dashboard_municipal</span>, <span class="mono">analitico</span>, análise de planos, <span class="mono">plano_municipal</span> (ações, narrativa executiva, PDF)</td><td>Secretário da rede</td></tr>
             <tr><td><b>Administração</b></td><td>Provisionar secretários, retirar publicações; <span class="mono">retencao</span> (rotina de prazos)</td><td>Administrador (criado só pela linha de comando)</td></tr>
@@ -871,7 +948,7 @@ flowchart LR
     <div class="sub" id="arq-qualidade">
       <h3><span class="num-sub">7.10</span>Qualidade</h3>
       <div class="grid3" style="margin-top:6px">
-        <div class="card"><h4>455 testes automatizados</h4><p>A suíte do backend roda no SQLite e também no PostgreSQL 18, para que o que funciona localmente funcione em produção sem retrabalho.</p></div>
+        <div class="card"><h4>455 testes automatizados</h4><p>A suíte do backend roda também sobre PostgreSQL 18, o mesmo banco usado em produção.</p></div>
         <div class="card"><h4>Integração contínua</h4><p>GitHub Actions a cada push: backend em Python 3.11 e 3.14, backend contra PostgreSQL, checagem de tipos e lint do frontend.</p></div>
         <div class="card"><h4>Testes de arquitetura</h4><p>Só <span class="mono">ai_client.py</span> e <span class="mono">email.py</span> podem acessar a rede; nenhum SDK de provedor é importado; todo módulo que chama a IA protege o texto com os locais da rede. Conjunto de regressão do Guardião com 30 casos sintéticos, inclusive 10 frases que devem passar intactas.</p></div>
       </div>
