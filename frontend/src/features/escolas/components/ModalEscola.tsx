@@ -3,7 +3,7 @@ import { formatarMatriculasEsp } from "@/shared/lib/formatters";
 import { Badge } from "@/shared/components/Badge";
 import { Modal } from "@/shared/components/Modal";
 import { formatarScore } from "@/shared/lib/score";
-import type { Escola, StatusEixo } from "../types";
+import { rotuloRede, type Escola, type StatusEixo } from "../types";
 import { BarreirasEscola } from "./BarreirasEscola";
 import { DeclaracaoPublicaEscola } from "./DeclaracaoPublicaEscola";
 
@@ -26,7 +26,7 @@ export function ModalEscola({ escola, onFechar }: { escola: Escola; onFechar: ()
   return (
     <Modal
       titulo={escola.nome}
-      subtitulo={`Rede ${escola.rede} · ${escola.bairro} · INEP ${escola.coEntidade}`}
+      subtitulo={`Escola ${rotuloRede(escola.rede).toLowerCase()} · ${escola.bairro} · INEP ${escola.coEntidade}`}
       onFechar={onFechar}
     >
       <div className="mb-4 grid grid-cols-4 gap-2">
@@ -66,7 +66,7 @@ export function ModalEscola({ escola, onFechar }: { escola: Escola; onFechar: ()
           </tr>
           <tr className="border-b border-gray-100">
             <td className="py-1.5 text-gray-500">Rede de ensino</td>
-            <td className="py-1.5 text-right font-bold text-gray-700">{escola.rede}</td>
+            <td className="py-1.5 text-right font-bold text-gray-700">{rotuloRede(escola.rede)}</td>
           </tr>
           <tr className="border-b border-gray-100">
             <td className="py-1.5 text-gray-500">Ranking no município</td>

@@ -51,6 +51,18 @@ def test_diretor_distrital_pede_acesso_e_federal_ou_privada_nao(ambiente):
         resposta = _solicitar(cliente, email=f"d{escola}@escola.gov.br", escola=escola)
         assert resposta.status_code == 422
         assert "rede distrital" in resposta.json()["detail"]
+    privada = _solicitar(cliente, email="dp@escola.gov.br", escola=PRIVADA_DF).json()["detail"]
+    assert "Brasília/DF) na rede privada" in privada
+
+
+def test_recusa_fora_do_df_diz_a_rede_da_escola_e_nao_cita_o_df(ambiente):
+    cliente, _ = ambiente
+    maranata = 17054486  # escola privada de Palmas/TO
+    detalhe = _solicitar(cliente, email="dm@escola.gov.br", escola=maranata).json()["detail"]
+    assert detalhe == (
+        "O Censo Escolar 2025 registra esta escola (Palmas/TO) na rede privada. "
+        "Neste piloto, a Gestão Ativa atende só escolas da rede municipal."
+    )
 
 
 def test_secretario_do_df_aprova_e_o_de_outro_municipio_nao_ve(ambiente):

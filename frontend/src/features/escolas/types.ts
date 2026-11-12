@@ -7,6 +7,12 @@ export type StatusEixo = "ok" | "warn" | "nok" | "na" | "omitido";
 
 export type Rede = "Federal" | "Estadual" | "Municipal" | "Privada";
 
+// "Pública municipal" ou "Privada": quem consulta (e o diretor que vai pedir acesso à Gestão Ativa,
+// só para escolas públicas da rede municipal ou distrital) vê de cara se a escola é pública.
+export function rotuloRede(rede: Rede): string {
+  return rede === "Privada" ? "Privada" : `Pública ${rede.toLowerCase()}`;
+}
+
 export type Escola = {
   coEntidade: number;
   nome: string;

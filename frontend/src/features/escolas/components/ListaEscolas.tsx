@@ -2,7 +2,7 @@
 // com um badge de texto + ponto colorido por eixo, no estilo do protótipo de referência.
 import { formatarMatriculasEsp } from "@/shared/lib/formatters";
 import type { PublicacaoGestao } from "../api";
-import type { Escola, StatusEixo } from "../types";
+import { rotuloRede, type Escola, type Rede, type StatusEixo } from "../types";
 
 const ESTILO_POR_STATUS: Record<StatusEixo, { texto: string; chip: string; dot: string; label: string }> = {
   ok: { texto: "text-gov-green", chip: "bg-green-50", dot: "bg-gov-green", label: "Conforme" },
@@ -30,6 +30,19 @@ function ColunaEixo({ label, status }: { label: string; status: StatusEixo }) {
       <span className="text-[10px] font-extrabold uppercase tracking-wide text-gray-400">{label}</span>
       <BadgeStatusEixo status={status} />
     </div>
+  );
+}
+
+function SeloRede({ rede }: { rede: Rede }) {
+  const privada = rede === "Privada";
+  return (
+    <span
+      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide ${
+        privada ? "bg-gray-100 text-gray-500" : "bg-gov-blue-lt text-gov-blue"
+      }`}
+    >
+      {rotuloRede(rede)}
+    </span>
   );
 }
 
@@ -77,9 +90,12 @@ export function ListaEscolas({
           className={`flex w-full items-center gap-4 rounded-2xl bg-paper px-5 py-4 text-left shadow-sm transition-shadow hover:shadow ${publicacoes[escola.coEntidade]?.planoVersao ? "ring-2 ring-[#2f9e6b]/40" : ""}`}
         >
           <div className="min-w-0 flex-1">
-            <div className="truncate font-bold text-gov-blue-dark">{escola.nome}</div>
+            <div className="flex min-w-0 items-center gap-2">
+              <span className="truncate font-bold text-gov-blue-dark">{escola.nome}</span>
+              <SeloRede rede={escola.rede} />
+            </div>
             <div className="truncate text-xs text-gray-400">
-              {escola.bairro} · {escola.rede} · {formatarMatriculasEsp(escola.alunosEsp)} estudantes ESP
+              {escola.bairro} · {formatarMatriculasEsp(escola.alunosEsp)} estudantes ESP
             </div>
             <SelosPublicacao publicacao={publicacoes[escola.coEntidade]} />
           </div>

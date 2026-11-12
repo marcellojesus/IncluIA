@@ -184,7 +184,7 @@ def solicitar_acesso_diretor(sessao: Session, *, nome: str, email: str, co_entid
     if escola is None:
         raise ErroAcesso("Código INEP não encontrado no Censo Escolar 2025.", 404)
     if escola.rede != censo.rede_da_gestao(escola.co_municipio):
-        raise ErroAcesso("Neste piloto, a Gestão Ativa atende só escolas da rede municipal (no Distrito Federal, da rede distrital).")
+        raise ErroAcesso(censo.motivo_fora_do_piloto(escola))
 
     conta = _conta_por_email(sessao, email)
     if conta is None:

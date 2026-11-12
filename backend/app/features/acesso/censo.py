@@ -48,6 +48,20 @@ class EscolaCenso:
     rede: str
 
 
+_REDE_NO_TEXTO = {"Privada": "rede privada", "Federal": "rede federal", "Estadual": "rede estadual", "Municipal": "rede municipal"}
+
+
+def motivo_fora_do_piloto(escola: EscolaCenso) -> str:
+    """Recusa do pedido de acesso dizendo a rede da própria escola (dado público do Censo), para não
+    parecer que o sistema confundiu o município com o DF."""
+    rede = _REDE_NO_TEXTO.get(escola.rede, f"rede {escola.rede.lower()}")
+    atendida = rotulos_da_rede(escola.co_municipio).rede.lower()
+    return (
+        f"O Censo Escolar 2025 registra esta escola ({escola.municipio}/{escola.uf}) na {rede}. "
+        f"Neste piloto, a Gestão Ativa atende só escolas da {atendida}."
+    )
+
+
 @dataclass(frozen=True)
 class MunicipioCenso:
     co_municipio: int
