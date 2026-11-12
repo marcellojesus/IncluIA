@@ -6,6 +6,7 @@ import { useGestaoStore } from "./store";
 import type {
   AcaoVinculo,
   CamposAcao,
+  ContaDaGestao,
   EstadoPlano,
   VersaoPlano,
   ApontamentoEntrada,
@@ -119,6 +120,8 @@ export const decidirVinculo = (id: string, acao: AcaoVinculo, categoria: string,
 
 export const provisionarSecretario = (dados: { nome: string; email: string; coMunicipio: number; categoria: string; metodoVerificacao: string }) =>
   chamar<{ mensagem: string }>("/admin/secretarios", post(dados), true);
+
+export const listarContas = () => chamar<ContaDaGestao[]>("/admin/contas", {}, true);
 
 // Só existe com AMBIENTE=dev no backend e acesso pela própria máquina; fora disso responde 404.
 export type EmailTeste = { para: string; assunto: string; texto: string; codigo: string; enviadaEm: string };

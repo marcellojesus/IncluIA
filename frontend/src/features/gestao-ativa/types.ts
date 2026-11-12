@@ -26,6 +26,21 @@ export type Eu = {
 
 export type EstadoVinculo = "pendente" | "aprovado" | "rejeitado" | "suspenso" | "revogado";
 
+export type ContaDaGestao = {
+  papel: "secretario" | "diretor";
+  nome: string;
+  email: string;
+  emailConfirmado: boolean;
+  estado: EstadoVinculo;
+  pedidoConfirmado: boolean;
+  coMunicipio: number;
+  municipio: string;
+  uf: string;
+  coEntidade: number | null;
+  escola: string | null;
+  criadoEm: string;
+};
+
 export type SolicitacaoVinculo = {
   id: string;
   nome: string;

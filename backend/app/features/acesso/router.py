@@ -12,6 +12,7 @@ from app.features.acesso import censo, servico
 from app.features.acesso.dependencias import SessaoGestao, exigir_admin, exigir_qualquer_perfil, exigir_secretario
 from app.features.acesso.protecao import exigir_configuracao, limitar_envio_por_ip, limitar_por_ip
 from app.features.acesso.schemas import (
+    ContaDaGestao,
     Decisao,
     Entrada,
     Escopo,
@@ -113,6 +114,28 @@ def decidir(
 
 
 # --- Administrador ---------------------------------------------------------------------------
+
+@router.get("/admin/contas", response_model=list[ContaDaGestao])
+def listar_contas(
+    _: SessaoGestao = Depends(exigir_admin), sessao: Session = Depends(obter_sessao)
+) -> list[ContaDaGestao]:
+    """Secretários e diretores com e-mail, município e escola, para o administrador do piloto."""
+    vinculos = servico.contas_da_gestao(sessao)
+    escolas = censo.escolas({v.co_entidade for v in vinculos if v.co_entidade})
+    municipios = {c: censo.municipio(c) for c in {v.co_municipio for v in vinculos}}
+    linhas = []
+    for v in vinculos:
+        municipio = municipios.get(v.co_municipio)
+        escola = escolas.get(v.co_entidade) if v.co_entidade else None
+        linhas.append(ContaDaGestao(
+            papel=v.conta.papel, nome=v.conta.nome, email=v.conta.email,
+            email_confirmado=v.conta.email_confirmado_em is not None, estado=v.estado,
+            pedido_confirmado=v.confirmado_em is not None, co_municipio=v.co_municipio,
+            municipio=municipio.nome if municipio else "", uf=municipio.uf if municipio else "",
+            co_entidade=v.co_entidade, escola=escola.nome if escola else None, criado_em=v.criado_em,
+        ))
+    return sorted(linhas, key=lambda c: (c.uf, c.municipio, c.papel != "secretario", c.escola or "", c.nome))
+
 
 @router.post("/admin/secretarios", response_model=Mensagem, status_code=201)
 def provisionar_secretario(

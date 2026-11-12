@@ -267,6 +267,26 @@ def test_admin_provisiona_secretario(ambiente):
     assert cliente.post("/gestao/admin/secretarios", json=corpo, headers=secretario).status_code == 403
 
 
+def test_admin_ve_contas_com_email_municipio_e_escola(ambiente):
+    cliente, codigos = ambiente
+    _solicitar(cliente)
+    admin = _auth(_entrar(cliente, codigos, "admin@teste.gov.br")["token"])
+    contas = cliente.get("/gestao/admin/contas", headers=admin).json()
+
+    secretario = next(c for c in contas if c["email"] == "sec@niteroi.gov.br")
+    assert (secretario["papel"], secretario["municipio"], secretario["uf"], secretario["escola"]) == ("secretario", "Niterói", "RJ", None)
+    diretora = next(c for c in contas if c["email"] == "diretora@escola.gov.br")
+    assert (diretora["papel"], diretora["coEntidade"], diretora["municipio"], diretora["estado"]) == ("diretor", ESCOLA_NITEROI, "Niterói", "pendente")
+    assert diretora["escola"] and diretora["pedidoConfirmado"] is False
+    assert all(c["papel"] != "admin" for c in contas)
+    # Niterói (RJ) vem antes do Rio de Janeiro; dentro do município, o secretário antes dos diretores.
+    assert [c["email"] for c in contas][:2] == ["sec@niteroi.gov.br", "diretora@escola.gov.br"]
+
+    secretaria = _sessao_secretario(cliente, codigos)
+    assert cliente.get("/gestao/admin/contas", headers=secretaria).status_code == 403
+    assert cliente.get("/gestao/admin/contas").status_code == 401
+
+
 def test_auditoria_registra_sem_codigo(ambiente):
     cliente, codigos = ambiente
     _solicitar(cliente)

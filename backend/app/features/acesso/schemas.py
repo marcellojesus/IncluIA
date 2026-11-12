@@ -71,6 +71,25 @@ class SolicitacaoVinculo(_Camel):
     justificativa: str | None = None
 
 
+class ContaDaGestao(_Camel):
+    """Uma linha da tela "Contas da Gestão Ativa" do administrador: quem é, por qual e-mail e onde."""
+
+    papel: str
+    nome: str
+    email: str
+    email_confirmado: bool
+    estado: str
+    """Estado do vínculo mais recente (pendente, aprovado, suspenso, rejeitado, revogado)."""
+    pedido_confirmado: bool
+    """Diretor: usou o código deste pedido. Sem isso o pedido não aparece para a secretaria."""
+    co_municipio: int
+    municipio: str
+    uf: str
+    co_entidade: int | None = None
+    escola: str | None = None
+    criado_em: datetime
+
+
 class NovoSecretario(_Camel):
     nome: str = Field(max_length=200)
     email: str = Field(max_length=254)

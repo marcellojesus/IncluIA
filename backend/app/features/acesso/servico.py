@@ -15,7 +15,7 @@ from sqlalchemy import delete, func, select, update
 from sqlalchemy.orm import Session
 
 from app.features.acesso import censo, seguranca
-from app.features.acesso.modelos import CodigoUsoUnico, Conta, EventoAuditoria, Vinculo
+from app.features.acesso.modelos import ESTADOS_VIGENTES, CodigoUsoUnico, Conta, EventoAuditoria, Vinculo
 from app.shared import email as envio
 from app.shared.banco_gestao import agora
 from app.shared.guardiao_lgpd import proteger
@@ -283,6 +283,24 @@ def entrar(sessao: Session, *, email: str, codigo: str) -> ResultadoEntrada:
         # Só o dono do e-mail chega aqui (usou o código): pode saber que o pedido não seguiu.
         return ResultadoEntrada(estado, mensagem=MENSAGEM_PEDIDO_NAO_CONFIRMADO)
     return ResultadoEntrada(estado, mensagem=_MENSAGENS_SITUACAO[estado])
+
+
+# --- Administrador: visão das contas -----------------------------------------------------------
+
+def contas_da_gestao(sessao: Session) -> list[Vinculo]:
+    """Um vínculo por conta de secretário ou diretor: o vigente ou, sem ele, o mais recente.
+    Contas anonimizadas pela retenção ficam fora (não há mais nome nem e-mail para mostrar)."""
+    vinculos = sessao.scalars(
+        select(Vinculo).join(Conta, Vinculo.conta_id == Conta.id)
+        .where(Conta.papel.in_(("secretario", "diretor")), Conta.anonimizada_em.is_(None))
+        .order_by(Vinculo.criado_em)
+    )
+    por_conta: dict[str, Vinculo] = {}
+    for vinculo in vinculos:
+        atual = por_conta.get(vinculo.conta_id)
+        if atual is None or vinculo.estado in ESTADOS_VIGENTES or atual.estado not in ESTADOS_VIGENTES:
+            por_conta[vinculo.conta_id] = vinculo
+    return list(por_conta.values())
 
 
 # --- Secretário: decisão sobre vínculos de diretor ---------------------------------------------
